@@ -28,7 +28,7 @@ NETWORK_CONFIGURATION_HEADER_PATH="${SC_HEADER_PATH}/SCNetworkConfiguration.h"
 #NETWORK_CONNECTION_HEADER_PATH="${SC_HEADER_PATH}/SCNetworkConnection.h"
 NETWORK_REACHABILITY_HEADER_PATH="${SC_HEADER_PATH}/SCNetworkReachability.h"
 PREFERENCES_HEADER_PATH="${SC_HEADER_PATH}/SCPreferences.h"
-#PREFERENCES_PATH_HEADER_PATH="${SC_HEADER_PATH}/SCPreferencesPath.h"
+PREFERENCES_PATH_HEADER_PATH="${SC_HEADER_PATH}/SCPreferencesPath.h"
 #PREFERENCES_SET_SPECIFIC_HEADER_PATH="${SC_HEADER_PATH}/SCPreferencesSetSpecific.h"
 SCHEMA_DEFINITIONS_HEADER_PATH="${SC_HEADER_PATH}/SCSchemaDefinitions.h"
 SYSTEM_CONFIGURATION_HEADER_PATH="${SC_HEADER_PATH}/SystemConfiguration.h"
@@ -47,7 +47,7 @@ NETWORK_CONFIGURATION_BINDING_PATH="${SC_BINDING_PATH}/network_configuration.rs"
 #NETWORK_CONNECTION_BINDING_PATH="${SC_BINDING_PATH}/network_connection.rs"
 NETWORK_REACHABILITY_BINDING_PATH="${SC_BINDING_PATH}/network_reachability.rs"
 PREFERENCES_BINDING_PATH="${SC_BINDING_PATH}/preferences.rs"
-#PREFERENCES_PATH_BINDING_PATH="${SC_BINDING_PATH}/preferences_path.rs"
+PREFERENCES_PATH_BINDING_PATH="${SC_BINDING_PATH}/preferences_path.rs"
 #PREFERENCES_SET_SPECIFIC_BINDING_PATH="${SC_BINDING_PATH}/preferences_set_specific.rs"
 SCHEMA_DEFINITIONS_BINDING_PATH="${SC_BINDING_PATH}/schema_definitions.rs"
 SYSTEM_CONFIGURATION_BINDING_PATH="${SC_BINDING_PATH}/system_configuration.rs"
@@ -259,6 +259,37 @@ bindgen \
     -F$FRAMEWORK_PATH
 
 cleanup_binding $PREFERENCES_BINDING_PATH
+
+echo ""
+echo ""
+
+# ---------------- Bindgen: SCPreferencesPath.h => preferences_path.rs ----------------
+echo "Generating bindings for $PREFERENCES_PATH_HEADER_PATH"
+bindgen \
+    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
+    --allowlist-function "SCPreferences.*" \
+    --blocklist-type "(__)?CF.*" \
+    --blocklist-type "Boolean" \
+    --blocklist-type "dispatch_queue_[ts]" \
+    --blocklist-type "(AuthorizationOpaqueRef|__SCPreferences)" \
+    --raw-line "use core::ffi::c_void;" \
+    --raw-line "use core_foundation_sys::array::CFArrayRef;" \
+    --raw-line "use core_foundation_sys::base::{Boolean, CFIndex, CFAllocatorRef, CFTypeID};" \
+    --raw-line "use core_foundation_sys::data::CFDataRef;" \
+    --raw-line "use core_foundation_sys::string::CFStringRef;" \
+    --raw-line "use core_foundation_sys::propertylist::CFPropertyListRef;" \
+    --raw-line "use core_foundation_sys::runloop::CFRunLoopRef;" \
+    --raw-line "" \
+    --raw-line "use crate::dispatch_queue_t;" \
+    --raw-line "" \
+    --raw-line "pub type AuthorizationOpaqueRef = c_void;" \
+    --raw-line "pub type __SCPreferences = c_void;" \
+    -o $PREFERENCES_PATH_BINDING_PATH \
+    $PREFERENCES_PATH_HEADER_PATH -- \
+    -I$SDK_PATH/usr/include \
+    -F$FRAMEWORK_PATH
+
+cleanup_binding $PREFERENCES_PATH_BINDING_PATH
 
 echo ""
 echo ""
