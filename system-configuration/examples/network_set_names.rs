@@ -13,18 +13,6 @@ fn main() {
 
     // grab IDs
     let prefs = SCPreferences::default(&"my-network-set-test".into());
-    let perf_keys = prefs
-        .get_keys()
-        .iter()
-        .map(|i| (&*i).clone())
-        .collect::<Vec<_>>();
-    // println!("{:?}", perf_keys);
-    let sets_values = prefs
-        .get(sets_key.clone())
-        .unwrap()
-        .downcast_into::<CFDictionary>()
-        .unwrap();
-    // println!("{:?}", sets_values);
 
     // create path that points to stores dictionary
     let sets_path: CFString = (&*format!("/{sets_key}")).into();
