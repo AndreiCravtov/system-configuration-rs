@@ -8,7 +8,7 @@ publish = false
 name = "sys-changer-app"
 
 [dependencies]
-core-foundation = "0.10.1"
+core-foundation = "0.9"
 system-configuration = { path = "../system-configuration", version = "0.6" }
 system-configuration-sys = { path = "../system-configuration-sys", version = "0.6" }
 security-framework = "3.4"
