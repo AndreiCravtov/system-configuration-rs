@@ -32,6 +32,7 @@ fn main() {
         .collect::<Vec<_>>();
 
     // For every key grab the associated set dictionary, then look up name and print if exits
+    println!("Network sets:");
     for k in keys {
         let set_path: CFString = (&*format!("{sets_path}/{k}")).into();
         let set_dict = get_path_dictionary(&prefs, &set_path).unwrap();
@@ -39,7 +40,7 @@ fn main() {
             continue;
         };
         let user_defined_name = (&*user_defined_name).downcast::<CFString>().unwrap();
-        println!("{} aka {}", k, user_defined_name);
+        println!("\t-> {} aka {}", k, user_defined_name);
     }
 }
 
