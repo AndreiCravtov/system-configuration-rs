@@ -9,7 +9,7 @@ use system_configuration_sys::preferences_path::SCPreferencesPathGetValue;
 
 fn main() {
     // grab IDs
-    let prefs = SCPreferences::default("my-network-set-test".into());
+    let prefs = SCPreferences::default(&"my-network-set-test".into());
     println!("{:?}", prefs.get_keys());
 
     // // create path that points to stores dictionary
