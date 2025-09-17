@@ -27,7 +27,7 @@ fn main() {
     // println!("{:?}", sets_values);
 
     // create path that points to stores dictionary
-    let sets_path: CFString = format!("/{sets_key}").into();
+    let sets_path: CFString = (&format!("/{sets_key}")).into();
 
     // Grab the dictionary corresponding to that path, and iterate over all the items
     // ensuring that all values are actually dictionaries (this is correct according to MacOS docs)
