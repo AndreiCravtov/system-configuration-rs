@@ -3,11 +3,14 @@ use core_foundation::dictionary::CFDictionary;
 use core_foundation::string::CFString;
 use system_configuration::preferences::SCPreferences;
 use system_configuration_sys::preferences_path::SCPreferencesPathGetValue;
-
+use system_configuration_sys::schema_definitions::kSCPrefSets;
 // This example will read the persistent store and print (to stdout) all the names of any network sets.
 // This is done with the `preferences_path` API specifically, it is what is being tested for.
 
 fn main() {
+    // constants
+    let sets_key = unsafe { CFString::wrap_under_get_rule(kSCPrefSets) };
+
     // grab IDs
     let prefs = SCPreferences::default(&"my-network-set-test".into());
     let perf_keys = prefs
@@ -16,9 +19,11 @@ fn main() {
         .map(|i| (&*i).clone())
         .collect::<Vec<_>>();
     println!("{:?}", perf_keys);
+    let values = prefs.get(sets_key).unwrap();
+    println!("{:?}", values);
 
     // // create path that points to stores dictionary
-    // let sets_key = unsafe { CFString::wrap_under_get_rule(kSCPrefSets) };
+
     // let sets_path: CFString = format!("/{sets_key}").into();
     //
     // // Grab the dictionary corresponding to that path, and iterate over all the items
