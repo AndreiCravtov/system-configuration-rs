@@ -29,8 +29,13 @@ fn main() {
                 .unwrap()
         })
         .collect::<Vec<_>>();
+
+    // For every key grab the associated set dictionary, then look up name and print if exits
     for k in keys {
-        println!("key -> {}; {}", k, k.retain_count());
+        let set_path: CFString = (&*format!("{sets_path}/{k}")).into();
+        let set_dict = get_path_dictionary(&prefs, &set_path).unwrap();
+
+        println!("{} -> {:?}", set_path, set_dict);
     }
 }
 
