@@ -20,7 +20,7 @@ fn main() {
         .collect::<Vec<_>>();
     // println!("{:?}", perf_keys);
     let sets_values = prefs
-        .get(&sets_key)
+        .get(sets_key.clone())
         .unwrap()
         .downcast_into::<CFDictionary>()
         .unwrap();
