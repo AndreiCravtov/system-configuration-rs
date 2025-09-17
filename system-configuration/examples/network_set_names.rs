@@ -32,7 +32,7 @@ fn main() {
 
     // Grab the dictionary corresponding to that path, and iterate over all the items
     // ensuring that all values are actually dictionaries (this is correct according to MacOS docs)
-    let sets_dict = get_path_dictionary(&prefs, &sets_key).unwrap();
+    let sets_dict = get_path_dictionary(&prefs, &sets_path).unwrap();
     println!("{:?}", sets_path);
     let sets_dict = sets_dict.get_keys_and_values();
 }
