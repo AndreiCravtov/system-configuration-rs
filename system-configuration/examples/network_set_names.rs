@@ -21,6 +21,7 @@ fn main() {
     // TODO: is this behavior even correct??????
     //       what should be the reference count of things???
     let sets_dict = get_path_dictionary(&prefs, &sets_path).unwrap();
+    println!("sets retain count{:?}", sets_dict.retain_count());
     let (keys, _) = sets_dict.get_keys_and_values();
     let keys = keys
         .into_iter()
