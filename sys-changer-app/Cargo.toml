@@ -11,4 +11,5 @@ name = "sys-changer-app"
 core-foundation = "0.9"
 system-configuration = { path = "../system-configuration", version = "0.6" }
 system-configuration-sys = { path = "../system-configuration-sys", version = "0.6" }
+security-framework = "3.4"
 bitflags = "2"
