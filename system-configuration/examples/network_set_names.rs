@@ -39,7 +39,7 @@ fn main() {
             continue;
         };
         let user_defined_name = (&*user_defined_name).downcast::<CFString>().unwrap();
-        println!("{} aka {}", set_path, user_defined_name);
+        println!("{} aka {}", k, user_defined_name);
     }
 }
 
