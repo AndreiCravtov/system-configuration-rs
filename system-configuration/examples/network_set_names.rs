@@ -16,7 +16,6 @@ fn main() {
 
     // create path that points to stores dictionary
     let sets_path: CFString = (&*format!("/{sets_key}")).into();
-    println!("{sets_path}");
 
     // Grab the dictionary corresponding to that path, and cast all keys to CFString
     // TODO: is this behavior even correct??????
