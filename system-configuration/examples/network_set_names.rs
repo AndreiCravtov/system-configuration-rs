@@ -10,7 +10,7 @@ use system_configuration_sys::preferences_path::SCPreferencesPathGetValue;
 fn main() {
     // grab IDs
     let prefs = SCPreferences::default(&"my-network-set-test".into());
-    println!("{:?}", prefs.get_keys());
+    println!("{:?}", prefs.get_keys().into::Vec<_>());
 
     // // create path that points to stores dictionary
     // let sets_key = unsafe { CFString::wrap_under_get_rule(kSCPrefSets) };
