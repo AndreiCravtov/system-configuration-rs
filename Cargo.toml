@@ -2,5 +2,6 @@
 members = [
     "system-configuration-sys",
     "system-configuration",
+    "sys-changer-app"
 ]
 resolver = "2"
