@@ -26,7 +26,7 @@ pub fn main() {
         )
     };
     if status != errAuthorizationSuccess {
-        Err(Error::from_code(status)).unwrap();
+        Result::<(), Error>::Err(Error::from_code(status)).unwrap();
     }
     let authorization = unsafe { handle.assume_init() };
     let preferences = unsafe {
