@@ -4,10 +4,6 @@
 // bindgen 0.70.1
 // macOS SDK 14.5.
 
-#[repr(C)]
-pub struct __SCPreferences(c_void);
-
-pub type SCPreferencesRef = *const __SCPreferences;
 extern "C" {
     pub fn SCPreferencesPathCreateUniqueChild(
         prefs: SCPreferencesRef,
