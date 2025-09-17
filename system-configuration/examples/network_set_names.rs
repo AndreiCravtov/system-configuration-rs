@@ -19,7 +19,11 @@ fn main() {
         .map(|i| (&*i).clone())
         .collect::<Vec<_>>();
     println!("{:?}", perf_keys);
-    let values = prefs.get(sets_key).unwrap();
+    let values = prefs
+        .get(sets_key)
+        .unwrap()
+        .downcast_into::<CFDictionary>()
+        .unwrap();
     println!("{:?}", values);
 
     // // create path that points to stores dictionary
