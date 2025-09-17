@@ -2,7 +2,6 @@ use core_foundation::base::{CFType, FromVoid, TCFType};
 use core_foundation::dictionary::CFDictionary;
 use core_foundation::string::CFString;
 use system_configuration::preferences::SCPreferences;
-use system_configuration_sys::core_foundation_sys::base::CFTypeRef;
 use system_configuration_sys::preferences_path::SCPreferencesPathGetValue;
 use system_configuration_sys::schema_definitions::kSCPrefSets;
 // This example will read the persistent store and print (to stdout) all the names of any network sets.
@@ -36,9 +35,10 @@ fn main() {
     //       what should be the reference count of things???
     let sets_dict = get_path_dictionary(&prefs, &sets_path).unwrap();
     let (keys, _) = sets_dict.get_keys_and_values();
-    let keys = keys.into_iter().map(|k| unsafe {
-        (&*CFType::from_void(k)).downcast::<CFString>().unwrap()
-    }).collect::<Vec<_>>();
+    let keys = keys
+        .into_iter()
+        .map(|k| unsafe { (&*CFType::from_void(k)).downcast::<CFString>().unwrap() })
+        .collect::<Vec<_>>();
     for k in keys {
         println!("key -> {k}");
     }
@@ -59,5 +59,3 @@ fn get_path_dictionary(
         }
     }
 }
-
-fn vec_cast_to_string()
