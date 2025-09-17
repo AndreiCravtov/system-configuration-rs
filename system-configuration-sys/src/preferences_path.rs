@@ -4,6 +4,12 @@
 // bindgen 0.70.1
 // macOS SDK 14.5.
 
+use core_foundation_sys::base::Boolean;
+use core_foundation_sys::dictionary::CFDictionaryRef;
+use core_foundation_sys::string::CFStringRef;
+
+use crate::preferences::SCPreferencesRef;
+
 extern "C" {
     pub fn SCPreferencesPathCreateUniqueChild(
         prefs: SCPreferencesRef,

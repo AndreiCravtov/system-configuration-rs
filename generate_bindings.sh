@@ -271,6 +271,11 @@ bindgen \
     --blocklist-type "(__)?CF.*" \
     --blocklist-type "Boolean" \
     --blocklist-type "(__SCPreferences|SCPreferencesRef)" \
+    --raw-line "use core_foundation_sys::dictionary::CFDictionaryRef;" \
+    --raw-line "use core_foundation_sys::base::Boolean;" \
+    --raw-line "use core_foundation_sys::string::CFStringRef;" \
+    --raw-line "" \
+    --raw-line "use crate::preferences::SCPreferencesRef;" \
     -o $PREFERENCES_PATH_BINDING_PATH \
     $PREFERENCES_PATH_HEADER_PATH -- \
     -I$SDK_PATH/usr/include \
@@ -286,18 +291,7 @@ echo ""
 #    --blocklist-type "Boolean" \
 #    --blocklist-type "dispatch_queue_[ts]" \
 #    --blocklist-type "(AuthorizationOpaqueRef|__SCPreferences)" \
-#    --raw-line "use core::ffi::c_void;" \
-#    --raw-line "use core_foundation_sys::array::CFArrayRef;" \
-#    --raw-line "use core_foundation_sys::base::{Boolean, CFIndex, CFAllocatorRef, CFTypeID};" \
-#    --raw-line "use core_foundation_sys::data::CFDataRef;" \
-#    --raw-line "use core_foundation_sys::string::CFStringRef;" \
-#    --raw-line "use core_foundation_sys::propertylist::CFPropertyListRef;" \
-#    --raw-line "use core_foundation_sys::runloop::CFRunLoopRef;" \
-#    --raw-line "" \
-#    --raw-line "use crate::dispatch_queue_t;" \
-#    --raw-line "" \
-#    --raw-line "pub type AuthorizationOpaqueRef = c_void;" \
-#    --raw-line "pub type __SCPreferences = c_void;" \
+
 
 # ---------------- Bindgen: SCSchemaDefinitions.h => schema_definitions.rs ----------------
 echo "Generating bindings for $SCHEMA_DEFINITIONS_HEADER_PATH"
