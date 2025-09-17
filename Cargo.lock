@@ -70,6 +70,7 @@ dependencies = [
  "bitflags",
  "core-foundation 0.9.4",
  "security-framework",
+ "security-framework-sys",
  "system-configuration",
  "system-configuration-sys",
 ]

@@ -12,4 +12,5 @@ core-foundation = "0.9"
 system-configuration = { path = "../system-configuration", version = "0.6" }
 system-configuration-sys = { path = "../system-configuration-sys", version = "0.6" }
 security-framework = "3.4"
+security-framework-sys = "2.15"
 bitflags = "2"
