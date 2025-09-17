@@ -18,22 +18,22 @@ fn main() {
         .iter()
         .map(|i| (&*i).clone())
         .collect::<Vec<_>>();
-    println!("{:?}", perf_keys);
-    let values = prefs
-        .get(sets_key)
+    // println!("{:?}", perf_keys);
+    let sets_values = prefs
+        .get(&sets_key)
         .unwrap()
         .downcast_into::<CFDictionary>()
         .unwrap();
-    println!("{:?}", values);
+    // println!("{:?}", sets_values);
 
-    // // create path that points to stores dictionary
+    // create path that points to stores dictionary
+    let sets_path: CFString = format!("/{sets_key}").into();
 
-    // let sets_path: CFString = format!("/{sets_key}").into();
-    //
-    // // Grab the dictionary corresponding to that path, and iterate over all the items
-    // // ensuring that all values are actually dictionaries (this is correct according to MacOS docs)
-    // let sets_dict = get_path_dictionary(&prefs, &sets_key).unwrap();
-    // let sets_dict = sets_dict.get_keys_and_values();
+    // Grab the dictionary corresponding to that path, and iterate over all the items
+    // ensuring that all values are actually dictionaries (this is correct according to MacOS docs)
+    let sets_dict = get_path_dictionary(&prefs, &sets_key).unwrap();
+    println!("{:?}", sets_path);
+    let sets_dict = sets_dict.get_keys_and_values();
 }
 
 /// Returns the dictionary associated with the specified path, or nothing if the path does not exist.
