@@ -1,7 +1,8 @@
-use core_foundation::base::{CFType, TCFType};
+use core_foundation::base::{CFType, FromVoid, TCFType};
 use core_foundation::dictionary::CFDictionary;
 use core_foundation::string::CFString;
 use system_configuration::preferences::SCPreferences;
+use system_configuration_sys::core_foundation_sys::base::CFTypeRef;
 use system_configuration_sys::preferences_path::SCPreferencesPathGetValue;
 use system_configuration_sys::schema_definitions::kSCPrefSets;
 // This example will read the persistent store and print (to stdout) all the names of any network sets.
@@ -30,11 +31,17 @@ fn main() {
     let sets_path: CFString = (&*format!("/{sets_key}")).into();
     println!("{sets_path}");
 
-    // Grab the dictionary corresponding to that path, and iterate over all the items
-    // ensuring that all values are actually dictionaries (this is correct according to MacOS docs)
+    // Grab the dictionary corresponding to that path, and cast all keys to CFString
+    // TODO: is this behavior even correct??????
+    //       what should be the reference count of things???
     let sets_dict = get_path_dictionary(&prefs, &sets_path).unwrap();
-    println!("{:?}", sets_dict);
-    let sets_dict = sets_dict.get_keys_and_values();
+    let (keys, _) = sets_dict.get_keys_and_values();
+    let keys = keys.into_iter().map(|k| unsafe {
+        (&*CFType::from_void(k)).downcast::<CFString>().unwrap()
+    }).collect::<Vec<_>>();
+    for k in keys {
+        println!("key -> {k}");
+    }
 }
 
 /// Returns the dictionary associated with the specified path, or nothing if the path does not exist.
@@ -52,3 +59,5 @@ fn get_path_dictionary(
         }
     }
 }
+
+fn vec_cast_to_string()
