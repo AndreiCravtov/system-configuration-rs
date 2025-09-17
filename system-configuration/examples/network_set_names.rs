@@ -1,4 +1,4 @@
-use core_foundation::base::{CFType, FromVoid, TCFType};
+use core_foundation::base::{CFType, TCFType};
 use core_foundation::dictionary::CFDictionary;
 use core_foundation::string::CFString;
 use system_configuration::preferences::SCPreferences;
@@ -19,15 +19,16 @@ fn main() {
     let sets_path: CFString = (&*format!("/{sets_key}")).into();
 
     // Grab the dictionary corresponding to that path, and cast all keys to CFString
-    // TODO: is this behavior even correct??????
-    //       what should be the reference count of things???
     let sets_dict = get_path_dictionary(&prefs, &sets_path).unwrap();
     let (keys, _) = sets_dict.get_keys_and_values();
     let keys = keys
         .into_iter()
-        .map(|k| unsafe { (&*CFType::from_void(k)).downcast::<CFString>().unwrap() })
+        .map(|k| unsafe {
+            CFType::wrap_under_get_rule(k)
+                .downcast_into::<CFString>()
+                .unwrap()
+        })
         .collect::<Vec<_>>();
-    drop(sets_dict);
     for k in keys {
         println!("key -> {}; {}", k, k.retain_count());
     }
