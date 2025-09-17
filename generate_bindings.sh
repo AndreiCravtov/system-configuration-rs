@@ -270,7 +270,7 @@ bindgen \
     --allowlist-function "SCPreferencesPath.*" \
     --blocklist-type "(__)?CF.*" \
     --blocklist-type "Boolean" \
-    --blocklist-type "__SCPreferences" \
+    --blocklist-type "(__SCPreferences|SCPreferencesRef)" \
     -o $PREFERENCES_PATH_BINDING_PATH \
     $PREFERENCES_PATH_HEADER_PATH -- \
     -I$SDK_PATH/usr/include \
