@@ -1,7 +1,7 @@
 use core_foundation::string::CFString;
 #[cfg(target_os = "macos")]
 use security_framework::authorization::Authorization;
-use security_framework::authorization::AuthorizationItemSetStorage;
+use security_framework::authorization::{AuthorizationItemSetStorage, Flags};
 
 #[cfg(target_os = "macos")]
 pub fn main() {
@@ -13,7 +13,7 @@ pub fn main() {
     let authorization = Authorization::new(
         None,
         Some(AuthorizationItemSetStorage::default()),
-        Default::default(),
+        Flags::EXTEND_RIGHTS | Flags::INTERACTION_ALLOWED,
     )
     .unwrap();
 }
