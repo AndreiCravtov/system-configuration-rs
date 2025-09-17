@@ -40,7 +40,7 @@ fn main() {
         .map(|k| unsafe { (&*CFType::from_void(k)).downcast::<CFString>().unwrap() })
         .collect::<Vec<_>>();
     for k in keys {
-        println!("key -> {k}");
+        println!("key -> {}; {}", k, k.retain_count());
     }
 }
 
