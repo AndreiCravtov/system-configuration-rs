@@ -1,4 +1,4 @@
-#![allow(unused_imports, non_upper_case_globals)]
+#![allow(unused_imports, non_upper_case_globals, dead_code)]
 
 mod interfaces;
 mod simpler_auth;
