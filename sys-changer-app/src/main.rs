@@ -2,13 +2,9 @@ mod interfaces;
 mod simpler_auth;
 
 use crate::interfaces::get_interfaces;
-use core_foundation::base::{CFGetTypeID, TCFType};
+use crate::simpler_auth::SimpleAuthorization;
+use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
-use security_framework::base::Error;
-use security_framework_sys::authorization::{
-    errAuthorizationSuccess, kAuthorizationFlagDefaults, AuthorizationCreate, AuthorizationRef,
-};
-use std::mem::MaybeUninit;
 use std::ptr;
 use system_configuration::network_configuration::SCNetworkSet;
 use system_configuration::preferences::SCPreferences;
@@ -26,29 +22,13 @@ pub fn main() {
     }
 
     // grab authorization & create preference set with it
-    let mut handle = MaybeUninit::<AuthorizationRef>::uninit();
-    let status = unsafe {
-        AuthorizationCreate(
-            ptr::null(),
-            ptr::null(),
-            kAuthorizationFlagDefaults,
-            handle.as_mut_ptr(),
-        )
-    };
-    if status != errAuthorizationSuccess {
-        Result::<(), Error>::Err(Error::from_code(status)).unwrap();
-    }
-    let authorization = unsafe { handle.assume_init() };
-    let _: () = unsafe {
-        let id = CFGetTypeID(authorization);
-        println!("id = {}", id);
-    };
+    let authorization = SimpleAuthorization::default().unwrap();
     let prefs = unsafe {
         SCPreferences::wrap_under_create_rule(SCPreferencesCreateWithAuthorization(
             ptr::null(),
             proc_name.as_concrete_TypeRef(),
             ptr::null(),
-            authorization,
+            authorization.get_ref(),
         ))
     };
 
