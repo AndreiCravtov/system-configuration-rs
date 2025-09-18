@@ -223,8 +223,16 @@ mod helper {
 
     pub fn save_prefs(prefs: &SCPreferences) {
         unsafe {
-            assert_ne!(SCPreferencesCommitChanges(prefs.as_concrete_TypeRef()), 0);
-            assert_ne!(SCPreferencesApplyChanges(prefs.as_concrete_TypeRef()), 0);
+            panic_err(SCPreferencesCommitChanges(prefs.as_concrete_TypeRef()) != 0);
+            panic_err(SCPreferencesApplyChanges(prefs.as_concrete_TypeRef()) != 0);
         }
+    }
+
+    pub fn panic_err(success: bool) {
+        if success {
+            return;
+        }
+        let e = unsafe { CFError::wrap_under_create_rule(SCCopyLastError()) };
+        panic!("error: {}", e);
     }
 }
