@@ -7,11 +7,11 @@ use core_foundation::{
     string::CFString,
 };
 use sys::network_configuration::{
-    SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetSupportedInterfaceTypes,
-    SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkProtocolGetProtocolType,
-    SCNetworkProtocolGetTypeID, SCNetworkProtocolRef, SCNetworkServiceRemove, SCNetworkSetCopy,
-    SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetSetID,
-    SCNetworkSetRemove,
+    SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface,
+    SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
+    SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
+    SCNetworkServiceRemove, SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices,
+    SCNetworkSetGetName, SCNetworkSetGetSetID, SCNetworkSetRemove,
 };
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
@@ -87,6 +87,23 @@ impl SCNetworkInterface {
                 None
             } else {
                 Some(CFString::wrap_under_get_rule(ptr))
+            }
+        }
+    }
+
+    /// Returns the underlying interface, for layered network interfaces. Or `None` if the specified
+    /// interface is a leaf interface.
+    ///
+    /// See [`SCNetworkInterfaceGetInterface`] for details.
+    ///
+    /// [`SCNetworkInterfaceGetInterface`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegetinterface(_:)?language=objc
+    pub fn underlying_interface(&self) -> Option<Self> {
+        unsafe {
+            let ptr = SCNetworkInterfaceGetInterface(self.0);
+            if ptr.is_null() {
+                None
+            } else {
+                Some(Self::wrap_under_get_rule(ptr))
             }
         }
     }
