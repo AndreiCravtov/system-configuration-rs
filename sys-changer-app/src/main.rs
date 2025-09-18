@@ -87,7 +87,7 @@ mod helper {
 
         // grab info from old set
         let old_set_id = old_set.id().unwrap();
-        let old_set_path: CFString() = (&*format!("/{}/{}", sets_key, old_set_id)).into();
+        let old_set_path: CFString = (&*format!("/{}/{}", sets_key, old_set_id)).into();
         let old_set_values = get_path_dictionary(prefs, &old_set_path).unwrap();
 
         // create new values & alter name to match new one -> mark it as owned
