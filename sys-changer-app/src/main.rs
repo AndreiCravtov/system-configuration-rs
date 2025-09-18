@@ -7,10 +7,8 @@ use crate::interfaces::get_interfaces;
 use crate::simpler_auth::SimpleAuthorization;
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
-use std::ptr;
 use system_configuration::network_configuration::SCNetworkSet;
 use system_configuration::preferences::SCPreferences;
-use system_configuration_sys::preferences::SCPreferencesCreateWithAuthorization;
 
 #[cfg(target_os = "macos")]
 pub fn main() {
@@ -25,15 +23,8 @@ pub fn main() {
 
     // grab authorization & create preference set with it
     let authorization = SimpleAuthorization::default().unwrap();
-    let prefs = unsafe {
-        SCPreferences::wrap_under_create_rule(SCPreferencesCreateWithAuthorization(
-            ptr::null(),
-            proc_name.as_concrete_TypeRef(),
-            ptr::null(),
-            // authorization.get_ref(),
-            ptr::null(),
-        ))
-    };
+    let prefs =
+        unsafe { SCPreferences::default_with_authorization(&proc_name, authorization.get_ref()) };
 
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
