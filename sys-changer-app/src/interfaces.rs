@@ -27,7 +27,7 @@ pub fn get_interfaces() -> Vec<Interface> {
                 .filter_map(|i| SCNetworkInterfaceType::from_cfstring(&i))
                 .collect();
             let supported_proto_types = iface
-                .supported_interface_type_strings()
+                .supported_protocol_type_strings()
                 .into_iter()
                 .filter_map(|i| SCNetworkProtocolType::from_cfstring(&i))
                 .collect();
