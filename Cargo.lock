@@ -118,7 +118,7 @@ name = "sys-changer-app"
 version = "0.0.1"
 dependencies = [
  "bitflags",
- "core-foundation 0.9.4",
+ "core-foundation 0.10.1",
  "libc",
  "mac_address",
  "security-framework",
