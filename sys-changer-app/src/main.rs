@@ -118,14 +118,15 @@ mod helper {
         };
 
         // extract new set ID from path to be able to fetch new network set
-        let new_set_id = new_set_path
+        let new_set_id: CFString = new_set_path
             .to_string()
             .as_str()
             .split("/")
             .collect::<Vec<_>>()
             .last()
-            .unwrap();
-        let new_set = prefs.find_network_set(*new_set_id).unwrap();
+            .unwrap()
+            .into();
+        let new_set = prefs.find_network_set(new_set_id).unwrap();
         new_set
     }
 
