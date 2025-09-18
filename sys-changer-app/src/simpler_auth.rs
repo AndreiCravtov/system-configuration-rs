@@ -16,7 +16,7 @@ use security_framework_sys::authorization::{
     AuthorizationItemSet as sys_AuthorizationItemSet, AuthorizationMakeExternalForm,
     AuthorizationRef, AuthorizationRightGet, AuthorizationRightRemove, AuthorizationRightSet,
 };
-use security_framework_sys::base::errSecSuccess;
+use security_framework_sys::base::{errSecConversionError, errSecSuccess};
 use std::ffi::CString;
 use std::fs::File;
 use std::marker::PhantomData;
