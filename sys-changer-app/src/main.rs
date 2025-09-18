@@ -125,7 +125,7 @@ mod helper {
             .collect::<Vec<_>>()
             .last()
             .unwrap();
-        let new_set = prefs.find_network_set(new_set_id).unwrap();
+        let new_set = prefs.find_network_set(*new_set_id).unwrap();
         new_set
     }
 
