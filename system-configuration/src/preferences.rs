@@ -12,14 +12,12 @@
 //!
 //! [`SCPreferences`]: https://developer.apple.com/documentation/systemconfiguration/scpreferences-ft8
 
-use crate::network_configuration::SCNetworkSet;
 use crate::sys::preferences::{SCPreferencesCreate, SCPreferencesGetTypeID, SCPreferencesRef};
 use core_foundation::array::CFArray;
 use core_foundation::base::{CFAllocator, TCFType};
 use core_foundation::propertylist::CFPropertyList;
 use core_foundation::string::CFString;
 use std::ptr;
-use sys::network_configuration::SCNetworkSetCopy;
 use sys::preferences::{SCPreferencesCopyKeyList, SCPreferencesGetValue};
 
 declare_TCFType! {
@@ -102,25 +100,6 @@ impl SCPreferences {
                 SCPreferencesGetValue(self.as_concrete_TypeRef(), cf_key.as_concrete_TypeRef());
             if !dict_ref.is_null() {
                 Some(CFPropertyList::wrap_under_get_rule(dict_ref))
-            } else {
-                None
-            }
-        }
-    }
-
-    /// Returns the set with the specified identifier. Or `None` if the identifier does not exist
-    /// in the preferences or if an error occurred
-    ///
-    /// See [`SCNetworkSetCopy`] for details.
-    ///
-    /// [`SCNetworkSetCopy`]: https://developer.apple.com/documentation/systemconfiguration/scnetworksetcopy(_:_:)?language=objc
-    pub fn find_network_set<S: Into<CFString>>(&self, set_id: S) -> Option<SCNetworkSet> {
-        let cf_set_id = set_id.into();
-        unsafe {
-            let set_ref =
-                SCNetworkSetCopy(self.as_concrete_TypeRef(), cf_set_id.as_concrete_TypeRef());
-            if !set_ref.is_null() {
-                Some(SCNetworkSet::wrap_under_create_rule(set_ref))
             } else {
                 None
             }

@@ -6,7 +6,10 @@ use core_foundation::{
     base::{TCFType, ToVoid},
     string::CFString,
 };
-use sys::network_configuration::SCNetworkSetGetSetID;
+use sys::network_configuration::{
+    SCNetworkServiceRemove, SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices,
+    SCNetworkSetGetName, SCNetworkSetGetSetID, SCNetworkSetRemove,
+};
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
     SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef,
@@ -262,6 +265,13 @@ impl SCNetworkService {
             }
         }
     }
+
+    /// Removes the specified network service from the configuration.
+    ///
+    /// Returns: `true` if the service was removed; `false` if an error occurred.
+    pub fn remove(self) -> bool {
+        (unsafe { SCNetworkServiceRemove(self.0) }) != 0
+    }
 }
 
 core_foundation::declare_TCFType!(
@@ -277,10 +287,63 @@ core_foundation::declare_TCFType!(
 core_foundation::impl_TCFType!(SCNetworkSet, SCNetworkSetRef, SCNetworkSetGetTypeID);
 
 impl SCNetworkSet {
+    /// Returns all available sets for the specified preferences session.
+    pub fn get_sets(prefs: &SCPreferences) -> CFArray<Self> {
+        unsafe {
+            let array_ptr = SCNetworkSetCopyAll(prefs.to_void());
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<Self>::wrap_under_create_rule(array_ptr)
+        }
+    }
+
+    /// Returns the current set. Or `None` if no current set has been defined.
+    pub fn get_current(prefs: &SCPreferences) -> Option<Self> {
+        unsafe {
+            let set_ref = SCNetworkSetCopyCurrent(prefs.as_concrete_TypeRef());
+            if !set_ref.is_null() {
+                Some(SCNetworkSet::wrap_under_create_rule(set_ref))
+            } else {
+                None
+            }
+        }
+    }
+
+    /// Returns the set with the specified identifier. Or `None` if the identifier does not exist
+    /// in the preferences or if an error occurred
+    ///
+    /// See [`SCNetworkSetCopy`] for details.
+    ///
+    /// [`SCNetworkSetCopy`]: https://developer.apple.com/documentation/systemconfiguration/scnetworksetcopy(_:_:)?language=objc
+    pub fn find_set<S: Into<CFString>>(prefs: &SCPreferences, set_id: S) -> Option<SCNetworkSet> {
+        let cf_set_id = set_id.into();
+        unsafe {
+            let set_ref =
+                SCNetworkSetCopy(prefs.as_concrete_TypeRef(), cf_set_id.as_concrete_TypeRef());
+            if !set_ref.is_null() {
+                Some(SCNetworkSet::wrap_under_create_rule(set_ref))
+            } else {
+                None
+            }
+        }
+    }
+
     /// Constructs a new set of network services from the preferences.
     pub fn new(prefs: &SCPreferences) -> Self {
         let ptr = unsafe { SCNetworkSetCopyCurrent(prefs.to_void()) };
         unsafe { SCNetworkSet::wrap_under_create_rule(ptr) }
+    }
+
+    /// Returns all network services associated with the specified set.
+    pub fn services(&self) -> CFArray<SCNetworkService> {
+        unsafe {
+            let array_ptr = SCNetworkSetCopyServices(self.0);
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<SCNetworkService>::wrap_under_create_rule(array_ptr)
+        }
     }
 
     /// Returns an list of network service identifiers, ordered by their priority.
@@ -304,6 +367,26 @@ impl SCNetworkSet {
                 Some(CFString::wrap_under_get_rule(ptr))
             }
         }
+    }
+
+    /// Returns the user-specified name associated with the specified set. Or `None` if it hasn't
+    /// been defined.
+    pub fn name(&self) -> Option<CFString> {
+        unsafe {
+            let ptr = SCNetworkSetGetName(self.0);
+            if ptr.is_null() {
+                None
+            } else {
+                Some(CFString::wrap_under_get_rule(ptr))
+            }
+        }
+    }
+
+    /// Removes the specified set from the configuration.
+    ///
+    /// Returns: `true` if the set was removed; `false` if an error occurred.
+    pub fn remove(self) -> bool {
+        (unsafe { SCNetworkSetRemove(self.0) }) != 0
     }
 }
 

@@ -1,5 +1,4 @@
 use core_foundation::base::TCFType;
-use core_foundation::error::CFError;
 use core_foundation::string::CFString;
 use security_framework::base::Error;
 use security_framework_sys::authorization::{
@@ -7,10 +6,9 @@ use security_framework_sys::authorization::{
 };
 use std::mem::MaybeUninit;
 use std::ptr;
+use system_configuration::network_configuration::SCNetworkSet;
 use system_configuration::preferences::SCPreferences;
-use system_configuration_sys::network_configuration::SCNetworkSetGetSetID;
 use system_configuration_sys::preferences::SCPreferencesCreateWithAuthorization;
-use system_configuration_sys::system_configuration::SCCopyLastError;
 
 #[cfg(target_os = "macos")]
 pub fn main() {
@@ -32,7 +30,7 @@ pub fn main() {
         Result::<(), Error>::Err(Error::from_code(status)).unwrap();
     }
     let authorization = unsafe { handle.assume_init() };
-    let preferences = unsafe {
+    let prefs = unsafe {
         SCPreferences::wrap_under_create_rule(SCPreferencesCreateWithAuthorization(
             ptr::null(),
             proc_name.as_concrete_TypeRef(),
@@ -41,13 +39,17 @@ pub fn main() {
         ))
     };
 
-    unsafe {
-        let list = SCNetworkSetGetSetID(ptr::null());
-        if list.is_null() {
-            let error = CFError::wrap_under_create_rule(SCCopyLastError());
-            println!("SCPreferencesGetValue returned null w/ error: {:?}", error);
-        }
-    };
+    // clean up previous sets/services that existed
+    helper::delete_old_if_exits(&prefs);
+
+    // grab current set and duplicate it
+    let current = SCNetworkSet::get_current(&prefs).unwrap();
+    let new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
+    println!(
+        "Created copy of current: {}]--[{}",
+        new.name().unwrap(),
+        new.id().unwrap()
+    );
 }
 
 #[cfg(not(target_os = "macos"))]
@@ -63,19 +65,21 @@ mod helper {
     use core_foundation::error::CFError;
     use core_foundation::string::CFString;
     use std::io::BufRead;
-    use system_configuration::network_configuration::SCNetworkSet;
+    use system_configuration::network_configuration::{SCNetworkService, SCNetworkSet};
     use system_configuration::preferences::SCPreferences;
     use system_configuration_sys::preferences_path::{
         SCPreferencesPathCreateUniqueChild, SCPreferencesPathGetValue, SCPreferencesPathSetValue,
     };
-    use system_configuration_sys::schema_definitions::{kSCPrefSets, kSCPropUserDefinedName};
+    use system_configuration_sys::schema_definitions::{
+        kSCPrefNetworkServices, kSCPrefSets, kSCPropUserDefinedName,
+    };
     use system_configuration_sys::system_configuration::SCCopyLastError;
 
     /// Creates a shallow copy of the provided network set, using the `SCPreferencesPath*` APIs.
     ///
     /// The resulting network set will have the exact same __everything__, except for a different
     /// user-defined name compared to the old network set.
-    fn shallow_clone_network_set(
+    pub fn shallow_clone_network_set(
         prefs: &SCPreferences,
         old_set: &SCNetworkSet,
         new_set_name: CFString,
@@ -126,12 +130,12 @@ mod helper {
             .last()
             .unwrap())
         .into();
-        let new_set = prefs.find_network_set(new_set_id).unwrap();
+        let new_set = SCNetworkSet::find_set(prefs, new_set_id).unwrap();
         new_set
     }
 
     /// Returns the dictionary associated with the specified path, or nothing if the path does not exist.
-    fn get_path_dictionary(
+    pub fn get_path_dictionary(
         prefs: &SCPreferences,
         path: &CFString,
     ) -> Option<CFDictionary<CFString, CFType>> {
@@ -147,10 +151,67 @@ mod helper {
     }
 
     /// Insert `ThisNetworkSetWasCreatedByExo: true` flag to indicate this is a manged network set.
-    fn marked_as_owned(dict: &mut CFMutableDictionary<CFString, CFType>) {
+    pub fn marked_as_owned(dict: &mut CFMutableDictionary<CFString, CFType>) {
+        // constants
         let owned_key = CFString::new("ThisNetworkSetWasCreatedByExo");
         let owned_value = CFBoolean::true_value();
 
         dict.set(owned_key, owned_value.into_CFType());
+    }
+
+    /// Delete old managed items if they still exits
+    pub fn delete_old_if_exits(prefs: &SCPreferences) {
+        // constants
+        let sets_key = unsafe { CFString::wrap_under_get_rule(kSCPrefSets) };
+        let services_key = unsafe { CFString::wrap_under_get_rule(kSCPrefNetworkServices) };
+        let owned_key = CFString::new("ThisNetworkSetWasCreatedByExo");
+
+        // closures
+        let set_path =
+            |set_id: &CFString| -> CFString { (&*format!("/{sets_key}/{set_id}")).into() };
+        let set_values = |set: &SCNetworkSet| {
+            let id = set.id().unwrap();
+            get_path_dictionary(prefs, &set_path(&id)).unwrap()
+        };
+        let service_path = |service_id: &CFString| -> CFString {
+            (&*format!("/{services_key}/{service_id}")).into()
+        };
+        let service_values = |service: &SCNetworkService| {
+            let id = service.id().unwrap();
+            get_path_dictionary(prefs, &service_path(&id)).unwrap()
+        };
+
+        // delete any owned sets
+        let sets = SCNetworkSet::get_sets(prefs);
+        for set in sets.into_iter() {
+            let set = set.clone();
+            let values = set_values(&set);
+
+            // encountered ownership marker, remove network set
+            if values.contains_key(&owned_key) {
+                assert!(set.remove());
+            }
+        }
+
+        // delete any owned services NOT in the current preference set
+        let current_services = SCNetworkSet::get_current(prefs)
+            .unwrap()
+            .services()
+            .into_iter()
+            .map(|s| s.clone())
+            .collect::<Vec<_>>();
+        let services = SCNetworkService::get_services(prefs);
+        for service in services.into_iter() {
+            let service = service.clone();
+            if current_services.contains(&service) {
+                continue;
+            }
+            let values = service_values(&service);
+
+            // encountered ownership marker, remove network service
+            if values.contains_key(&owned_key) {
+                assert!(service.remove());
+            }
+        }
     }
 }
