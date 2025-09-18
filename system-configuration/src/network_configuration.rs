@@ -135,7 +135,7 @@ impl SCNetworkInterface {
             if array_ptr.is_null() {
                 return create_empty_array();
             }
-            CFArray::<CFString>::wrap_under_create_rule(array_ptr)
+            CFArray::<CFString>::wrap_under_get_rule(array_ptr)
         }
     }
 
@@ -151,7 +151,7 @@ impl SCNetworkInterface {
             if array_ptr.is_null() {
                 return create_empty_array();
             }
-            CFArray::<CFString>::wrap_under_create_rule(array_ptr)
+            CFArray::<CFString>::wrap_under_get_rule(array_ptr)
         }
     }
 }
