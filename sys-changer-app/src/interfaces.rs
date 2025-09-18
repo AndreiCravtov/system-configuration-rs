@@ -17,9 +17,10 @@ pub fn get_interfaces() -> Vec<Interface> {
     SCNetworkInterface::get_interfaces()
         .into_iter()
         .filter_map(|iface| {
-            println!("running");
+            println!("running start");
             let iface_type = iface.interface_type()?;
             let bsd_name = iface.bsd_name()?.to_string();
+            println!("running stop");
             let hardware_address_string = iface.hardware_address_string()?.to_string();
             let mac_addr = MacAddress::from_str(&hardware_address_string).ok()?;
             let supported_iface_types = iface
