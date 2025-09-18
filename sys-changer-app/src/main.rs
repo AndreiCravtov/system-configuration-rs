@@ -2,6 +2,7 @@
 
 mod interfaces;
 mod simpler_auth;
+mod tweaking_config;
 
 use crate::interfaces::get_interfaces;
 use crate::simpler_auth::SimpleAuthorization;
@@ -9,6 +10,26 @@ use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::SCNetworkSet;
 use system_configuration::preferences::SCPreferences;
+
+pub(crate) mod ext {
+    use core_foundation::array::CFArray;
+    use core_foundation::base::FromVoid;
+    use extend::ext;
+
+    #[ext(pub, name=CFArrayExt)]
+    impl<T> CFArray<T> {
+        fn into_collect<B: FromIterator<T>>(self) -> B
+        where
+            T: FromVoid,
+            B: FromIterator<T>,
+        {
+            self.into_iter()
+                .into_iter()
+                .map(|i| i.clone())
+                .collect::<B>()
+        }
+    }
+}
 
 #[cfg(target_os = "macos")]
 pub fn main() {
@@ -48,7 +69,7 @@ pub fn main() {
 }
 
 #[cfg(target_os = "macos")]
-mod helper {
+pub(crate) mod helper {
     use core_foundation::base::{CFType, TCFType};
     use core_foundation::boolean::CFBoolean;
     use core_foundation::dictionary::{CFDictionary, CFMutableDictionary};
