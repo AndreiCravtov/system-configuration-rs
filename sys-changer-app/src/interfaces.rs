@@ -27,12 +27,12 @@ pub fn get_interfaces() -> Vec<Interface> {
                 .into_iter()
                 .filter_map(|i| SCNetworkInterfaceType::from_cfstring(&i))
                 .collect();
+            println!("running stop");
             let supported_proto_types = iface
                 .supported_interface_type_strings()
                 .into_iter()
                 .filter_map(|i| SCNetworkProtocolType::from_cfstring(&i))
                 .collect();
-            println!("running stop");
 
             Some(Interface {
                 iface_type,
