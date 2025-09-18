@@ -38,6 +38,15 @@ core_foundation::impl_TCFType!(
 
 // TODO: implement all the other methods a SCNetworkInterface has
 impl SCNetworkInterface {
+    /// Retrieve all current network interfaces
+    ///
+    /// See [`SCNetworkInterfaceCopyAll`] for more details.
+    ///
+    /// [`SCNetworkInterfaceCopyAll`]: https://developer.apple.com/documentation/systemconfiguration/1517090-scnetworkinterfacecopyall?language=objc
+    pub fn get_interfaces() -> CFArray<Self> {
+        get_interfaces()
+    }
+
     /// Get type of the network interface, if the type is recognized, returns `None` otherwise.
     ///
     /// See [`SCNetworkInterfaceGetInterfaceType`] for details.
