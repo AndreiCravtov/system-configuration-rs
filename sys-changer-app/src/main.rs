@@ -30,7 +30,8 @@ pub fn main() {
             ptr::null(),
             proc_name.as_concrete_TypeRef(),
             ptr::null(),
-            authorization.get_ref(),
+            // authorization.get_ref(),
+            ptr::null(),
         ))
     };
 
