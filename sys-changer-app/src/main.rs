@@ -13,7 +13,7 @@ use system_configuration::preferences::SCPreferences;
 
 pub(crate) mod ext {
     use core_foundation::array::CFArray;
-    use core_foundation::base::FromVoid;
+    use core_foundation::base::{FromVoid, ItemRef};
     use extend::ext;
 
     #[ext(pub, name=CFArrayExt)]
@@ -22,6 +22,7 @@ pub(crate) mod ext {
         where
             T: FromVoid,
             B: FromIterator<T>,
+            for<'a> ItemRef<'a, T>: Clone,
         {
             self.into_iter()
                 .into_iter()
