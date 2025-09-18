@@ -7,9 +7,11 @@ use core_foundation::{
     string::CFString,
 };
 use sys::network_configuration::{
-    SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
-    SCNetworkServiceRemove, SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices,
-    SCNetworkSetGetName, SCNetworkSetGetSetID, SCNetworkSetRemove,
+    SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetSupportedInterfaceTypes,
+    SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkProtocolGetProtocolType,
+    SCNetworkProtocolGetTypeID, SCNetworkProtocolRef, SCNetworkServiceRemove, SCNetworkSetCopy,
+    SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetSetID,
+    SCNetworkSetRemove,
 };
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
@@ -89,6 +91,22 @@ impl SCNetworkInterface {
         }
     }
 
+    /// Returns a displayable link layer address for the specified interface, i.e. the hardware
+    /// MAC (Media Access Control) address for the interface.
+    ///
+    /// See [`SCNetworkInterfaceGetHardwareAddressString`] for details.
+    ///
+    /// [`SCNetworkInterfaceGetHardwareAddressString`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegethardwareaddressstring(_:)?language=objc
+    pub fn hardware_address_string(&self) -> Option<CFString> {
+        unsafe {
+            let ptr = SCNetworkInterfaceGetHardwareAddressString(self.0);
+            if ptr.is_null() {
+                None
+            } else {
+                Some(CFString::wrap_under_get_rule(ptr))
+            }
+        }
+    }
     /// Returns the localized display name for the interface.
     ///
     /// See [`SCNetworkInterfaceGetLocalizedDisplayName`] for details.
@@ -102,6 +120,38 @@ impl SCNetworkInterface {
             } else {
                 Some(CFString::wrap_under_get_rule(ptr))
             }
+        }
+    }
+
+    /// Get all the raw network interface type identifiers, such as PPP, that can be layered on top
+    /// of the specified interface.
+    ///
+    /// See [`SCNetworkInterfaceGetSupportedInterfaceTypes`] for details.
+    ///
+    /// [`SCNetworkInterfaceGetSupportedInterfaceTypes`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegetsupportedinterfacetypes(_:)?language=objc
+    pub fn supported_interface_type_strings(&self) -> CFArray<CFString> {
+        unsafe {
+            let array_ptr = SCNetworkInterfaceGetSupportedInterfaceTypes(self.0);
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<CFString>::wrap_under_create_rule(array_ptr)
+        }
+    }
+
+    /// Get all the raw network protocol type identifiers, such as IPv4 and IPv6, that can be
+    /// layered on top of the specified interface.
+    ///
+    /// See [`SCNetworkInterfaceGetSupportedProtocolTypes`] for details.
+    ///
+    /// [`SCNetworkInterfaceGetSupportedProtocolTypes`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegetsupportedprotocoltypes(_:)?language=objc
+    pub fn supported_protocol_type_strings(&self) -> CFArray<CFString> {
+        unsafe {
+            let array_ptr = SCNetworkInterfaceGetSupportedProtocolTypes(self.0);
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<CFString>::wrap_under_create_rule(array_ptr)
         }
     }
 }

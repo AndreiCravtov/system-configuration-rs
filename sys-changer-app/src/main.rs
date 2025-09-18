@@ -1,5 +1,6 @@
 mod interfaces;
 
+use crate::interfaces::get_interfaces;
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use security_framework::base::Error;
@@ -17,6 +18,11 @@ pub fn main() {
     // constants
     let proc_name = CFString::new("sys-changer-app");
     let my_networkset_name = CFString::new("sys-changer-app-networkset");
+
+    // grab network info
+    for i in get_interfaces() {
+        println!("found interface {i:?}");
+    }
 
     // grab authorization & create preference set with it
     let mut handle = MaybeUninit::<AuthorizationRef>::uninit();
