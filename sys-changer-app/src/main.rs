@@ -91,7 +91,7 @@ mod helper {
         let old_set_values = get_path_dictionary(prefs, &old_set_path).unwrap();
 
         // create new values & alter name to match new one -> mark it as owned
-        let mut new_set_values = CFMutableDictionary::<CFString, CFType>::from(old_set_values);
+        let mut new_set_values = CFMutableDictionary::<CFString, CFType>::from(&old_set_values);
         new_set_values.set(user_defined_name_key, new_set_name.into_CFType());
         marked_as_owned(&mut new_set_values);
 
