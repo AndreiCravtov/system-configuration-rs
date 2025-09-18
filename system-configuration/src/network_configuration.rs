@@ -6,6 +6,7 @@ use core_foundation::{
     base::{TCFType, ToVoid},
     string::CFString,
 };
+use sys::network_configuration::SCNetworkSetGetSetID;
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
     SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef,
@@ -293,17 +294,17 @@ impl SCNetworkSet {
         }
     }
 
-    // /// Returns the identifier for the specified set.
-    // pub fn id(&self) -> Option<CFString> {
-    //     unsafe {
-    //         let ptr = SCNetworkServiceGetServiceID(self.0);
-    //         if ptr.is_null() {
-    //             None
-    //         } else {
-    //             Some(CFString::wrap_under_get_rule(ptr))
-    //         }
-    //     }
-    // }
+    /// Returns the identifier for the specified set.
+    pub fn id(&self) -> Option<CFString> {
+        unsafe {
+            let ptr = SCNetworkSetGetSetID(self.0);
+            if ptr.is_null() {
+                None
+            } else {
+                Some(CFString::wrap_under_get_rule(ptr))
+            }
+        }
+    }
 }
 
 fn create_empty_array<T>() -> CFArray<T> {
