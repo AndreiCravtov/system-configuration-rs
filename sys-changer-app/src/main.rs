@@ -1,3 +1,5 @@
+#![warn(unused_imports)]
+
 mod interfaces;
 mod simpler_auth;
 
