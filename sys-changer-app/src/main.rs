@@ -1,7 +1,8 @@
 mod interfaces;
+mod simpler_auth;
 
 use crate::interfaces::get_interfaces;
-use core_foundation::base::TCFType;
+use core_foundation::base::{CFGetTypeID, TCFType};
 use core_foundation::string::CFString;
 use security_framework::base::Error;
 use security_framework_sys::authorization::{
@@ -38,6 +39,10 @@ pub fn main() {
         Result::<(), Error>::Err(Error::from_code(status)).unwrap();
     }
     let authorization = unsafe { handle.assume_init() };
+    let _: () = unsafe {
+        let id = CFGetTypeID(authorization);
+        println!("id = {}", id);
+    };
     let prefs = unsafe {
         SCPreferences::wrap_under_create_rule(SCPreferencesCreateWithAuthorization(
             ptr::null(),
