@@ -43,10 +43,7 @@ pub fn main() {
     };
 
     unsafe {
-        let list = SCPreferencesGetValue(
-            preferences.as_concrete_TypeRef(),
-            CFString::new("does_not_exist").as_concrete_TypeRef(),
-        );
+        let list = SCPreferencesGetValue(preferences.as_concrete_TypeRef(), ptr::null());
         if list.is_null() {
             let error = CFError::wrap_under_create_rule(SCCopyLastError());
             println!("SCPreferencesGetValue returned null w/ error: {:?}", error);
