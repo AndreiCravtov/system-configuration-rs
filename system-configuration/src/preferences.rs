@@ -73,13 +73,13 @@ impl SCPreferences {
         }
     }
 
-    pub unsafe fn new_with_authorization(
-        allocator: Option<&CFAllocator>,
-        calling_process_name: &CFString,
-        prefs_id: Option<&CFString>,
-        // autho,autho
-    ) {
-    }
+    // pub unsafe fn new_with_authorization(
+    //     allocator: Option<&CFAllocator>,
+    //     calling_process_name: &CFString,
+    //     prefs_id: Option<&CFString>,
+    //     // autho,autho
+    // ) {
+    // }
 
     /// Returns the currently defined preference keys.
     ///
