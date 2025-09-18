@@ -14,10 +14,9 @@ pub struct Interface {
 }
 
 pub fn get_interfaces() -> Vec<Interface> {
-    let ifaces = SCNetworkInterface::get_interfaces()
+    SCNetworkInterface::get_interfaces()
         .into_iter()
         .filter_map(|iface| {
-            println!("running start");
             let iface_type = iface.interface_type()?;
             let bsd_name = iface.bsd_name()?.to_string();
             let hardware_address_string = iface.hardware_address_string()?.to_string();
@@ -27,7 +26,6 @@ pub fn get_interfaces() -> Vec<Interface> {
                 .into_iter()
                 .filter_map(|i| SCNetworkInterfaceType::from_cfstring(&i))
                 .collect();
-            println!("running stop");
             let supported_proto_types = iface
                 .supported_interface_type_strings()
                 .into_iter()
@@ -42,8 +40,5 @@ pub fn get_interfaces() -> Vec<Interface> {
                 supported_proto_types,
             })
         })
-        .collect::<Vec<_>>();
-    println!("exited");
-
-    ifaces
+        .collect::<Vec<_>>()
 }
