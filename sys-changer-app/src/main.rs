@@ -50,6 +50,9 @@ pub fn main() {
         new.name().unwrap(),
         new.id().unwrap()
     );
+
+    // commit and apply new changes
+    helper::save_prefs(&prefs);
 }
 
 #[cfg(not(target_os = "macos"))]
@@ -67,6 +70,9 @@ mod helper {
     use std::io::BufRead;
     use system_configuration::network_configuration::{SCNetworkService, SCNetworkSet};
     use system_configuration::preferences::SCPreferences;
+    use system_configuration_sys::preferences::{
+        SCPreferencesApplyChanges, SCPreferencesCommitChanges,
+    };
     use system_configuration_sys::preferences_path::{
         SCPreferencesPathCreateUniqueChild, SCPreferencesPathGetValue, SCPreferencesPathSetValue,
     };
@@ -212,6 +218,13 @@ mod helper {
             if values.contains_key(&owned_key) {
                 assert!(service.remove());
             }
+        }
+    }
+
+    pub fn save_prefs(prefs: &SCPreferences) {
+        unsafe {
+            assert_ne!(SCPreferencesCommitChanges(prefs.as_concrete_TypeRef()), 0);
+            assert_ne!(SCPreferencesApplyChanges(prefs.as_concrete_TypeRef()), 0);
         }
     }
 }
