@@ -96,7 +96,7 @@ mod helper {
         marked_as_owned(&mut new_set_values);
 
         // create unique child path in `/Sets` prefix & associate it w/ the values dictionary
-        let sets_path: CFString() = (&*format!("/{}", sets_key)).into();
+        let sets_path: CFString = (&*format!("/{}", sets_key)).into();
         let new_set_path = unsafe {
             CFString::wrap_under_create_rule(SCPreferencesPathCreateUniqueChild(
                 prefs.as_concrete_TypeRef(),
