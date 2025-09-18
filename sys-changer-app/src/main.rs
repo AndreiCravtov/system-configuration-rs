@@ -104,11 +104,12 @@ mod helper {
             ))
         };
         unsafe {
-            if !SCPreferencesPathSetValue(
+            if SCPreferencesPathSetValue(
                 prefs.as_concrete_TypeRef(),
                 new_set_path.as_concrete_TypeRef(),
                 new_set_values.as_concrete_TypeRef(),
-            ) {
+            ) == 0
+            {
                 panic!(
                     "Encountered error: {}",
                     CFError::wrap_under_create_rule(SCCopyLastError())
