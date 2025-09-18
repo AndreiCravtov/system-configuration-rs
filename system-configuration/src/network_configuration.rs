@@ -292,6 +292,18 @@ impl SCNetworkSet {
             CFArray::<CFString>::wrap_under_get_rule(array_ptr)
         }
     }
+
+    // /// Returns the identifier for the specified set.
+    // pub fn id(&self) -> Option<CFString> {
+    //     unsafe {
+    //         let ptr = SCNetworkServiceGetServiceID(self.0);
+    //         if ptr.is_null() {
+    //             None
+    //         } else {
+    //             Some(CFString::wrap_under_get_rule(ptr))
+    //         }
+    //     }
+    // }
 }
 
 fn create_empty_array<T>() -> CFArray<T> {

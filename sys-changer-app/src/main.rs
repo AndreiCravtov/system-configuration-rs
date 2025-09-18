@@ -8,9 +8,8 @@ use security_framework_sys::authorization::{
 use std::mem::MaybeUninit;
 use std::ptr;
 use system_configuration::preferences::SCPreferences;
-use system_configuration_sys::preferences::{
-    SCPreferencesCreateWithAuthorization, SCPreferencesGetValue,
-};
+use system_configuration_sys::network_configuration::SCNetworkSetGetSetID;
+use system_configuration_sys::preferences::SCPreferencesCreateWithAuthorization;
 use system_configuration_sys::system_configuration::SCCopyLastError;
 
 #[cfg(target_os = "macos")]
@@ -43,7 +42,7 @@ pub fn main() {
     };
 
     unsafe {
-        let list = SCPreferencesGetValue(preferences.as_concrete_TypeRef(), ptr::null());
+        let list = SCNetworkSetGetSetID(ptr::null());
         if list.is_null() {
             let error = CFError::wrap_under_create_rule(SCCopyLastError());
             println!("SCPreferencesGetValue returned null w/ error: {:?}", error);
@@ -58,11 +57,19 @@ pub fn main() {
 
 #[cfg(target_os = "macos")]
 mod helper {
+    use core_foundation::string::CFString;
+    use system_configuration::network_configuration::SCNetworkSet;
     use system_configuration::preferences::SCPreferences;
 
     /// Creates a shallow copy of the provided network set, using the `SCPreferencesPath*` APIs.
     ///
     /// The resulting network set will have the exact same __everything__, except for a different
     /// user-defined name compared to the old network set.
-    fn shallow_clone_network_set(prefs: &SCPreferences) {}
+    fn shallow_clone_network_set(
+        prefs: &SCPreferences,
+        old_set: &SCNetworkSet,
+        new_set_name: &CFString,
+    ) {
+        // grab info from old set
+    }
 }
