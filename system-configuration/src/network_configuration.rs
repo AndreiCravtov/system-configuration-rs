@@ -7,9 +7,9 @@ use core_foundation::{
     string::CFString,
 };
 use sys::network_configuration::{
-    SCNetworkProtocolGetTypeID, SCNetworkProtocolRef, SCNetworkServiceRemove, SCNetworkSetCopy,
-    SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetSetID,
-    SCNetworkSetRemove,
+    SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
+    SCNetworkServiceRemove, SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices,
+    SCNetworkSetGetName, SCNetworkSetGetSetID, SCNetworkSetRemove,
 };
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
@@ -241,57 +241,25 @@ impl SCNetworkProtocol {
     /// See [`SCNetworkProtocolGetProtocolType`] for details.
     ///
     /// [`SCNetworkProtocolGetProtocolType`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkprotocolgetprotocoltype(_:)?language=objc
-    pub fn protocol_type(&self) -> Option<SCNetworkInterfaceType> {
-        SCNetworkInterfaceType::from_cfstring(&self.interface_type_string()?)
+    pub fn protocol_type(&self) -> Option<SCNetworkProtocolType> {
+        SCNetworkProtocolType::from_cfstring(&self.protocol_type_string()?)
     }
 
-    // /// Returns the raw interface type identifier.
-    // ///
-    // /// See [`SCNetworkInterfaceGetInterfaceType`] for details.
-    // ///
-    // /// [`SCNetworkInterfaceGetInterfaceType`]: https://developer.apple.com/documentation/systemconfiguration/1517371-scnetworkinterfacegetinterfacety?language=objc
-    // pub fn interface_type_string(&self) -> Option<CFString> {
-    //     unsafe {
-    //         let ptr = SCNetworkInterfaceGetInterfaceType(self.0);
-    //         if ptr.is_null() {
-    //             None
-    //         } else {
-    //             Some(CFString::wrap_under_get_rule(ptr))
-    //         }
-    //     }
-    // }
-    //
-    // /// Returns the _BSD_ name for the interface, such as `en0`.
-    // ///
-    // /// See [`SCNetworkInterfaceGetBSDName`] for details.
-    // ///
-    // /// [`SCNetworkInterfaceGetBSDName`]: https://developer.apple.com/documentation/systemconfiguration/1516854-scnetworkinterfacegetbsdname?language=objc
-    // pub fn bsd_name(&self) -> Option<CFString> {
-    //     unsafe {
-    //         let ptr = SCNetworkInterfaceGetBSDName(self.0);
-    //         if ptr.is_null() {
-    //             None
-    //         } else {
-    //             Some(CFString::wrap_under_get_rule(ptr))
-    //         }
-    //     }
-    // }
-    //
-    // /// Returns the localized display name for the interface.
-    // ///
-    // /// See [`SCNetworkInterfaceGetLocalizedDisplayName`] for details.
-    // ///
-    // /// [`SCNetworkInterfaceGetLocalizedDisplayName`]: https://developer.apple.com/documentation/systemconfiguration/1517060-scnetworkinterfacegetlocalizeddi?language=objc
-    // pub fn display_name(&self) -> Option<CFString> {
-    //     unsafe {
-    //         let ptr = SCNetworkInterfaceGetLocalizedDisplayName(self.0);
-    //         if ptr.is_null() {
-    //             None
-    //         } else {
-    //             Some(CFString::wrap_under_get_rule(ptr))
-    //         }
-    //     }
-    // }
+    /// Returns the raw protocol type identifier.
+    ///
+    /// See [`SCNetworkProtocolGetProtocolType`] for details.
+    ///
+    /// [`SCNetworkProtocolGetProtocolType`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkprotocolgetprotocoltype(_:)?language=objc
+    pub fn protocol_type_string(&self) -> Option<CFString> {
+        unsafe {
+            let ptr = SCNetworkProtocolGetProtocolType(self.0);
+            if ptr.is_null() {
+                None
+            } else {
+                Some(CFString::wrap_under_get_rule(ptr))
+            }
+        }
+    }
 }
 
 /// Represents the possible network protocol types.
@@ -324,10 +292,16 @@ impl SCNetworkProtocolType {
             &const_str == type_id
         };
         unsafe {
-            if id_is_equal_to(kSCNetworkInterfaceTypeIPv4) {
+            if id_is_equal_to(kSCNetworkProtocolTypeDNS) {
+                Some(SCNetworkProtocolType::DNS)
+            } else if id_is_equal_to(kSCNetworkProtocolTypeIPv4) {
                 Some(SCNetworkProtocolType::IPv4)
-            } else if id_is_equal_to(kSCNetworkInterfaceTypeIPv6) {
-                Some(SCNetworkProtocolType::IPv4)
+            } else if id_is_equal_to(kSCNetworkProtocolTypeIPv6) {
+                Some(SCNetworkProtocolType::IPv6)
+            } else if id_is_equal_to(kSCNetworkProtocolTypeProxies) {
+                Some(SCNetworkProtocolType::Proxies)
+            } else if id_is_equal_to(kSCNetworkProtocolTypeSMB) {
+                Some(SCNetworkProtocolType::SMB)
             } else {
                 None
             }
