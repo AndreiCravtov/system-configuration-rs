@@ -33,7 +33,7 @@ impl Interface {
             .collect();
         let underlying_iface = scnetwork_interface
             .underlying_interface()
-            .and_then(Self::from_scnetwork_interface)
+            .and_then(|i| Self::from_scnetwork_interface(&i))
             .map(Box::new);
 
         Some(Interface {
@@ -50,6 +50,6 @@ impl Interface {
 pub fn get_interfaces() -> Vec<Interface> {
     SCNetworkInterface::get_interfaces()
         .into_iter()
-        .filter_map(Interface::from_scnetwork_interface)
+        .filter_map(|i| Interface::from_scnetwork_interface(&i))
         .collect::<Vec<_>>()
 }
