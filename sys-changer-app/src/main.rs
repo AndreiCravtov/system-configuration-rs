@@ -1,12 +1,12 @@
 #![allow(unused_imports, non_upper_case_globals, dead_code)]
 
+mod dynstore;
 mod interfaces;
 mod simpler_auth;
 mod tweaking_config;
 
-use crate::interfaces::get_interfaces;
+use crate::dynstore::dynstore_display;
 use crate::simpler_auth::SimpleAuthorization;
-use crate::tweaking_config::get_priority_ordered_services;
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::SCNetworkSet;
@@ -39,9 +39,10 @@ pub fn main() {
     let my_networkset_name = CFString::new("sys-changer-app-networkset");
 
     // grab network info
-    for i in get_interfaces() {
-        println!("found interface {i:?}");
-    }
+    // for i in get_interfaces() {
+    //     println!("found interface {i:?}");
+    // }
+    dynstore_display(&proc_name);
 
     // grab authorization & create preference set with it
     let authorization = SimpleAuthorization::default().unwrap();
@@ -54,17 +55,6 @@ pub fn main() {
     // grab current set and duplicate it
     let current = SCNetworkSet::get_current(&prefs).unwrap();
     let new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
-    println!(
-        "Created copy of current: {}]--[{}",
-        new.name().unwrap(),
-        new.id().unwrap()
-    );
-    println!("{:?}", new.service_order());
-    let services = get_priority_ordered_services(&new)
-        .iter()
-        .map(|s| s.id().unwrap())
-        .collect::<Vec<_>>();
-    println!("{:?}", services);
 
     // commit and apply new changes
     helper::save_prefs(&prefs);
