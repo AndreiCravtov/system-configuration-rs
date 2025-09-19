@@ -7,5 +7,5 @@ pub fn dynstore_display(name: &CFString) {
     let keys = dynstore.get_keys(".*").unwrap().into_collect::<Vec<_>>();
     println!("keys: {:#?}", keys);
 
-    println!("{:?}", dynstore.get("Setup:".into()).unwrap());
+    println!("{:?}", dynstore.get("Setup:").unwrap());
 }
