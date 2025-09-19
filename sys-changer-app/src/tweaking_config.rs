@@ -1,5 +1,6 @@
 use crate::ext::CFArrayExt;
 use crate::helper;
+use crate::interfaces::Interface;
 use core_foundation::array::CFArray;
 use system_configuration::network_configuration::{
     SCNetworkInterface, SCNetworkInterfaceType, SCNetworkProtocolType, SCNetworkService,
@@ -61,6 +62,12 @@ pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
                 .map(|_| i.clone())
         })
         .collect::<Vec<_>>();
+    println!(
+        "creating this {:?}",
+        eligible_ifaces
+            .iter()
+            .filter_map(Interface::from_scnetwork_interface)
+    );
 
     // create new services for each interface, add IPv6 to each & then establish a default configuration in general
     let new_services = eligible_ifaces
