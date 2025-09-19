@@ -9,7 +9,7 @@ use crate::simpler_auth::SimpleAuthorization;
 use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
-use system_configuration::network_configuration::SCNetworkSet;
+use system_configuration::network_configuration::{SCNetworkInterface, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
 
 pub(crate) mod ext {
@@ -49,6 +49,13 @@ pub fn main() {
     // grab current set and duplicate it
     let current = SCNetworkSet::get_current(&prefs).unwrap();
     let mut new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
+
+    let en1 = SCNetworkInterface::get_interfaces()
+        .iter()
+        .find(|i| i.bsd_name().unwrap() == "en1")
+        .unwrap();
+    let en1_service = helper::create_service(&prefs, &en1);
+    println!("created new service: {:?}", en1_service.id().unwrap());
 
     // modify existing services first, removing thing like the bridge service or enabling IPv6
     // if missing; then add services for any missing interfaces
