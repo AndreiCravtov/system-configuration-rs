@@ -98,11 +98,12 @@ impl ServiceModifications {
         match (service.enabled(), ProtocolModifications::gather(service)) {
             (true, None) => {
                 println!("{iface_ty:?} not modified");
-
                 None
             }
             (enabled, protocol) => {
-                println!("{iface_ty:?} needs to be modified => {enabled}, {protocol:?}");
+                println!(
+                    "{iface_ty:?} needs to be modified => is_enabled: {enabled}, {protocol:?}"
+                );
                 Some(ServiceModifications::Modify {
                     enable: !enabled,
                     protocol,
