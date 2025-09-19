@@ -38,12 +38,6 @@ pub fn main() {
     let proc_name = CFString::new("sys-changer-app");
     let my_networkset_name = CFString::new("sys-changer-app-networkset");
 
-    // grab network info
-    // for i in get_interfaces() {
-    //     println!("found interface {i:?}");
-    // }
-    // dynstore_display(&proc_name);
-
     // grab authorization & create preference set with it
     let authorization = SimpleAuthorization::default().unwrap();
     let prefs =
