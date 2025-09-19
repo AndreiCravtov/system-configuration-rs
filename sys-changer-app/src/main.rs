@@ -6,7 +6,7 @@ mod tweaking_config;
 
 use crate::interfaces::get_interfaces;
 use crate::simpler_auth::SimpleAuthorization;
-use crate::tweaking_config::sorting_function;
+use crate::tweaking_config::get_priority_ordered_services;
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::SCNetworkSet;
@@ -60,7 +60,11 @@ pub fn main() {
         new.id().unwrap()
     );
 
-    sorting_function();
+    let services = get_priority_ordered_services(&new)
+        .iter()
+        .map(|s| s.id().unwrap())
+        .collect::<Vec<_>>();
+    println!("{:?}", services);
 
     // commit and apply new changes
     helper::save_prefs(&prefs);

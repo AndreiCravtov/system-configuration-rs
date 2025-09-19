@@ -24,7 +24,8 @@ pub fn remove_bridge_services(prefs: &SCPreferences, set: &SCNetworkSet) {
     }
 }
 
-pub fn remove_bridge_services2(prefs: &SCPreferences, set: &SCNetworkSet) {
+/// Compute a list of services __in order__ of their priority, if any.
+pub fn get_priority_ordered_services(set: &SCNetworkSet) -> Vec<SCNetworkService> {
     let service_priorities = set.service_order().into_collect::<Vec<_>>();
     let mut services = set
         .services()
@@ -41,74 +42,6 @@ pub fn remove_bridge_services2(prefs: &SCPreferences, set: &SCNetworkSet) {
 
             (service, Some(id))
         })
-        .collect::<Vec<_>>()
-        .sort_by(|(s1, p1), (s2, p2)| match (p1, p2) {
-            (Some(p1), Some(p2)) => p1.cmp(p2),
-            (Some(_), None) => std::cmp::Ordering::Less,
-            (None, Some(_)) => std::cmp::Ordering::Greater,
-            (None, None) => std::cmp::Ordering::Equal,
-        });
-}
-
-pub fn sorting_function() {
-    #[derive(Debug)]
-    struct Service {
-        id: Option<&'static str>,
-        meta: &'static str,
-    }
-
-    let service_priorities = vec!["1", "2", "3", "4", "5", "6"];
-    let services = vec![
-        Service {
-            id: Some("7"),
-            meta: "7",
-        },
-        Service {
-            id: Some("3"),
-            meta: "3",
-        },
-        Service {
-            id: Some("6"),
-            meta: "6",
-        },
-        Service {
-            id: None,
-            meta: "4",
-        },
-        Service {
-            id: Some("5"),
-            meta: "5",
-        },
-        Service {
-            id: None,
-            meta: "9",
-        },
-        Service {
-            id: Some("1"),
-            meta: "1",
-        },
-        Service {
-            id: Some("8"),
-            meta: "8",
-        },
-        Service {
-            id: None,
-            meta: "2",
-        },
-    ];
-    let mut services = services
-        .into_iter()
-        .map(|s| {
-            let Some(service_id) = s.id else {
-                return (s, None);
-            };
-
-            let Some(id) = service_priorities.iter().position(|id| id == &service_id) else {
-                return (s, None);
-            };
-
-            (s, Some(id))
-        })
         .collect::<Vec<_>>();
     services.sort_by(|(s1, p1), (s2, p2)| match (p1, p2) {
         (Some(p1), Some(p2)) => p1.cmp(p2),
@@ -116,5 +49,5 @@ pub fn sorting_function() {
         (None, Some(_)) => std::cmp::Ordering::Greater,
         (None, None) => std::cmp::Ordering::Equal,
     });
-    println!("{:?}", services);
+    services.into_iter().map(|(s, _)| s).collect()
 }
