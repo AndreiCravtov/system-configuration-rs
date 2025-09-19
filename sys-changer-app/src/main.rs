@@ -5,6 +5,7 @@ mod interfaces;
 mod simpler_auth;
 mod tweaking_config;
 
+use crate::ext::CFArrayExt;
 use crate::simpler_auth::SimpleAuthorization;
 use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
@@ -51,6 +52,7 @@ pub fn main() {
     let mut new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
 
     let en1 = SCNetworkInterface::get_interfaces()
+        .into_collect::<Vec<_>>()
         .into_iter()
         .find(|i| i.bsd_name().unwrap() == "en1")
         .unwrap();
