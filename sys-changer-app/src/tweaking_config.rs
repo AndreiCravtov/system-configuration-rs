@@ -48,6 +48,7 @@ pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
 }
 
 /// Modifications needed to be done to a service.
+#[derive(Debug)]
 enum ServiceModifications {
     /// This service needs to be deleted.
     Delete,
@@ -71,10 +72,14 @@ impl ServiceModifications {
             return None;
         };
 
+        println!("{iface_ty:?} has been detected");
+
         // if it's a service for bridge interfaces, delete it
         if let SCNetworkInterfaceType::Bridge = iface_ty {
             return Some(Self::Delete);
         }
+
+        println!("{iface_ty:?} not bridge");
 
         // check that the interface supports IPv6 protocol -> leave this service unmodified if doesn't
         if iface
@@ -87,18 +92,28 @@ impl ServiceModifications {
             return None;
         }
 
+        println!("{iface_ty:?} supports ipv6");
+
         // no protocol modifications needed && service ALREADY enabled  =>  leave this service unmodified
         match (service.enabled(), ProtocolModifications::gather(service)) {
-            (true, None) => None,
-            (enabled, protocol) => Some(ServiceModifications::Modify {
-                enable: !enabled,
-                protocol,
-            }),
+            (true, None) => {
+                println!("{iface_ty:?} not modified");
+
+                None
+            }
+            (enabled, protocol) => {
+                println!("{iface_ty:?} needs to be modified => {enabled}, {protocol:?}");
+                Some(ServiceModifications::Modify {
+                    enable: !enabled,
+                    protocol,
+                })
+            }
         }
     }
 }
 
 /// Modifications needed to be done to the protocols of a service.
+#[derive(Debug)]
 enum ProtocolModifications {
     AddIPv6,
     ModifyIPv6 {
