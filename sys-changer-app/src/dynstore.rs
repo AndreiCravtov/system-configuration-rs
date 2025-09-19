@@ -7,6 +7,6 @@ pub fn dynstore_display(name: &CFString) {
     let keys = dynstore.get_keys(".*").unwrap().into_collect::<Vec<_>>();
     println!("keys: {:#?}", keys);
 
-    println!("{:?}", dynstore.get("Setup:").unwrap());
-    println!("{:?}", dynstore.get("Setup:/").unwrap());
+    println!("{:?}", dynstore.get("Setup:").unwrap()); // these seem to have different values??
+    println!("{:?}", dynstore.get("Setup:/").unwrap()); // what is the semantics of the dynamic store?? is it directory based?
 }

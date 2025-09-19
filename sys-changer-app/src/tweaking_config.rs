@@ -4,7 +4,32 @@ use system_configuration::network_configuration::{
 };
 use system_configuration::preferences::SCPreferences;
 
-// pub fn into_priorities()
+/// Gather modifications needed to be done to a service.
+enum ServiceModifications {
+    /// This service needs to be deleted.
+    Delete,
+    /// This service needs to be modified.
+    Modify {
+        /// Whether the service needs to be marked as enabled.
+        enable: bool,
+        /// Protocol modifications to perform.
+        protocol: Option<ProtocolModifications>,
+    },
+}
+
+impl ServiceModifications {
+    /// Gather modifications needed to be done to a service.
+    pub fn gather() -> Self {}
+}
+
+enum ProtocolModifications {
+    AddIPv6,
+    ModifyIPv6 {
+        /// Whether the protocol needs to be marked as enabled
+        enable: bool,
+        // TODO: if the configuration keys are WRONG, add information here
+    },
+}
 
 pub fn remove_bridge_services(prefs: &SCPreferences, set: &SCNetworkSet) {
     let ordered_services = get_priority_ordered_services(set);
@@ -26,7 +51,7 @@ pub fn remove_bridge_services(prefs: &SCPreferences, set: &SCNetworkSet) {
                 return None;
             }
 
-            // check that the interface supports IPv6 protocol -> leave modified if not
+            // check that the interface supports IPv6 protocol -> leave modified if it doesn't
             if iface
                 .supported_protocol_type_strings()
                 .into_iter()
@@ -37,7 +62,10 @@ pub fn remove_bridge_services(prefs: &SCPreferences, set: &SCNetworkSet) {
                 return Some(s);
             }
 
-            // check that the service HAS
+            // start gathering any modifications we may need
+
+            // check that the service ALREADY the IPv6 protocol configured
+            let d = s.find_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring());
 
             // matches!(iface_ty, SCNetworkInterfaceType::Bridge)
             None

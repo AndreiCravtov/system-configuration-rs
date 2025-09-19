@@ -10,8 +10,9 @@ use sys::network_configuration::{
     SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface,
     SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
     SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
-    SCNetworkServiceRemove, SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices,
-    SCNetworkSetGetName, SCNetworkSetGetSetID, SCNetworkSetRemove,
+    SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols, SCNetworkServiceRemove,
+    SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName,
+    SCNetworkSetGetSetID, SCNetworkSetRemove,
 };
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
@@ -274,6 +275,33 @@ impl SCNetworkInterfaceType {
             }
         }
     }
+
+    /// Returns the string constants used to identify this network interface type.
+    pub fn to_cfstring(&self) -> CFString {
+        use system_configuration_sys::network_configuration::*;
+        let wrap_const = |const_str| unsafe { CFString::wrap_under_get_rule(const_str) };
+        unsafe {
+            match self {
+                SCNetworkInterfaceType::SixToFour => wrap_const(kSCNetworkInterfaceType6to4),
+                SCNetworkInterfaceType::Bluetooth => wrap_const(kSCNetworkInterfaceTypeBluetooth),
+                SCNetworkInterfaceType::Bridge => BRIDGE_INTERFACE_TYPE_ID.into(),
+                SCNetworkInterfaceType::Bond => wrap_const(kSCNetworkInterfaceTypeBond),
+                SCNetworkInterfaceType::Ethernet => wrap_const(kSCNetworkInterfaceTypeEthernet),
+                SCNetworkInterfaceType::FireWire => wrap_const(kSCNetworkInterfaceTypeFireWire),
+                SCNetworkInterfaceType::IEEE80211 => wrap_const(kSCNetworkInterfaceTypeIEEE80211),
+                SCNetworkInterfaceType::IPSec => wrap_const(kSCNetworkInterfaceTypeIPSec),
+                SCNetworkInterfaceType::IrDA => IRDA_INTERFACE_TYPE_ID.into(),
+                SCNetworkInterfaceType::L2TP => wrap_const(kSCNetworkInterfaceTypeL2TP),
+                SCNetworkInterfaceType::Modem => wrap_const(kSCNetworkInterfaceTypeModem),
+                SCNetworkInterfaceType::PPP => wrap_const(kSCNetworkInterfaceTypePPP),
+                SCNetworkInterfaceType::PPTP => wrap_const(kSCNetworkInterfaceTypePPTP),
+                SCNetworkInterfaceType::Serial => wrap_const(kSCNetworkInterfaceTypeSerial),
+                SCNetworkInterfaceType::VLAN => wrap_const(kSCNetworkInterfaceTypeVLAN),
+                SCNetworkInterfaceType::WWAN => wrap_const(kSCNetworkInterfaceTypeWWAN),
+                SCNetworkInterfaceType::IPv4 => wrap_const(kSCNetworkInterfaceTypeIPv4),
+            }
+        }
+    }
 }
 
 /// Retrieve all current network interfaces
@@ -374,6 +402,21 @@ impl SCNetworkProtocolType {
             }
         }
     }
+
+    /// Returns the string constants used to identify this network protocol type.
+    pub fn to_cfstring(&self) -> CFString {
+        use system_configuration_sys::network_configuration::*;
+        let wrap_const = |const_str| unsafe { CFString::wrap_under_get_rule(const_str) };
+        unsafe {
+            match self {
+                SCNetworkProtocolType::DNS => wrap_const(kSCNetworkProtocolTypeDNS),
+                SCNetworkProtocolType::IPv4 => wrap_const(kSCNetworkProtocolTypeIPv4),
+                SCNetworkProtocolType::IPv6 => wrap_const(kSCNetworkProtocolTypeIPv6),
+                SCNetworkProtocolType::Proxies => wrap_const(kSCNetworkProtocolTypeProxies),
+                SCNetworkProtocolType::SMB => wrap_const(kSCNetworkProtocolTypeSMB),
+            }
+        }
+    }
 }
 
 core_foundation::declare_TCFType!(
@@ -410,6 +453,18 @@ impl SCNetworkService {
         unsafe { SCNetworkServiceGetEnabled(self.0) == 0 }
     }
 
+    /// Returns the service identifier.
+    pub fn id(&self) -> Option<CFString> {
+        unsafe {
+            let ptr = SCNetworkServiceGetServiceID(self.0);
+            if ptr.is_null() {
+                None
+            } else {
+                Some(CFString::wrap_under_get_rule(ptr))
+            }
+        }
+    }
+
     /// Returns the network interface backing this network service, if it has one.
     pub fn network_interface(&self) -> Option<SCNetworkInterface> {
         unsafe {
@@ -422,14 +477,38 @@ impl SCNetworkService {
         }
     }
 
-    /// Returns the service identifier.
-    pub fn id(&self) -> Option<CFString> {
+    /// Returns all network protocols associated with the specified service.
+    ///
+    /// See [`SCNetworkServiceCopyProtocols`] for details.
+    ///
+    /// [`SCNetworkServiceCopyProtocols`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecopyprotocols(_:)?language=objc
+    pub fn network_protocols(&self) -> CFArray<SCNetworkProtocol> {
         unsafe {
-            let ptr = SCNetworkServiceGetServiceID(self.0);
+            let array_ptr = SCNetworkServiceCopyProtocols(self.0);
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<SCNetworkProtocol>::wrap_under_create_rule(array_ptr)
+        }
+    }
+
+    /// Returns the network protocol of the specified type for the specified service. Or `None` if
+    /// this protocol has not been added or if an error occurred.
+    ///
+    /// See [`SCNetworkServiceCopyProtocol`] for details.
+    ///
+    /// [`SCNetworkServiceCopyProtocol`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecopyprotocol(_:_:)?language=objc
+    pub fn find_network_protocol<S: Into<CFString>>(
+        &self,
+        protocol_type: S,
+    ) -> Option<SCNetworkProtocol> {
+        let protocol_type_ref = protocol_type.into().as_concrete_TypeRef();
+        unsafe {
+            let ptr = SCNetworkServiceCopyProtocol(self.0, protocol_type_ref);
             if ptr.is_null() {
                 None
             } else {
-                Some(CFString::wrap_under_get_rule(ptr))
+                Some(SCNetworkProtocol::wrap_under_create_rule(ptr))
             }
         }
     }
