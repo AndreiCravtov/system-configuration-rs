@@ -4,7 +4,7 @@ use system_configuration::network_configuration::{
 };
 use system_configuration::preferences::SCPreferences;
 
-/// Gather modifications needed to be done to a service.
+/// Modifications needed to be done to a service.
 enum ServiceModifications {
     /// This service needs to be deleted.
     Delete,
@@ -19,9 +19,43 @@ enum ServiceModifications {
 
 impl ServiceModifications {
     /// Gather modifications needed to be done to a service.
-    pub fn gather() -> Self {}
+    pub fn gather(service: &SCNetworkService) -> Option<Self> {
+        // grab network interface & interface type -> leave unmodified if missing
+        let Some(iface) = service.network_interface() else {
+            return None;
+        };
+        let Some(iface_ty) = iface.interface_type() else {
+            return None;
+        };
+
+        // if it's a service for bridge interfaces, delete it
+        if let SCNetworkInterfaceType::Bridge = iface_ty {
+            return Some(Self::Delete);
+        }
+
+        // check that the interface supports IPv6 protocol -> leave this service unmodified if doesn't
+        if iface
+            .supported_protocol_type_strings()
+            .into_iter()
+            .filter_map(|p| SCNetworkProtocolType::from_cfstring(&p))
+            .find(|p| matches!(p, SCNetworkProtocolType::IPv6))
+            .is_none()
+        {
+            return None;
+        }
+
+        // no protocol modifications needed && service ALREADY enabled  =>  leave this service unmodified
+        match (service.enabled(), ProtocolModifications::gather(service)) {
+            (true, None) => None,
+            (enabled, protocol) => Some(ServiceModifications::Modify {
+                enable: !enabled,
+                protocol,
+            }),
+        }
+    }
 }
 
+/// Modifications needed to be done to the protocols of a service.
 enum ProtocolModifications {
     AddIPv6,
     ModifyIPv6 {
@@ -31,44 +65,41 @@ enum ProtocolModifications {
     },
 }
 
+impl ProtocolModifications {
+    /// Gather modifications needed to be done to a service.
+    pub fn gather(service: &SCNetworkService) -> Option<Self> {
+        // check that the service ALREADY the IPv6 protocol configured => add IPv6 otherwise
+        let Some(ipv6_proto) =
+            service.find_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring())
+        else {
+            return Some(Self::AddIPv6);
+        };
+
+        // if protocol is disabled => enable it
+        // TODO: expand this match-case statement to account for configuration keys!!!
+        let ipv6_enabled = ipv6_proto.enabled();
+        match (ipv6_enabled,) {
+            (false,) => Some(Self::ModifyIPv6 { enable: true }),
+            _ => None,
+        }
+    }
+}
+
 pub fn remove_bridge_services(prefs: &SCPreferences, set: &SCNetworkSet) {
     let ordered_services = get_priority_ordered_services(set);
 
     // remove bridge interface
     let ordered_services = ordered_services
         .into_iter()
-        .filter_map(|s| {
-            // grab interface & interface type -> leave unmodified if missing
-            let Some(iface) = s.network_interface() else {
-                return Some(s);
-            };
-            let Some(iface_ty) = iface.interface_type() else {
-                return Some(s);
-            };
-
-            // if it's a service for bridge interfaces, remove it
-            if let SCNetworkInterfaceType::Bridge = iface_ty {
-                return None;
+        .filter_map(|s| match ServiceModifications::gather(&s) {
+            None => Some(s),
+            Some(ServiceModifications::Delete) => None,
+            Some(ServiceModifications::Modify {
+                enable,
+                protocol: proto_mods,
+            }) => {
+                todo!()
             }
-
-            // check that the interface supports IPv6 protocol -> leave modified if it doesn't
-            if iface
-                .supported_protocol_type_strings()
-                .into_iter()
-                .filter_map(|p| SCNetworkProtocolType::from_cfstring(&p))
-                .find(|p| matches!(p, SCNetworkProtocolType::IPv6))
-                .is_none()
-            {
-                return Some(s);
-            }
-
-            // start gathering any modifications we may need
-
-            // check that the service ALREADY the IPv6 protocol configured
-            let d = s.find_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring());
-
-            // matches!(iface_ty, SCNetworkInterfaceType::Bridge)
-            None
         })
         .collect::<Vec<_>>();
 }

@@ -86,6 +86,61 @@ pub(crate) mod helper {
     };
     use system_configuration_sys::system_configuration::SCCopyLastError;
 
+    /// Creates a shallow copy of the provided network service, using the `SCPreferencesPath*` APIs.
+    ///
+    /// The resulting network service will have the exact same __everything__, except for it missing
+    /// a user-defined name (to not clash with any other service names).
+    pub fn shallow_clone_network_service(
+        prefs: &SCPreferences,
+        old_service: &SCNetworkService,
+    ) -> SCNetworkService {
+        // constants
+        let services_key = unsafe { CFString::wrap_under_get_rule(kSCPrefNetworkServices) };
+        let user_defined_name_key =
+            unsafe { CFString::wrap_under_get_rule(kSCPropUserDefinedName) };
+
+        // grab info from network service
+        let old_service_id = old_service.id().unwrap();
+        let old_service_path: CFString = (&*format!("/{}/{}", services_key, old_service_id)).into();
+        let old_service_values = get_path_dictionary(prefs, &old_service_path).unwrap();
+
+        // create new values & delete user-defined name -> mark it as owned
+        let mut new_service_values =
+            CFMutableDictionary::<CFString, CFType>::from(&old_service_values);
+        new_service_values.remove(user_defined_name_key);
+        marked_as_owned(&mut new_service_values);
+
+        // create unique child path in `/NetworkServices` prefix & associate it w/ the values dictionary
+        let services_path: CFString = (&*format!("/{}", services_key)).into();
+        let new_service_path = unsafe {
+            CFString::wrap_under_create_rule(SCPreferencesPathCreateUniqueChild(
+                prefs.as_concrete_TypeRef(),
+                services_path.as_concrete_TypeRef(),
+            ))
+        };
+        unsafe {
+            panic_err(
+                SCPreferencesPathSetValue(
+                    prefs.as_concrete_TypeRef(),
+                    new_service_path.as_concrete_TypeRef(),
+                    new_service_values.as_concrete_TypeRef(),
+                ) != 0,
+            );
+        };
+
+        // extract new service ID from path to be able to fetch new network service
+        let new_service_id: CFString = (*new_service_path
+            .to_string()
+            .as_str()
+            .split("/")
+            .collect::<Vec<_>>()
+            .last()
+            .unwrap())
+        .into();
+        let new_service = SCNetworkService::find_service(prefs, new_service_id).unwrap();
+        new_service
+    }
+
     /// Creates a shallow copy of the provided network set, using the `SCPreferencesPath*` APIs.
     ///
     /// The resulting network set will have the exact same __everything__, except for a different
@@ -119,17 +174,13 @@ pub(crate) mod helper {
             ))
         };
         unsafe {
-            if SCPreferencesPathSetValue(
-                prefs.as_concrete_TypeRef(),
-                new_set_path.as_concrete_TypeRef(),
-                new_set_values.as_concrete_TypeRef(),
-            ) == 0
-            {
-                panic!(
-                    "Encountered error: {}",
-                    CFError::wrap_under_create_rule(SCCopyLastError())
-                );
-            }
+            panic_err(
+                SCPreferencesPathSetValue(
+                    prefs.as_concrete_TypeRef(),
+                    new_set_path.as_concrete_TypeRef(),
+                    new_set_values.as_concrete_TypeRef(),
+                ) != 0,
+            );
         };
 
         // extract new set ID from path to be able to fetch new network set
@@ -161,10 +212,10 @@ pub(crate) mod helper {
         }
     }
 
-    /// Insert `ThisNetworkSetWasCreatedByExo: true` flag to indicate this is a manged network set.
+    /// Insert `ThisNetworkEntityWasCreatedByExo: true` flag to indicate this is a manged network set/service.
     pub fn marked_as_owned(dict: &mut CFMutableDictionary<CFString, CFType>) {
         // constants
-        let owned_key = CFString::new("ThisNetworkSetWasCreatedByExo");
+        let owned_key = CFString::new("ThisNetworkEntityWasCreatedByExo");
         let owned_value = CFBoolean::true_value();
 
         dict.set(owned_key, owned_value.into_CFType());
@@ -175,7 +226,7 @@ pub(crate) mod helper {
         // constants
         let sets_key = unsafe { CFString::wrap_under_get_rule(kSCPrefSets) };
         let services_key = unsafe { CFString::wrap_under_get_rule(kSCPrefNetworkServices) };
-        let owned_key = CFString::new("ThisNetworkSetWasCreatedByExo");
+        let owned_key = CFString::new("ThisNetworkEntityWasCreatedByExo");
 
         // closures
         let set_path =
@@ -238,6 +289,6 @@ pub(crate) mod helper {
             return;
         }
         let e = unsafe { CFError::wrap_under_create_rule(SCCopyLastError()) };
-        panic!("error: {}", e);
+        panic!("Encountered error: {}", e);
     }
 }

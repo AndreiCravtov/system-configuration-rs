@@ -9,10 +9,10 @@ use core_foundation::{
 use sys::network_configuration::{
     SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface,
     SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
-    SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
-    SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols, SCNetworkServiceRemove,
-    SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName,
-    SCNetworkSetGetSetID, SCNetworkSetRemove,
+    SCNetworkProtocolGetEnabled, SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID,
+    SCNetworkProtocolRef, SCNetworkServiceCopy, SCNetworkServiceCopyProtocol,
+    SCNetworkServiceCopyProtocols, SCNetworkServiceRemove, SCNetworkSetCopy, SCNetworkSetCopyAll,
+    SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetSetID, SCNetworkSetRemove,
 };
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
@@ -331,6 +331,11 @@ core_foundation::impl_TCFType!(
 
 // TODO: implement all the other methods a SCNetworkProtocol has
 impl SCNetworkProtocol {
+    /// Returns a [`bool`] value indicating whether the specified protocol is enabled.
+    pub fn enabled(&self) -> bool {
+        unsafe { SCNetworkProtocolGetEnabled(self.0) == 0 }
+    }
+
     /// Get type of the network protocol, if the type is recognized, returns `None` otherwise.
     ///
     /// See [`SCNetworkProtocolGetProtocolType`] for details.
@@ -448,7 +453,28 @@ impl SCNetworkService {
         }
     }
 
-    /// Returns true if the network service is currently enabled
+    /// Returns the service with the specified identifier. Or `None` if the service ID does not
+    /// exist in the preferences or if an error occurred.
+    ///
+    /// See [`SCNetworkServiceCopy`] for details.
+    ///
+    /// [`SCNetworkServiceCopy`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecopy(_:_:)?language=objc
+    pub fn find_service<S: Into<CFString>>(prefs: &SCPreferences, service_id: S) -> Option<Self> {
+        let cf_service_id = service_id.into();
+        unsafe {
+            let service_ref = SCNetworkServiceCopy(
+                prefs.as_concrete_TypeRef(),
+                cf_service_id.as_concrete_TypeRef(),
+            );
+            if !service_ref.is_null() {
+                Some(Self::wrap_under_create_rule(service_ref))
+            } else {
+                None
+            }
+        }
+    }
+
+    /// Returns a [`bool`] value indicating whether the specified service is enabled.
     pub fn enabled(&self) -> bool {
         unsafe { SCNetworkServiceGetEnabled(self.0) == 0 }
     }
@@ -563,13 +589,13 @@ impl SCNetworkSet {
     /// See [`SCNetworkSetCopy`] for details.
     ///
     /// [`SCNetworkSetCopy`]: https://developer.apple.com/documentation/systemconfiguration/scnetworksetcopy(_:_:)?language=objc
-    pub fn find_set<S: Into<CFString>>(prefs: &SCPreferences, set_id: S) -> Option<SCNetworkSet> {
+    pub fn find_set<S: Into<CFString>>(prefs: &SCPreferences, set_id: S) -> Option<Self> {
         let cf_set_id = set_id.into();
         unsafe {
             let set_ref =
                 SCNetworkSetCopy(prefs.as_concrete_TypeRef(), cf_set_id.as_concrete_TypeRef());
             if !set_ref.is_null() {
-                Some(SCNetworkSet::wrap_under_create_rule(set_ref))
+                Some(Self::wrap_under_create_rule(set_ref))
             } else {
                 None
             }
