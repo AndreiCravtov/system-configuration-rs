@@ -59,11 +59,7 @@ pub fn main() {
         new.name().unwrap(),
         new.id().unwrap()
     );
-    let services = get_priority_ordered_services(&current)
-        .iter()
-        .map(|s| s.id().unwrap())
-        .collect::<Vec<_>>();
-    println!("{:?}", services);
+    println!("{:?}", new.service_order());
     let services = get_priority_ordered_services(&new)
         .iter()
         .map(|s| s.id().unwrap())
