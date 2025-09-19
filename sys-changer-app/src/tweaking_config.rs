@@ -32,7 +32,7 @@ pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
     // the new ones as an easy way of achieving this goal; finally just replace the service order
     // with the new one
     let old_services = set.services();
-    for s in old_services {
+    for s in &old_services {
         assert!(set.remove_service(&s));
     }
     for s in &ordered_services {
