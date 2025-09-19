@@ -6,13 +6,17 @@ use core_foundation::{
     base::{TCFType, ToVoid},
     string::CFString,
 };
+use sys::core_foundation_sys::base::Boolean;
 use sys::network_configuration::{
     SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface,
     SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
     SCNetworkProtocolGetEnabled, SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID,
-    SCNetworkProtocolRef, SCNetworkServiceCopy, SCNetworkServiceCopyProtocol,
-    SCNetworkServiceCopyProtocols, SCNetworkServiceRemove, SCNetworkSetCopy, SCNetworkSetCopyAll,
-    SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetSetID, SCNetworkSetRemove,
+    SCNetworkProtocolRef, SCNetworkProtocolSetEnabled, SCNetworkServiceAddProtocolType,
+    SCNetworkServiceCopy, SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols,
+    SCNetworkServiceRemove, SCNetworkServiceSetEnabled, SCNetworkSetAddService, SCNetworkSetCopy,
+    SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetSetID,
+    SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
+    SCNetworkSetSetServiceOrder,
 };
 use system_configuration_sys::network_configuration::{
     SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
@@ -360,6 +364,13 @@ impl SCNetworkProtocol {
             }
         }
     }
+
+    /// Enables or disables the specified protocol.
+    ///
+    /// Returns: `true` if the enabled status was saved; `false` if an error occurred.
+    pub fn set_enabled(&mut self, enabled: bool) -> bool {
+        (unsafe { SCNetworkProtocolSetEnabled(self.0, enabled as Boolean) }) != 0
+    }
 }
 
 /// Represents the possible network protocol types.
@@ -539,11 +550,29 @@ impl SCNetworkService {
         }
     }
 
+    /// Adds the network protocol of the specified type to the specified service. The protocol
+    /// configuration is set to default values that are appropriate for the interface associated
+    /// with the service.
+    ///
+    /// Returns: `true` if the protocol was added to the service; `false` if the protocol was
+    ///          already present or an error occurred.
+    pub fn add_network_protocol<S: Into<CFString>>(&mut self, protocol_type: S) -> bool {
+        let protocol_type_ref = protocol_type.into().as_concrete_TypeRef();
+        (unsafe { SCNetworkServiceAddProtocolType(self.0, protocol_type_ref) }) != 0
+    }
+
     /// Removes the specified network service from the configuration.
     ///
     /// Returns: `true` if the service was removed; `false` if an error occurred.
     pub fn remove(self) -> bool {
         (unsafe { SCNetworkServiceRemove(self.0) }) != 0
+    }
+
+    /// Enables or disables the specified service.
+    ///
+    /// Returns: `true` if the enabled status was saved; `false` if an error occurred.
+    pub fn set_enabled(&mut self, enabled: bool) -> bool {
+        (unsafe { SCNetworkServiceSetEnabled(self.0, enabled as Boolean) }) != 0
     }
 }
 
@@ -655,11 +684,44 @@ impl SCNetworkSet {
         }
     }
 
+    /// Adds the specified network service to the specified set.
+    ///
+    /// Returns: `true` if the service was added to the set; `false` if the service was already
+    ///          present or an error occurred.
+    pub fn add_service(&mut self, service: &SCNetworkService) -> bool {
+        let service_ref = service.as_concrete_TypeRef();
+        (unsafe { SCNetworkSetAddService(self.0, service_ref) }) != 0
+    }
+
     /// Removes the specified set from the configuration.
     ///
     /// Returns: `true` if the set was removed; `false` if an error occurred.
     pub fn remove(self) -> bool {
         (unsafe { SCNetworkSetRemove(self.0) }) != 0
+    }
+
+    /// Removes the specified network service from the specified set.
+    ///
+    /// Returns: `true` if the service was removed from the set; `false` if the service was not
+    ///          already present or an error occurred.
+    pub fn remove_service(&mut self, service: &SCNetworkService) -> bool {
+        let service_ref = service.as_concrete_TypeRef();
+        (unsafe { SCNetworkSetRemoveService(self.0, service_ref) }) != 0
+    }
+
+    /// Specifies the set that should be the current set.
+    ///
+    /// Returns: `true` if the current set was updated; `false` if an error occurred.
+    pub fn set_current(&mut self) -> bool {
+        (unsafe { SCNetworkSetSetCurrent(self.0) }) != 0
+    }
+
+    /// Stores the user-specified ordering of network services for the specified set.
+    ///
+    /// Returns: `true` if the new service order was saved; `false` if an error occurred.
+    pub fn set_service_order(&mut self, new_order: CFArray<CFString>) -> bool {
+        let cf_order_ref = new_order.as_concrete_TypeRef();
+        (unsafe { SCNetworkSetSetServiceOrder(self.0, cf_order_ref) }) != 0
     }
 }
 

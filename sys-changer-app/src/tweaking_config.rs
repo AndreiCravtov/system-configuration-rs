@@ -1,8 +1,51 @@
 use crate::ext::CFArrayExt;
+use crate::helper;
+use core_foundation::array::CFArray;
 use system_configuration::network_configuration::{
     SCNetworkInterfaceType, SCNetworkProtocolType, SCNetworkService, SCNetworkSet,
 };
 use system_configuration::preferences::SCPreferences;
+
+pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
+    let ordered_services = get_priority_ordered_services(set);
+
+    // iterate over the existing ordered services, removing or replacing them as necessary
+    let ordered_services = ordered_services
+        .into_iter()
+        .filter_map(|s| match ServiceModifications::gather(&s) {
+            None => Some(s),
+            Some(ServiceModifications::Delete) => None,
+            Some(ServiceModifications::Modify {
+                enable,
+                protocol: proto_mods,
+            }) => {
+                // create a duplicate service on which to apply our changes => we don't taint the
+                // original services with our modifications
+                let mut new_service = helper::shallow_clone_network_service(prefs, &s);
+                apply_modifications(&mut new_service, enable, proto_mods);
+                Some(new_service)
+            }
+        })
+        .collect::<Vec<_>>();
+
+    // apply the modified services to the network set -> remove all previous services and add back
+    // the new ones as an easy way of achieving this goal; finally just replace the service order
+    // with the new one
+    let old_services = set.services();
+    for s in old_services {
+        assert!(set.remove_service(&s));
+    }
+    for s in &ordered_services {
+        assert!(set.add_service(s));
+    }
+    let service_order = CFArray::from_CFTypes(
+        &ordered_services
+            .iter()
+            .filter_map(|s| s.id())
+            .collect::<Box<[_]>>(),
+    );
+    set.set_service_order(service_order);
+}
 
 /// Modifications needed to be done to a service.
 enum ServiceModifications {
@@ -85,23 +128,43 @@ impl ProtocolModifications {
     }
 }
 
-pub fn remove_bridge_services(prefs: &SCPreferences, set: &SCNetworkSet) {
-    let ordered_services = get_priority_ordered_services(set);
+pub fn apply_modifications(
+    service: &mut SCNetworkService,
+    enable_service: bool,
+    proto_mods: Option<ProtocolModifications>,
+) {
+    // enable network if needed
+    if enable_service {
+        assert!(service.set_enabled(true));
+    }
 
-    // remove bridge interface
-    let ordered_services = ordered_services
-        .into_iter()
-        .filter_map(|s| match ServiceModifications::gather(&s) {
-            None => Some(s),
-            Some(ServiceModifications::Delete) => None,
-            Some(ServiceModifications::Modify {
-                enable,
-                protocol: proto_mods,
-            }) => {
-                todo!()
+    // apply protocol modifications
+    let Some(proto_mods) = proto_mods else {
+        return;
+    };
+    match proto_mods {
+        ProtocolModifications::AddIPv6 => {
+            assert!(service.add_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring()));
+        }
+        ProtocolModifications::ModifyIPv6 {
+            enable: enable_proto,
+        } => {
+            let mut ipv6_proto = service
+                .find_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring())
+                .unwrap();
+
+            // enable protocol if needed
+            if enable_proto {
+                assert!((&mut ipv6_proto).set_enabled(true));
             }
-        })
-        .collect::<Vec<_>>();
+
+            // TODO: if the configuration keys are WRONG, modify configuration here
+            //       kSCValNetIPv6ConfigMethodAutomatic, which has the value Automatic
+            //       kSCValNetIPv6ConfigMethodManual, which has the value Manual
+            //       kSCValNetIPv6ConfigMethodRouterAdvertisement, which has the value RouterAdvertisement
+            //       kSCValNetIPv6ConfigMethod6to4, which has the value 6to4
+        }
+    }
 }
 
 /// Compute a list of services __in order__ of their priority, if any.
