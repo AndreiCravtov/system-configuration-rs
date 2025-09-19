@@ -16,7 +16,6 @@ pub struct Interface {
 
 impl Interface {
     pub fn from_scnetwork_interface(scnetwork_interface: &SCNetworkInterface) -> Option<Self> {
-        println!("interface counter");
         let iface_type = scnetwork_interface.interface_type()?;
         let bsd_name = scnetwork_interface.bsd_name()?.to_string();
         let hardware_address_string = scnetwork_interface.hardware_address_string()?.to_string();

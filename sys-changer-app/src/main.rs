@@ -6,6 +6,7 @@ mod tweaking_config;
 
 use crate::interfaces::get_interfaces;
 use crate::simpler_auth::SimpleAuthorization;
+use crate::tweaking_config::sorting_function;
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::SCNetworkSet;
@@ -58,6 +59,8 @@ pub fn main() {
         new.name().unwrap(),
         new.id().unwrap()
     );
+
+    sorting_function();
 
     // commit and apply new changes
     helper::save_prefs(&prefs);
