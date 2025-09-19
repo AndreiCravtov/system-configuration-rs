@@ -67,6 +67,7 @@ pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
         eligible_ifaces
             .iter()
             .filter_map(Interface::from_scnetwork_interface)
+            .collect::<Vec<_>>()
     );
 
     // create new services for each interface, add IPv6 to each & then establish a default configuration in general
