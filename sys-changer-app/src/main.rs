@@ -310,7 +310,10 @@ pub(crate) mod helper {
 
         // create new service & grab its new path -> extract associated values
         let service_id = {
-            let service = SCNetworkService::create(prefs, interface).unwrap();
+            let Some(service) = SCNetworkService::create(prefs, interface) else {
+                panic_err(false);
+                unreachable!()
+            };
             service.id().unwrap()
         };
         let service_path: CFString = (&*format!("/{}/{}", services_key, service_id)).into();
