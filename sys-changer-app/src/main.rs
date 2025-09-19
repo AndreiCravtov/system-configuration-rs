@@ -51,13 +51,13 @@ pub fn main() {
     let current = SCNetworkSet::get_current(&prefs).unwrap();
     let mut new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
 
-    let en1 = SCNetworkInterface::get_interfaces()
+    let en = SCNetworkInterface::get_interfaces()
         .into_collect::<Vec<_>>()
         .into_iter()
-        .find(|i| i.bsd_name().unwrap() == "en1")
+        .find(|i| i.bsd_name().unwrap() == "en2")
         .unwrap();
-    let en1_service = helper::create_service(&prefs, &en1);
-    println!("created new service: {:?}", en1_service.id().unwrap());
+    let en_service = helper::create_service(&prefs, &en);
+    println!("created new service: {:?}", en_service.id().unwrap());
 
     // modify existing services first, removing thing like the bridge service or enabling IPv6
     // if missing; then add services for any missing interfaces
