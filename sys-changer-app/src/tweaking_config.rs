@@ -60,7 +60,7 @@ pub fn sorting_function() {
     let service_priorities = vec!["1", "2", "3", "4", "5", "6"];
     let services = vec![
         Service {
-            id: Some("6"),
+            id: Some("7"),
             meta: "7",
         },
         Service {
@@ -88,7 +88,7 @@ pub fn sorting_function() {
             meta: "1",
         },
         Service {
-            id: Some("6"),
+            id: Some("8"),
             meta: "8",
         },
         Service {
