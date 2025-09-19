@@ -13,9 +13,10 @@ use sys::network_configuration::{
     SCNetworkProtocolGetEnabled, SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID,
     SCNetworkProtocolRef, SCNetworkProtocolSetEnabled, SCNetworkServiceAddProtocolType,
     SCNetworkServiceCopy, SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols,
-    SCNetworkServiceRemove, SCNetworkServiceSetEnabled, SCNetworkSetAddService, SCNetworkSetCopy,
-    SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetSetID,
-    SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
+    SCNetworkServiceCreate, SCNetworkServiceEstablishDefaultConfiguration, SCNetworkServiceRemove,
+    SCNetworkServiceSetEnabled, SCNetworkSetAddService, SCNetworkSetContainsInterface,
+    SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName,
+    SCNetworkSetGetSetID, SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
     SCNetworkSetSetServiceOrder,
 };
 use system_configuration_sys::network_configuration::{
@@ -485,6 +486,26 @@ impl SCNetworkService {
         }
     }
 
+    /// Creates a new network service for the specified interface in the configuration. Or `None`
+    /// if an error occurred.
+    ///
+    /// See [`SCNetworkServiceCreate`] for details.
+    ///
+    /// [`SCNetworkServiceCreate`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecreate(_:_:)?language=objc
+    pub fn create(prefs: &SCPreferences, interface: &SCNetworkInterface) -> Option<Self> {
+        unsafe {
+            let service_ref = SCNetworkServiceCreate(
+                prefs.as_concrete_TypeRef(),
+                interface.as_concrete_TypeRef(),
+            );
+            if !service_ref.is_null() {
+                Some(Self::wrap_under_create_rule(service_ref))
+            } else {
+                None
+            }
+        }
+    }
+
     /// Returns a [`bool`] value indicating whether the specified service is enabled.
     pub fn enabled(&self) -> bool {
         unsafe { SCNetworkServiceGetEnabled(self.0) != 0 }
@@ -548,6 +569,15 @@ impl SCNetworkService {
                 Some(SCNetworkProtocol::wrap_under_create_rule(ptr))
             }
         }
+    }
+
+    /// Establishes the default configuration for the specified network service. The default
+    /// configuration includes the addition of network protocols for the service (with default
+    /// configuration options).
+    ///
+    /// Returns: `true` if the configuration was updated; `false` if an error occurred.
+    pub fn establish_default_configuration(&mut self) -> bool {
+        (unsafe { SCNetworkServiceEstablishDefaultConfiguration(self.0) }) != 0
     }
 
     /// Adds the network protocol of the specified type to the specified service. The protocol
@@ -682,6 +712,13 @@ impl SCNetworkSet {
                 Some(CFString::wrap_under_get_rule(ptr))
             }
         }
+    }
+
+    /// Returns a [`bool`] value indicating whether the specified interface is represented by at
+    /// least one network service in the specified set.
+    pub fn contains_network_interface(&self, interface: &SCNetworkInterface) -> bool {
+        let iface_ref = interface.as_concrete_TypeRef();
+        (unsafe { SCNetworkSetContainsInterface(self.0, iface_ref) }) != 0
     }
 
     /// Adds the specified network service to the specified set.

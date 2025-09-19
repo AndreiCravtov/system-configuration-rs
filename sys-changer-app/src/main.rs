@@ -6,7 +6,7 @@ mod simpler_auth;
 mod tweaking_config;
 
 use crate::simpler_auth::SimpleAuthorization;
-use crate::tweaking_config::modify_existing_services;
+use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::SCNetworkSet;
@@ -56,9 +56,10 @@ pub fn main() {
     let current = SCNetworkSet::get_current(&prefs).unwrap();
     let mut new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
 
-    // modify existing services first, removing thing like the bridge service
-    // or enabling IPv6 if missing
+    // modify existing services first, removing thing like the bridge service or enabling IPv6
+    // if missing; then add services for any missing interfaces
     modify_existing_services(&prefs, &mut new);
+    add_missing_services(&prefs, &mut new);
 
     // commit and apply new changes
     helper::save_prefs(&prefs);
@@ -77,7 +78,9 @@ pub(crate) mod helper {
     use core_foundation::error::CFError;
     use core_foundation::string::CFString;
     use std::io::BufRead;
-    use system_configuration::network_configuration::{SCNetworkService, SCNetworkSet};
+    use system_configuration::network_configuration::{
+        SCNetworkInterface, SCNetworkService, SCNetworkSet,
+    };
     use system_configuration::preferences::SCPreferences;
     use system_configuration_sys::preferences::{
         SCPreferencesApplyChanges, SCPreferencesCommitChanges,
@@ -294,5 +297,41 @@ pub(crate) mod helper {
         }
         let e = unsafe { CFError::wrap_under_create_rule(SCCopyLastError()) };
         panic!("Encountered error: {}", e);
+    }
+
+    pub fn create_service(
+        prefs: &SCPreferences,
+        interface: &SCNetworkInterface,
+    ) -> SCNetworkService {
+        // constants
+        let services_key = unsafe { CFString::wrap_under_get_rule(kSCPrefNetworkServices) };
+        let user_defined_name_key =
+            unsafe { CFString::wrap_under_get_rule(kSCPropUserDefinedName) };
+
+        // create new service & grab its new path -> extract associated values
+        let service_id = {
+            let service = SCNetworkService::create(prefs, interface).unwrap();
+            service.id().unwrap()
+        };
+        let service_path: CFString = (&*format!("/{}/{}", services_key, service_id)).into();
+        let service_values = get_path_dictionary(prefs, &service_path).unwrap();
+
+        // create new values & delete user-defined name -> mark it as owned
+        let mut service_values = CFMutableDictionary::<CFString, CFType>::from(&service_values);
+        service_values.remove(user_defined_name_key);
+        marked_as_owned(&mut service_values);
+
+        // attach this new modified set as the NEW values for the new service & find it again
+        unsafe {
+            panic_err(
+                SCPreferencesPathSetValue(
+                    prefs.as_concrete_TypeRef(),
+                    service_path.as_concrete_TypeRef(),
+                    service_values.as_concrete_TypeRef(),
+                ) != 0,
+            );
+        };
+        let service = SCNetworkService::find_service(prefs, service_id).unwrap();
+        service
     }
 }

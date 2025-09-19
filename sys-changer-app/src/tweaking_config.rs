@@ -2,7 +2,8 @@ use crate::ext::CFArrayExt;
 use crate::helper;
 use core_foundation::array::CFArray;
 use system_configuration::network_configuration::{
-    SCNetworkInterfaceType, SCNetworkProtocolType, SCNetworkService, SCNetworkSet,
+    SCNetworkInterface, SCNetworkInterfaceType, SCNetworkProtocolType, SCNetworkService,
+    SCNetworkSet,
 };
 use system_configuration::preferences::SCPreferences;
 
@@ -45,6 +46,43 @@ pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
             .collect::<Box<[_]>>(),
     );
     set.set_service_order(service_order);
+}
+
+pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
+    // filter for interfaces that don't already have services in the set & also which support IPv6
+    let eligible_ifaces = SCNetworkInterface::get_interfaces()
+        .into_iter()
+        .filter(|i| !set.contains_network_interface(&i))
+        .filter_map(|i| {
+            (&i).supported_protocol_type_strings()
+                .into_iter()
+                .filter_map(|s| SCNetworkProtocolType::from_cfstring(&s))
+                .find(|p| matches!(p, SCNetworkProtocolType::IPv6))
+                .map(|_| i.clone())
+        })
+        .collect::<Vec<_>>();
+
+    // create new services for each interface, add IPv6 to each & then establish a default configuration in general
+    let new_services = eligible_ifaces
+        .iter()
+        .map(|i| {
+            let mut service = helper::create_service(prefs, i);
+            assert!(service.add_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring()));
+            service.establish_default_configuration();
+            service
+        })
+        .collect::<Vec<_>>();
+
+    // get the current service order & extend it with the new services
+    let mut service_order = set.service_order().into_collect::<Vec<_>>();
+    service_order.extend(new_services.iter().map(|i| i.id().unwrap()));
+    let service_order = CFArray::from_CFTypes(&service_order);
+
+    // add all new services and set new service order
+    for s in &new_services {
+        assert!(set.add_service(s));
+    }
+    assert!(set.set_service_order(service_order))
 }
 
 /// Modifications needed to be done to a service.
