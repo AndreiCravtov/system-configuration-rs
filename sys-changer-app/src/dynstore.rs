@@ -8,4 +8,5 @@ pub fn dynstore_display(name: &CFString) {
     println!("keys: {:#?}", keys);
 
     println!("{:?}", dynstore.get("Setup:").unwrap());
+    println!("{:?}", dynstore.get("Setup:/").unwrap());
 }
