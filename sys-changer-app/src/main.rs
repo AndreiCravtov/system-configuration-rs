@@ -51,7 +51,7 @@ pub fn main() {
     let mut new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
 
     let en1 = SCNetworkInterface::get_interfaces()
-        .iter()
+        .into_iter()
         .find(|i| i.bsd_name().unwrap() == "en1")
         .unwrap();
     let en1_service = helper::create_service(&prefs, &en1);
