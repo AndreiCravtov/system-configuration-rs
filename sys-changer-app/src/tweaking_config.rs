@@ -50,10 +50,15 @@ pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
 }
 
 pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
-    // filter for interfaces that don't already have services in the set & also which support IPv6
+    // filter for interfaces that don't already have services in the set, which aren't the Bridge
+    // interface & also which support IPv6
     let eligible_ifaces = SCNetworkInterface::get_interfaces()
         .into_iter()
         .filter(|i| !set.contains_network_interface(&i))
+        .filter(|i| {
+            i.interface_type()
+                .map_or(false, |t| !matches!(t, SCNetworkInterfaceType::Bridge))
+        })
         .filter_map(|i| {
             (&i).supported_protocol_type_strings()
                 .into_iter()
