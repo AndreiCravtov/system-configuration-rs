@@ -337,7 +337,7 @@ core_foundation::impl_TCFType!(
 impl SCNetworkProtocol {
     /// Returns a [`bool`] value indicating whether the specified protocol is enabled.
     pub fn enabled(&self) -> bool {
-        unsafe { SCNetworkProtocolGetEnabled(self.0) == 0 }
+        unsafe { SCNetworkProtocolGetEnabled(self.0) != 0 }
     }
 
     /// Get type of the network protocol, if the type is recognized, returns `None` otherwise.
@@ -487,7 +487,7 @@ impl SCNetworkService {
 
     /// Returns a [`bool`] value indicating whether the specified service is enabled.
     pub fn enabled(&self) -> bool {
-        unsafe { SCNetworkServiceGetEnabled(self.0) == 0 }
+        unsafe { SCNetworkServiceGetEnabled(self.0) != 0 }
     }
 
     /// Returns the service identifier.
