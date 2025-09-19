@@ -310,6 +310,10 @@ pub(crate) mod helper {
 
         // create new service & grab its new path -> extract associated values
         let service_id = {
+            println!(
+                "making service with interface: {:?}",
+                interface.interface_type().unwrap()
+            );
             let Some(service) = SCNetworkService::create(prefs, interface) else {
                 panic_err(false);
                 unreachable!()
