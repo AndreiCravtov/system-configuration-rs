@@ -13,7 +13,7 @@ use system_configuration::preferences::SCPreferences;
 use system_configuration_sys::preferences_path::SCPreferencesPathSetValue;
 use system_configuration_sys::schema_definitions::{
     kSCEntNetIPv6, kSCPrefNetworkServices, kSCPropNetIPv6ConfigMethod,
-    kSCValNetIPv6ConfigMethodAutomatic,
+    kSCValNetIPv6ConfigMethodAutomatic, kSCValNetIPv6ConfigMethodLinkLocal,
 };
 
 pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
@@ -70,6 +70,8 @@ fn add_ipv6(prefs: &SCPreferences, service: &mut SCNetworkService) {
     let ipv6_config_method = unsafe { CFString::wrap_under_get_rule(kSCPropNetIPv6ConfigMethod) };
     let ipv6_config_method_automatic =
         unsafe { CFString::wrap_under_get_rule(kSCValNetIPv6ConfigMethodAutomatic) };
+    let ipv6_config_method_link_local =
+        unsafe { CFString::wrap_under_get_rule(kSCValNetIPv6ConfigMethodLinkLocal) };
 
     // this usually doesn't establish a default configuration method, so we need to add the
     // KV-pair manually with `kSCPropNetIPv6ConfigMethod: kSCValNetIPv6ConfigMethodAutomatic`
@@ -87,7 +89,7 @@ fn add_ipv6(prefs: &SCPreferences, service: &mut SCNetworkService) {
         CFMutableDictionary::<CFString, CFType>::from(&old_service_ipv6_values);
     new_service_ipv6_values.set(
         ipv6_config_method,
-        ipv6_config_method_automatic.into_CFType(),
+        ipv6_config_method_link_local.into_CFType(),
     );
     unsafe {
         helper::panic_err(

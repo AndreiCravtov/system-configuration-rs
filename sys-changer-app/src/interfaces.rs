@@ -52,3 +52,6 @@ pub fn get_interfaces() -> Vec<Interface> {
         .filter_map(|i| Interface::from_scnetwork_interface(&i))
         .collect::<Vec<_>>()
 }
+
+/// This is undocumented Apple API
+pub fn remove_virtual_network_interfaces_bridge() {}
