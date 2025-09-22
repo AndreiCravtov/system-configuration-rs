@@ -59,8 +59,8 @@ function configure_macos_private_staging_headers() {
 
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
-echo "got past here.."
 configure_macos_private_staging_headers "${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj/"
+echo "got past here.."
 SC_HEADER_PATH="$SC_PRIVATE_HEADER_PATH"
 
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
