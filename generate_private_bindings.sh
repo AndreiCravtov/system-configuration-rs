@@ -22,39 +22,39 @@ SC_PRIVATE_HEADER_PATH="${SYSTEM_CONFIGURATION_PATH}/PrivateHeaders/"
 git submodule update --init --recursive
 MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
 function select_macos_vendored_version() {
-  # makes sure to select the right version of vendored code
-  local version="$1"
-  cd "$MACOS_VENDORED_PATH"
-  git checkout "$version"
-  cd "$SCRIPT_ROOT_PATH"
+    # makes sure to select the right version of vendored code
+    local version="$1"
+    cd "$MACOS_VENDORED_PATH"
+    git checkout "$version"
+    cd "$SCRIPT_ROOT_PATH"
 }
 function configure_macos_private_staging_headers() {
-  local system_configuration_src="$1"
-  mkdir -p "$SC_PRIVATE_HEADER_PATH"
+    local system_configuration_src="$1"
+    mkdir -p "$SC_PRIVATE_HEADER_PATH"
 
-  # copy over the appropriate headers (only the strictly needed ones)
-#  cp -n "$system_configuration_src/SCDPlugin.h"                         "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCPrivate.h"                         "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCDynamicStorePrivate.h"             "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCDynamicStoreCopySpecificPrivate.h" "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCDynamicStoreSetSpecificPrivate.h"  "$SC_PRIVATE_HEADER_PATH"
-  cp -n "$system_configuration_src/SCValidation.h"                      "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCPreferencesPrivate.h"              "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/DeviceOnHold.h"                      "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/LinkConfiguration.h"                 "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCPreferencesPathKey.h"              "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCPreferencesSetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCNetworkConnectionPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCPreferencesGetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCSchemaDefinitionsPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
-  cp -n "$system_configuration_src/SCNetworkConfigurationPrivate.h"     "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCPreferencesKeychainPrivate.h"      "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCNetworkSignature.h"                "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/SCNetworkSignaturePrivate.h"         "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/VPNPrivate.h"                        "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/VPNConfiguration.h"                  "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/VPNTunnelPrivate.h"                  "$SC_PRIVATE_HEADER_PATH"
-#  cp -n "$system_configuration_src/VPNTunnel.h"                         "$SC_PRIVATE_HEADER_PATH"
+    # copy over the appropriate headers (only the strictly needed ones)
+#    cp -n "$system_configuration_src/SCDPlugin.h"                         "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCPrivate.h"                         "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCDynamicStorePrivate.h"             "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCDynamicStoreCopySpecificPrivate.h" "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCDynamicStoreSetSpecificPrivate.h"  "$SC_PRIVATE_HEADER_PATH"
+    cp -n "$system_configuration_src/SCValidation.h"                      "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCPreferencesPrivate.h"              "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/DeviceOnHold.h"                      "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/LinkConfiguration.h"                 "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCPreferencesPathKey.h"              "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCPreferencesSetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCNetworkConnectionPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCPreferencesGetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCSchemaDefinitionsPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
+    cp -n "$system_configuration_src/SCNetworkConfigurationPrivate.h"     "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCPreferencesKeychainPrivate.h"      "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCNetworkSignature.h"                "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/SCNetworkSignaturePrivate.h"         "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/VPNPrivate.h"                        "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/VPNConfiguration.h"                  "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/VPNTunnelPrivate.h"                  "$SC_PRIVATE_HEADER_PATH"
+#    cp -n "$system_configuration_src/VPNTunnel.h"                         "$SC_PRIVATE_HEADER_PATH"
 }
 
 # ---------------- SystemConfiguration framework headers ----------------
@@ -142,57 +142,13 @@ BINDGEN_COMMON_ARGUMENTS=(
     --raw-line ""
 )
 
-## ---------------- Bindgen: SCDynamicStore.h => dynamic_store.rs ----------------
-#echo "Generating bindings for $DYNAMIC_STORE_HEADER_PATH"
-#bindgen \
-#    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-#    --allowlist-function "SCDynamicStore.*" \
-#    --allowlist-var "kSCDynamicStore.*" \
-#    --blocklist-type "(__)?CF.*" \
-#    --blocklist-type "Boolean" \
-#    --blocklist-type "dispatch_queue_[ts]" \
-#    --raw-line "use core::ffi::c_void;" \
-#    --raw-line "use core_foundation_sys::array::CFArrayRef;" \
-#    --raw-line "use core_foundation_sys::base::{Boolean, CFIndex, CFAllocatorRef, CFTypeID};" \
-#    --raw-line "use core_foundation_sys::string::CFStringRef;" \
-#    --raw-line "use core_foundation_sys::dictionary::CFDictionaryRef;" \
-#    --raw-line "use core_foundation_sys::propertylist::CFPropertyListRef;" \
-#    --raw-line "use core_foundation_sys::runloop::CFRunLoopSourceRef;" \
-#    --raw-line "" \
-#    --raw-line "use crate::dispatch_queue_t;" \
-#    -o $DYNAMIC_STORE_BINDING_PATH \
-#    $DYNAMIC_STORE_HEADER_PATH -- \
-#    -I$SDK_PATH/usr/include \
-#    -F$FRAMEWORK_PATH
-#
-#cleanup_binding $DYNAMIC_STORE_BINDING_PATH
-#
-#echo ""
-#echo ""
-#
-## ---------------- Bindgen: SCDynamicStoreCopySpecific.h => dynamic_store_copy_specific.rs ----------------
-#echo "Generating bindings for $DYNAMIC_STORE_COPY_SPECIFIC_HEADER_PATH"
-#bindgen \
-#    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-#    --allowlist-function "SCDynamicStoreCopy(ComputerName|ConsoleUser|LocalHostName|Location|Proxies)" \
-#    --blocklist-type "(__)?CF.*" \
-#    --blocklist-type "Boolean" \
-#    --blocklist-type "dispatch_queue_[ts]" \
-#    --blocklist-type "(__)?SCDynamicStore.*" \
-#    --raw-line "use core_foundation_sys::string::{CFStringEncoding, CFStringRef};" \
-#    --raw-line "use core_foundation_sys::dictionary::CFDictionaryRef;" \
-#    --raw-line "use crate::dynamic_store::SCDynamicStoreRef;" \
-#    -o $DYNAMIC_STORE_COPY_SPECIFIC_BINDING_PATH \
-#    $DYNAMIC_STORE_COPY_SPECIFIC_HEADER_PATH -- \
-#    -I$SDK_PATH/usr/include \
-#    -F$FRAMEWORK_PATH
-#
-#cleanup_binding $DYNAMIC_STORE_COPY_SPECIFIC_BINDING_PATH
-#
-#echo ""
-#echo ""
-
 # ---------------- Bindgen: SCNetworkConfigurationPrivate.h => network_configuration_private.rs ----------------
+clang -E -H "$NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH" -- \
+        -I$SDK_PATH/usr/include \
+        -F$FRAMEWORK_PATH \
+        -isysroot "$SDK_PATH" -fblocks >/dev/null
+
+
 echo "Generating bindings for $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH"
 bindgen \
     "${BINDGEN_COMMON_ARGUMENTS[@]}" \
@@ -231,128 +187,4 @@ bindgen \
     -isysroot "$SDK_PATH" # try isysroot...
 
 cleanup_binding $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH
-
-echo ""
-echo ""
-
-## ---------------- Bindgen: SCNetworkReachability.h => network_reachability.rs ----------------
-#echo "Generating bindings for $NETWORK_REACHABILITY_HEADER_PATH"
-#bindgen \
-#    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-#    --allowlist-function "SCNetworkReachability.*" \
-#    --allowlist-type "SCNetworkReachability.*" \
-#    --allowlist-var "kSCNetworkReachability.*" \
-#    --blocklist-type "sockaddr" \
-#    --blocklist-type "dispatch_queue_[ts]" \
-#    --blocklist-type "(__)?CF.*" \
-#    --blocklist-type "__SC.*" \
-#    --blocklist-type "Boolean" \
-#    --blocklist-type "dispatch_.*" \
-#    --blocklist-type "(sockaddr|socklen_t|sa_family_t|__darwin_socklen_t|__uint.*_t)" \
-#    --raw-line '#![allow(clippy::unreadable_literal)]' \
-#    --raw-line "use core_foundation_sys::base::{Boolean, CFAllocatorRef, CFTypeID, CFIndex};" \
-#    --raw-line "use core_foundation_sys::string::CFStringRef;" \
-#    --raw-line "use core_foundation_sys::runloop::CFRunLoopRef;" \
-#    --raw-line "use libc::sockaddr;" \
-#    --raw-line "use crate::dispatch_queue_t;" \
-#    --raw-line "pub type __SCNetworkReachability = ::core::ffi::c_void;" \
-#    -o $NETWORK_REACHABILITY_BINDING_PATH \
-#    $NETWORK_REACHABILITY_HEADER_PATH -- \
-#    -I$SDK_PATH/usr/include \
-#    -F$FRAMEWORK_PATH
-#
-#cleanup_binding $NETWORK_REACHABILITY_BINDING_PATH
-#
-#echo ""
-#echo ""
-#
-## ---------------- Bindgen: SCPreferences.h => preferences.rs ----------------
-#echo "Generating bindings for $PREFERENCES_HEADER_PATH"
-#bindgen \
-#    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-#    --allowlist-function "SCPreferences.*" \
-#    --blocklist-type "(__)?CF.*" \
-#    --blocklist-type "Boolean" \
-#    --blocklist-type "dispatch_queue_[ts]" \
-#    --blocklist-type "(AuthorizationOpaqueRef|__SCPreferences)" \
-#    --raw-line "use core::ffi::c_void;" \
-#    --raw-line "use core_foundation_sys::array::CFArrayRef;" \
-#    --raw-line "use core_foundation_sys::base::{Boolean, CFIndex, CFAllocatorRef, CFTypeID};" \
-#    --raw-line "use core_foundation_sys::data::CFDataRef;" \
-#    --raw-line "use core_foundation_sys::string::CFStringRef;" \
-#    --raw-line "use core_foundation_sys::propertylist::CFPropertyListRef;" \
-#    --raw-line "use core_foundation_sys::runloop::CFRunLoopRef;" \
-#    --raw-line "" \
-#    --raw-line "use crate::dispatch_queue_t;" \
-#    --raw-line "" \
-#    --raw-line "pub type AuthorizationOpaqueRef = c_void;" \
-#    --raw-line "pub type __SCPreferences = c_void;" \
-#    -o $PREFERENCES_BINDING_PATH \
-#    $PREFERENCES_HEADER_PATH -- \
-#    -I$SDK_PATH/usr/include \
-#    -F$FRAMEWORK_PATH
-#
-#cleanup_binding $PREFERENCES_BINDING_PATH
-#
-#echo ""
-#echo ""
-#
-## ---------------- Bindgen: SCPreferencesPath.h => preferences_path.rs ----------------
-#echo "Generating bindings for $PREFERENCES_PATH_HEADER_PATH"
-#bindgen \
-#    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-#    --allowlist-function "SCPreferencesPath.*" \
-#    --blocklist-type "(__)?CF.*" \
-#    --blocklist-type "Boolean" \
-#    --blocklist-type "(__SCPreferences|SCPreferencesRef)" \
-#    --raw-line "use core_foundation_sys::dictionary::CFDictionaryRef;" \
-#    --raw-line "use core_foundation_sys::base::Boolean;" \
-#    --raw-line "use core_foundation_sys::string::CFStringRef;" \
-#    --raw-line "" \
-#    --raw-line "use crate::preferences::SCPreferencesRef;" \
-#    -o $PREFERENCES_PATH_BINDING_PATH \
-#    $PREFERENCES_PATH_HEADER_PATH -- \
-#    -I$SDK_PATH/usr/include \
-#    -F$FRAMEWORK_PATH
-#
-#cleanup_binding $PREFERENCES_PATH_BINDING_PATH
-#
-#echo ""
-#echo ""
-#
-## ---------------- Bindgen: SCSchemaDefinitions.h => schema_definitions.rs ----------------
-#echo "Generating bindings for $SCHEMA_DEFINITIONS_HEADER_PATH"
-#bindgen \
-#    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-#    --allowlist-var "kSC.*" \
-#    --blocklist-type "(__)?CF.*" \
-#    --blocklist-type "dispatch_queue_[ts]" \
-#    --raw-line "use core_foundation_sys::string::CFStringRef;" \
-#    --raw-line "" \
-#    -o $SCHEMA_DEFINITIONS_BINDING_PATH \
-#    $SCHEMA_DEFINITIONS_HEADER_PATH -- \
-#    -I$SDK_PATH/usr/include \
-#    -F$FRAMEWORK_PATH
-#
-#cleanup_binding $SCHEMA_DEFINITIONS_BINDING_PATH
-#
-#echo ""
-#echo ""
-#
-## ---------------- Bindgen: SystemConfiguration.h => system_configuration.rs ----------------
-#echo "Generating bindings for $SYSTEM_CONFIGURATION_HEADER_PATH"
-#bindgen \
-#    "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-#    --allowlist-var "k(CFErrorDomainSystemConfiguration|SCStatus.*)" \
-#    --allowlist-function "SC(CopyLastError|Error|ErrorString)" \
-#    --blocklist-type "(__)?CF.*" \
-#    --raw-line "use core_foundation_sys::error::CFErrorRef;" \
-#    --raw-line "use core_foundation_sys::string::CFStringRef;" \
-#    --raw-line "" \
-#    -o $SYSTEM_CONFIGURATION_BINDING_PATH \
-#    $SYSTEM_CONFIGURATION_HEADER_PATH -- \
-#    -I$SDK_PATH/usr/include \
-#    -F$FRAMEWORK_PATH
-#
-#cleanup_binding $SYSTEM_CONFIGURATION_BINDING_PATH
 
