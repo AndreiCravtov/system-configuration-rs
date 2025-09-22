@@ -48,8 +48,8 @@ pub fn main() {
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
 
-    helper::save_prefs(&prefs);
-    return;
+    // helper::save_prefs(&prefs);
+    // return;
 
     for i in get_interfaces() {
         println!("found interface: {:?}", i);
@@ -59,21 +59,16 @@ pub fn main() {
     let current = SCNetworkSet::get_current(&prefs).unwrap();
     let mut new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
 
-    // let en = SCNetworkInterface::get_interfaces()
-    //     .into_collect::<Vec<_>>()
-    //     .into_iter()
-    //     .find(|i| i.bsd_name().unwrap() == "en2")
-    //     .unwrap();
-    // let en_service = helper::create_service(&prefs, &en);
-    // println!("created new service: {:?}", en_service.id().unwrap());
-
     // modify existing services first, removing thing like the bridge service or enabling IPv6
     // if missing; then add services for any missing interfaces
     modify_existing_services(&prefs, &mut new);
+    println!("modified existing services");
+
     add_missing_services(&prefs, &mut new);
+    println!("added missing services");
 
     // commit and apply new changes
-    helper::save_prefs(&prefs);
+    // helper::save_prefs(&prefs);
 }
 
 #[cfg(not(target_os = "macos"))]
