@@ -107,6 +107,11 @@ pub(crate) mod helper {
         prefs: &SCPreferences,
         old_service: &SCNetworkService,
     ) -> SCNetworkService {
+        println!(
+            "cloning network service {:?}",
+            old_service.network_interface().unwrap().bsd_name().unwrap()
+        );
+
         // constants
         let services_key = unsafe { CFString::wrap_under_get_rule(kSCPrefNetworkServices) };
         let user_defined_name_key =
