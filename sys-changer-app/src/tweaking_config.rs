@@ -68,7 +68,7 @@ pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
         })
         .collect::<Vec<_>>();
     println!(
-        "creating this {:?}",
+        "creating this {:#?}",
         eligible_ifaces
             .iter()
             .filter_map(Interface::from_scnetwork_interface)
