@@ -59,6 +59,7 @@ function configure_macos_private_staging_headers() {
 
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
+echo "got past here.."
 configure_macos_private_staging_headers "${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj/"
 SC_HEADER_PATH="$SC_PRIVATE_HEADER_PATH"
 
@@ -84,8 +85,6 @@ NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH="${SC_BINDING_PATH}/network_configura
 #PREFERENCES_GET_SPECIFIC_PRIVATE_BINDING_PATH="${SC_BINDING_PATH}/preferences_get_specific_private.rs"
 #PREFERENCES_SET_SPECIFIC_PRIVATE_BINDING_PATH="${SC_BINDING_PATH}/preferences_set_specific_private.rs"
 #SCHEMA_DEFINITIONS_PRIVATE_BINDING_PATH="${SC_BINDING_PATH}/schema_definitions_private.rs"
-
-echo "got past here.."
 
 # ---------------- Bindgen-related definitions ----------------
 BINDGEN_VERSION=`bindgen --version`
