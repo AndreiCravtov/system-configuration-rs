@@ -40,7 +40,6 @@ function configure_macos_private_staging_headers() {
     cp "$system_configuration_src/SCDynamicStoreSetSpecificPrivate.h"  "$SC_PRIVATE_HEADER_PATH"
     cp "$system_configuration_src/SCValidation.h"                      "$SC_PRIVATE_HEADER_PATH"
     cp "$system_configuration_src/SCPreferencesPrivate.h"              "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/LinkConfiguration.h"                 "$SC_PRIVATE_HEADER_PATH"
     cp "$system_configuration_src/SCPreferencesPathKey.h"              "$SC_PRIVATE_HEADER_PATH"
     cp "$system_configuration_src/SCPreferencesSetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
     cp "$system_configuration_src/SCNetworkConnectionPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
