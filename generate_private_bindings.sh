@@ -2,12 +2,10 @@
 
 # Always have the latest version of bindgen and rustfmt installed before using this script.
 # This script require GNU sed, and expects it to be available as `gsed`. Adjust SED var if needed.
-# This script require rsync, and expects it to be available as `rsync`. Adjust RSYNC var if needed.
 
 set -eu
 
 SED=$(which gsed)
-RSYNC=$(which rsync)
 
 export DYLD_LIBRARY_PATH=$(rustc +stable --print sysroot)/lib
 
@@ -208,9 +206,9 @@ bindgen \
     --raw-line "pub type __SCNetworkSet = c_void;" \
     -o $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH \
     $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH -- \
-    -I$MACOS_PRIVATE_STAGING_HEADERS_PATH \
     -I$SDK_PATH/usr/include \
-    -F$FRAMEWORK_PATH
+    -F$FRAMEWORK_PATH \
+    -I$MACOS_PRIVATE_STAGING_HEADERS_PATH
 
 cleanup_binding $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH
 
