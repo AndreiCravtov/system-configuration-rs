@@ -29,7 +29,7 @@ FRAMEWORK_PATH="${SDK_PATH}/System/Library/Frameworks/"
 
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
-SC_HEADER_PATH="${SCRIPT_ROOT_PATH}/configd/SystemConfiguration.fproj"
+SC_HEADER_PATH="${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj"
 
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreCopySpecificPrivate.h"
@@ -42,7 +42,7 @@ NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCNetworkConfigurat
 #SCHEMA_DEFINITIONS_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCSchemaDefinitionsPrivate.h"
 
 # ---------------- SystemConfiguration framework bindings ----------------
-SC_BINDING_PATH="./system-configuration-sys/src/private/"
+SC_BINDING_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/src/private/"
 
 #DYNAMIC_STORE_PRIVATE_BINDING_PATH="${SC_BINDING_PATH}/dynamic_store_private.rs"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_BINDING_PATH="${SC_BINDING_PATH}/dynamic_store_copy_specific_private.rs"
