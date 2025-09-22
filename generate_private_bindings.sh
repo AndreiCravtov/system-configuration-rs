@@ -34,7 +34,7 @@ function configure_macos_private_staging_headers() {
 
     # copy over the appropriate headers (only the strictly needed ones)
 #    cp "$system_configuration_src/SCDPlugin.h"                         "$SC_PRIVATE_HEADER_PATH"
-#    cp "$system_configuration_src/SCPrivate.h"                         "$SC_PRIVATE_HEADER_PATH"
+    cp "$system_configuration_src/SCPrivate.h"                         "$SC_PRIVATE_HEADER_PATH"
 #    cp "$system_configuration_src/SCDynamicStorePrivate.h"             "$SC_PRIVATE_HEADER_PATH"
 #    cp "$system_configuration_src/SCDynamicStoreCopySpecificPrivate.h" "$SC_PRIVATE_HEADER_PATH"
 #    cp "$system_configuration_src/SCDynamicStoreSetSpecificPrivate.h"  "$SC_PRIVATE_HEADER_PATH"
