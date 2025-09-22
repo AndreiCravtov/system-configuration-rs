@@ -3,28 +3,26 @@
 //! [`SCNetworkConfiguration`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkconfiguration?language=objc
 use core_foundation::{
     array::CFArray,
-    base::{TCFType, ToVoid},
+    base::{Boolean, TCFType, ToVoid},
     string::CFString,
 };
-use sys::core_foundation_sys::base::Boolean;
 use sys::network_configuration::{
+    SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName,
     SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface,
+    SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName,
     SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
-    SCNetworkProtocolGetEnabled, SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID,
-    SCNetworkProtocolRef, SCNetworkProtocolSetEnabled, SCNetworkServiceAddProtocolType,
-    SCNetworkServiceCopy, SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols,
-    SCNetworkServiceCreate, SCNetworkServiceEstablishDefaultConfiguration, SCNetworkServiceRemove,
+    SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef, SCNetworkProtocolGetEnabled,
+    SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
+    SCNetworkProtocolSetEnabled, SCNetworkServiceAddProtocolType, SCNetworkServiceCopy,
+    SCNetworkServiceCopyAll, SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols,
+    SCNetworkServiceCreate, SCNetworkServiceEstablishDefaultConfiguration,
+    SCNetworkServiceGetEnabled, SCNetworkServiceGetInterface, SCNetworkServiceGetServiceID,
+    SCNetworkServiceGetTypeID, SCNetworkServiceRef, SCNetworkServiceRemove,
     SCNetworkServiceSetEnabled, SCNetworkSetAddService, SCNetworkSetContainsInterface,
-    SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyServices, SCNetworkSetGetName,
-    SCNetworkSetGetSetID, SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
+    SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyCurrent, SCNetworkSetCopyServices,
+    SCNetworkSetGetName, SCNetworkSetGetServiceOrder, SCNetworkSetGetSetID, SCNetworkSetGetTypeID,
+    SCNetworkSetRef, SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
     SCNetworkSetSetServiceOrder,
-};
-use system_configuration_sys::network_configuration::{
-    SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetInterfaceType,
-    SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef,
-    SCNetworkServiceCopyAll, SCNetworkServiceGetEnabled, SCNetworkServiceGetInterface,
-    SCNetworkServiceGetServiceID, SCNetworkServiceGetTypeID, SCNetworkServiceRef,
-    SCNetworkSetCopyCurrent, SCNetworkSetGetServiceOrder, SCNetworkSetGetTypeID, SCNetworkSetRef,
 };
 
 use crate::preferences::SCPreferences;
