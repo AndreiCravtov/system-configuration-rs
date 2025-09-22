@@ -11,8 +11,16 @@ export DYLD_LIBRARY_PATH=$(rustc +stable --print sysroot)/lib
 
 SCRIPT_ROOT_PATH="$(pwd)/"
 
+# ---------------- MacOS SDK ----------------
+SDK_VERSION=`xcodebuild -sdk macosx -version SDKVersion`
+SDK_PATH=`xcodebuild -sdk macosx -version Path`
+FRAMEWORK_PATH="${SDK_PATH}/System/Library/Frameworks/"
+SYSTEM_CONFIGURATION_PATH="${FRAMEWORK_PATH}/SystemConfiguration.framework/"
+SC_PRIVATE_HEADER_PATH="${SYSTEM_CONFIGURATION_PATH}/PrivateHeaders/"
+
 # ---------------- MacOS vendored sourcecode ----------------
 git submodule update --init --recursive
+MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
 function select_macos_vendored_version() {
   # makes sure to select the right version of vendored code
   local version="$1"
@@ -20,22 +28,34 @@ function select_macos_vendored_version() {
   git checkout "$version"
   cd "$SCRIPT_ROOT_PATH"
 }
-MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
-MACOS_PRIVATE_STAGING_HEADERS_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/private-staging-headers/"
 function configure_macos_private_staging_headers() {
-  # create a clean directory to include private headers that AREN'T found in SDK path
-  rm -rf "$MACOS_PRIVATE_STAGING_HEADERS_PATH"
-  mkdir -p "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration"
+  local system_configuration_src="$1"
+  mkdir -p "$SC_PRIVATE_HEADER_PATH"
 
   # copy over the appropriate headers (only the strictly needed ones)
-  local system_configuration_src="$1"
-  cp "$system_configuration_src/SCValidation.h" "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration/SCValidation.h"
+#  cp "$system_configuration_src/SCDPlugin.h"                         "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCPrivate.h"                         "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCDynamicStorePrivate.h"             "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCDynamicStoreCopySpecificPrivate.h" "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCDynamicStoreSetSpecificPrivate.h"  "$SC_PRIVATE_HEADER_PATH"
+  cp "$system_configuration_src/SCValidation.h"                      "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCPreferencesPrivate.h"              "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/DeviceOnHold.h"                      "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/LinkConfiguration.h"                 "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCPreferencesPathKey.h"              "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCPreferencesSetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCNetworkConnectionPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCPreferencesGetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCSchemaDefinitionsPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
+  cp "$system_configuration_src/SCNetworkConfigurationPrivate.h"     "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCPreferencesKeychainPrivate.h"      "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCNetworkSignature.h"                "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/SCNetworkSignaturePrivate.h"         "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/VPNPrivate.h"                        "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/VPNConfiguration.h"                  "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/VPNTunnelPrivate.h"                  "$SC_PRIVATE_HEADER_PATH"
+#  cp "$system_configuration_src/VPNTunnel.h"                         "$SC_PRIVATE_HEADER_PATH"
 }
-
-# ---------------- MacOS SDK ----------------
-SDK_VERSION=`xcodebuild -sdk macosx -version SDKVersion`
-SDK_PATH=`xcodebuild -sdk macosx -version Path`
-FRAMEWORK_PATH="${SDK_PATH}/System/Library/Frameworks/"
 
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
