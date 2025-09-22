@@ -137,8 +137,6 @@ BINDGEN_COMMON_ARGUMENTS=(
 #    -I $SDK_PATH/usr/include \
 #    -F $FRAMEWORK_PATH >/dev/null
 
-export LIBCLANG_PATH="$(xcrun --sdk macosx --show-sdk-platform-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib"
-
 echo "Generating bindings for $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH"
 bindgen \
     "${BINDGEN_COMMON_ARGUMENTS[@]}" \
@@ -163,7 +161,8 @@ bindgen \
     $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH -- \
     -I$SDK_PATH/usr/include \
     -F$FRAMEWORK_PATH \
-    -isysroot "$SDK_PATH" # try isysroot...
+    -isysroot "$SDK_PATH"\
+    -D"API_AVAILABLE(...)=" -D"API_UNAVAILABLE(...)="
 
 cleanup_binding $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH
 
