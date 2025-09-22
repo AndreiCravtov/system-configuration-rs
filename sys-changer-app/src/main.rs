@@ -68,7 +68,7 @@ pub fn main() {
     println!("added missing services");
 
     // commit and apply new changes
-    // helper::save_prefs(&prefs);
+    helper::save_prefs(&prefs);
 }
 
 #[cfg(not(target_os = "macos"))]
