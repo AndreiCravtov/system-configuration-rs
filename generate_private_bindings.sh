@@ -143,26 +143,9 @@ BINDGEN_COMMON_ARGUMENTS=(
 )
 
 # ---------------- Bindgen: SCNetworkConfigurationPrivate.h => network_configuration_private.rs ----------------
-clang -E -H "$NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH" -- \
-        -I$SDK_PATH/usr/include \
-        -F$FRAMEWORK_PATH \
-        -isysroot "$SDK_PATH"
-
-
 echo "Generating bindings for $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH"
 bindgen \
     "${BINDGEN_COMMON_ARGUMENTS[@]}" \
-    --allowlist-function "SCNetwork.*" \
-    --allowlist-function "SCBondInterface.*" \
-    --allowlist-var "kSC(NetworkInterface|NetworkProtocol|BondStatus).*" \
-    --blocklist-type "SCNetworkReachability.*" \
-    --blocklist-function "SCNetworkReachability.*" \
-    --blocklist-type "dispatch_queue_[ts]" \
-    --blocklist-type "(__)?CF.*" \
-    --blocklist-type "__SC.*" \
-    --blocklist-type "Boolean" \
-    --blocklist-type "(sockaddr|socklen_t|sa_family_t|__darwin_socklen_t|__uint.*_t)" \
-    --blocklist-type "(__)?SCPreferences.*" \
     --raw-line "use core::ffi::c_void;" \
     --raw-line "use core_foundation_sys::array::CFArrayRef;" \
     --raw-line "use core_foundation_sys::base::{Boolean, CFIndex, CFAllocatorRef, CFTypeID};" \
