@@ -48,6 +48,7 @@ pub fn main() {
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
 
+    helper::save_prefs(&prefs);
     return;
 
     for i in get_interfaces() {
