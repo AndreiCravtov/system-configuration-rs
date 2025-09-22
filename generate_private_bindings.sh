@@ -37,7 +37,6 @@ select_macos_vendored_version "$SDK_VERSION"
 SC_HEADER_PATH="${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj/"
 INC_SCVALIDATION_PATH="${SC_HEADER_PATH}/SCValidation.h" # <<-----   remove this...???
 $RSYNC -a --include='*.h' --exclude='*' "${SC_HEADER_PATH}/" "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration/"
-exit 69
 
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreCopySpecificPrivate.h"
@@ -203,7 +202,7 @@ bindgen \
     --raw-line "pub type __SCNetworkSet = c_void;" \
     -o $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH \
     $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH -- \
-    -I$INC_SCVALIDATION_PATH \
+    -I$MACOS_PRIVATE_STAGING_HEADERS_PATH \
     -I$SDK_PATH/usr/include \
     -F$FRAMEWORK_PATH
 
