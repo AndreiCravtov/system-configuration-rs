@@ -2,10 +2,12 @@
 
 # Always have the latest version of bindgen and rustfmt installed before using this script.
 # This script require GNU sed, and expects it to be available as `gsed`. Adjust SED var if needed.
+# This script require rsync, and expects it to be available as `rsync`. Adjust RSYNC var if needed.
 
 set -eu
 
 SED=$(which gsed)
+RSYNC=$(which rsync)
 
 export DYLD_LIBRARY_PATH=$(rustc +stable --print sysroot)/lib
 
@@ -21,6 +23,9 @@ function select_macos_vendored_version() {
   cd "$SCRIPT_ROOT_PATH"
 }
 MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
+MACOS_PRIVATE_STAGING_HEADERS_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/private-staging-headers/"
+rm -rf "$MACOS_PRIVATE_STAGING_HEADERS_PATH"
+mkdir -p "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration"
 
 # ---------------- MacOS SDK ----------------
 SDK_VERSION=`xcodebuild -sdk macosx -version SDKVersion`
@@ -29,8 +34,10 @@ FRAMEWORK_PATH="${SDK_PATH}/System/Library/Frameworks/"
 
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
-SC_HEADER_PATH="${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj"
-INC_SCVALIDATION_PATH="${SC_HEADER_PATH}/SCValidation.h"
+SC_HEADER_PATH="${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj/"
+INC_SCVALIDATION_PATH="${SC_HEADER_PATH}/SCValidation.h" # <<-----   remove this...???
+$RSYNC -a --include='*.h' --exclude='*' "${SC_HEADER_PATH}/" "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration/"
+exit 69
 
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreCopySpecificPrivate.h"
