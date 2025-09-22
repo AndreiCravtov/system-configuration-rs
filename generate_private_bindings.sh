@@ -25,12 +25,13 @@ function select_macos_vendored_version() {
 MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
 MACOS_PRIVATE_STAGING_HEADERS_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/private-staging-headers/"
 function configure_macos_private_staging_headers() {
-  # ensure that appropriate private headers are added to included path
-  local system_configuration_src="$1"
+  # create a clean directory to include private headers that AREN'T found in SDK path
   rm -rf "$MACOS_PRIVATE_STAGING_HEADERS_PATH"
   mkdir -p "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration"
 
-#  cp "$system_configuration_src/" "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration/"
+  # copy over the appropriate headers (only the strictly needed ones)
+  local system_configuration_src="$1"
+  cp "$system_configuration_src/SCValidation.h" "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration/SCValidation.h"
 }
 
 # ---------------- MacOS SDK ----------------
