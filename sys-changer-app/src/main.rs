@@ -68,7 +68,7 @@ pub fn main() {
     println!("added missing services");
 
     // make the new set the current set
-    new.set_current();
+    // new.set_current();
 
     // commit and apply new changes
     helper::save_prefs(&prefs);
