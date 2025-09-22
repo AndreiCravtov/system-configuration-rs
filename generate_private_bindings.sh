@@ -13,15 +13,14 @@ SCRIPT_ROOT_PATH="$(pwd)/"
 
 # ---------------- MacOS vendored sourcecode ----------------
 git submodule update --init --recursive
-MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
-function select_macos_vendored_version() { # makes sure to select the right version of vendored code
+function select_macos_vendored_version() {
+  # makes sure to select the right version of vendored code
   local version="$1"
   cd "$MACOS_VENDORED_PATH"
-  echo "i am in $(pwd), and here is $(git status)"
   git checkout "$version"
   cd "$SCRIPT_ROOT_PATH"
-  echo "i am now in $(pwd)"
 }
+MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
 
 # ---------------- MacOS SDK ----------------
 SDK_VERSION=`xcodebuild -sdk macosx -version SDKVersion`
@@ -31,6 +30,7 @@ FRAMEWORK_PATH="${SDK_PATH}/System/Library/Frameworks/"
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
 SC_HEADER_PATH="${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj"
+INC_SCVALIDATION_PATH="${SC_HEADER_PATH}/SCValidation.h"
 
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreCopySpecificPrivate.h"
@@ -162,7 +162,7 @@ BINDGEN_COMMON_ARGUMENTS=(
 #echo ""
 #echo ""
 
-# ---------------- Bindgen: SCNetworkConfiguration.h => network_configuration.rs ----------------
+# ---------------- Bindgen: SCNetworkConfigurationPrivate.h => network_configuration_private.rs ----------------
 echo "Generating bindings for $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH"
 bindgen \
     "${BINDGEN_COMMON_ARGUMENTS[@]}" \
@@ -196,6 +196,7 @@ bindgen \
     --raw-line "pub type __SCNetworkSet = c_void;" \
     -o $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH \
     $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH -- \
+    -I$INC_SCVALIDATION_PATH \
     -I$SDK_PATH/usr/include \
     -F$FRAMEWORK_PATH
 
