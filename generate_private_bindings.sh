@@ -17,6 +17,7 @@ MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-sou
 function select_macos_vendored_version() { # makes sure to select the right version of vendored code
   local version="$1"
   cd "$MACOS_VENDORED_PATH"
+  echo "i am in $(pwd), and here is $(git status)"
   git checkout "$version"
   cd "$SCRIPT_ROOT_PATH"
 }
