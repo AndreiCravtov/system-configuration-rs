@@ -59,8 +59,8 @@ function configure_macos_private_staging_headers() {
 
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
-SC_HEADER_PATH="${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj/"
-configure_macos_private_staging_headers "$SC_HEADER_PATH"
+configure_macos_private_staging_headers "${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj/"
+SC_HEADER_PATH="$SC_PRIVATE_HEADER_PATH"
 
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreCopySpecificPrivate.h"
@@ -227,8 +227,7 @@ bindgen \
     -o $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH \
     $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH -- \
     -I$SDK_PATH/usr/include \
-    -F$FRAMEWORK_PATH \
-    -I$MACOS_PRIVATE_STAGING_HEADERS_PATH
+    -F$FRAMEWORK_PATH
 
 cleanup_binding $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH
 
