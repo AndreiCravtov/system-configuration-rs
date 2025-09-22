@@ -146,7 +146,7 @@ BINDGEN_COMMON_ARGUMENTS=(
 clang -E -H "$NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH" -- \
         -I$SDK_PATH/usr/include \
         -F$FRAMEWORK_PATH \
-        -isysroot "$SDK_PATH" -fblocks
+        -isysroot "$SDK_PATH"
 
 
 echo "Generating bindings for $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH"
