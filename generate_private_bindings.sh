@@ -145,8 +145,8 @@ BINDGEN_COMMON_ARGUMENTS=(
 
 # ---------------- Bindgen: SCNetworkConfigurationPrivate.h => network_configuration_private.rs ----------------
 clang -E -H $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH -- \
-    -I$SDK_PATH/usr/include \
-    -F$FRAMEWORK_PATH >/dev/null
+    -I $SDK_PATH/usr/include \
+    -F $FRAMEWORK_PATH >/dev/null
 
 
 echo "Generating bindings for $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH"
