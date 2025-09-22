@@ -11,7 +11,7 @@ use crate::simpler_auth::SimpleAuthorization;
 use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
-use system_configuration::network_configuration::{SCNetworkInterface, SCNetworkSet};
+use system_configuration::network_configuration::SCNetworkSet;
 use system_configuration::preferences::SCPreferences;
 
 pub(crate) mod ext {
@@ -48,6 +48,8 @@ pub fn main() {
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
 
+    return;
+
     for i in get_interfaces() {
         println!("found interface: {:?}", i);
     }
@@ -56,13 +58,13 @@ pub fn main() {
     let current = SCNetworkSet::get_current(&prefs).unwrap();
     let mut new = helper::shallow_clone_network_set(&prefs, &current, my_networkset_name);
 
-    let en = SCNetworkInterface::get_interfaces()
-        .into_collect::<Vec<_>>()
-        .into_iter()
-        .find(|i| i.bsd_name().unwrap() == "en2")
-        .unwrap();
-    let en_service = helper::create_service(&prefs, &en);
-    println!("created new service: {:?}", en_service.id().unwrap());
+    // let en = SCNetworkInterface::get_interfaces()
+    //     .into_collect::<Vec<_>>()
+    //     .into_iter()
+    //     .find(|i| i.bsd_name().unwrap() == "en2")
+    //     .unwrap();
+    // let en_service = helper::create_service(&prefs, &en);
+    // println!("created new service: {:?}", en_service.id().unwrap());
 
     // modify existing services first, removing thing like the bridge service or enabling IPv6
     // if missing; then add services for any missing interfaces
