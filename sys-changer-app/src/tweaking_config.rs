@@ -2,11 +2,84 @@ use crate::ext::CFArrayExt;
 use crate::helper;
 use crate::interfaces::Interface;
 use core_foundation::array::CFArray;
+use core_foundation::base::TCFType;
+use core_foundation::string::CFString;
 use system_configuration::network_configuration::{
     SCNetworkInterface, SCNetworkInterfaceType, SCNetworkProtocolType, SCNetworkService,
     SCNetworkSet,
 };
 use system_configuration::preferences::SCPreferences;
+use system_configuration_sys::schema_definitions::{
+    kSCEntNetIPv6, kSCPrefNetworkServices, kSCPropNetIPv6ConfigMethod,
+    kSCValNetIPv6ConfigMethodAutomatic,
+};
+
+pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
+    // filter for interfaces that don't already have services in the set, which aren't the Bridge
+    // interface & also which support IPv6
+    let eligible_ifaces = SCNetworkInterface::get_interfaces()
+        .into_iter()
+        .filter(|i| !set.contains_network_interface(&i))
+        .filter(|i| {
+            i.interface_type()
+                .map_or(false, |t| !matches!(t, SCNetworkInterfaceType::Bridge))
+        })
+        .filter_map(|i| {
+            (&i).supported_protocol_type_strings()
+                .into_iter()
+                .filter_map(|s| SCNetworkProtocolType::from_cfstring(&s))
+                .find(|p| matches!(p, SCNetworkProtocolType::IPv6))
+                .map(|_| i.clone())
+        })
+        .collect::<Vec<_>>();
+    println!(
+        "creating this {:#?}",
+        eligible_ifaces
+            .iter()
+            .filter_map(Interface::from_scnetwork_interface)
+            .collect::<Vec<_>>()
+    );
+
+    // create new services for each interface, add IPv6 to each & then establish a default configuration in general
+    let new_services = eligible_ifaces
+        .iter()
+        .map(|i| {
+            let mut service = helper::create_service(prefs, i);
+            add_ipv6(&mut service);
+            service
+        })
+        .collect::<Vec<_>>();
+
+    // get the current service order & extend it with the new services
+    let mut service_order = set.service_order().into_collect::<Vec<_>>();
+    service_order.extend(new_services.iter().map(|i| i.id().unwrap()));
+    let service_order = CFArray::from_CFTypes(&service_order);
+
+    // add all new services and set new service order
+    for s in &new_services {
+        assert!(set.add_service(s));
+    }
+    assert!(set.set_service_order(service_order))
+}
+
+fn add_ipv6(prefs: &SCPreferences, service: &mut SCNetworkService) {
+    let services_key = unsafe { CFString::wrap_under_get_rule(kSCPrefNetworkServices) };
+    let ipv6_entity_key = unsafe { CFString::wrap_under_get_rule(kSCEntNetIPv6) };
+    let ipv6_config_method = unsafe { CFString::wrap_under_get_rule(kSCPropNetIPv6ConfigMethod) };
+    let ipv6_config_method_automatic =
+        unsafe { CFString::wrap_under_get_rule(kSCValNetIPv6ConfigMethodAutomatic) };
+
+    // this usually doesn't establish a default configuration method, so we need to add the
+    // KV-pair manually with `kSCPropNetIPv6ConfigMethod: kSCValNetIPv6ConfigMethodAutomatic`
+    assert!(service.add_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring()));
+
+    // grab info from network service
+    let service_id = service.id().unwrap();
+    let service_ipv6_path: CFString =
+        (&*format!("/{}/{}/{}", services_key, service_id, ipv6_entity_key)).into();
+    let service_ipv6_values = helper::get_path_dictionary(prefs, &service_ipv6_path).unwrap();
+    println!("ipv6 values: {:#?}", service_ipv6_values);
+}
 
 pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
     let ordered_services = get_priority_ordered_services(set);
@@ -47,55 +120,6 @@ pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
             .collect::<Box<[_]>>(),
     );
     set.set_service_order(service_order);
-}
-
-pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
-    // filter for interfaces that don't already have services in the set, which aren't the Bridge
-    // interface & also which support IPv6
-    let eligible_ifaces = SCNetworkInterface::get_interfaces()
-        .into_iter()
-        .filter(|i| !set.contains_network_interface(&i))
-        .filter(|i| {
-            i.interface_type()
-                .map_or(false, |t| !matches!(t, SCNetworkInterfaceType::Bridge))
-        })
-        .filter_map(|i| {
-            (&i).supported_protocol_type_strings()
-                .into_iter()
-                .filter_map(|s| SCNetworkProtocolType::from_cfstring(&s))
-                .find(|p| matches!(p, SCNetworkProtocolType::IPv6))
-                .map(|_| i.clone())
-        })
-        .collect::<Vec<_>>();
-    println!(
-        "creating this {:#?}",
-        eligible_ifaces
-            .iter()
-            .filter_map(Interface::from_scnetwork_interface)
-            .collect::<Vec<_>>()
-    );
-
-    // create new services for each interface, add IPv6 to each & then establish a default configuration in general
-    let new_services = eligible_ifaces
-        .iter()
-        .map(|i| {
-            let mut service = helper::create_service(prefs, i);
-            assert!(service.add_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring()));
-            // service.establish_default_configuration();
-            service
-        })
-        .collect::<Vec<_>>();
-
-    // get the current service order & extend it with the new services
-    let mut service_order = set.service_order().into_collect::<Vec<_>>();
-    service_order.extend(new_services.iter().map(|i| i.id().unwrap()));
-    let service_order = CFArray::from_CFTypes(&service_order);
-
-    // add all new services and set new service order
-    for s in &new_services {
-        assert!(set.add_service(s));
-    }
-    assert!(set.set_service_order(service_order))
 }
 
 /// Modifications needed to be done to a service.
