@@ -45,7 +45,7 @@ pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
         .iter()
         .map(|i| {
             let mut service = helper::create_service(prefs, i);
-            add_ipv6(&mut service);
+            add_ipv6(prefs, &mut service);
             service
         })
         .collect::<Vec<_>>();
