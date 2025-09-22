@@ -33,26 +33,8 @@ function configure_macos_private_staging_headers() {
     mkdir -p "$SC_PRIVATE_HEADER_PATH"
 
     # copy over the appropriate headers (only the strictly needed ones)
-    cp "$system_configuration_src/SCDPlugin.h"                         "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCPrivate.h"                         "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCDynamicStorePrivate.h"             "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCDynamicStoreCopySpecificPrivate.h" "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCDynamicStoreSetSpecificPrivate.h"  "$SC_PRIVATE_HEADER_PATH"
     cp "$system_configuration_src/SCValidation.h"                      "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCPreferencesPrivate.h"              "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCPreferencesPathKey.h"              "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCPreferencesSetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCNetworkConnectionPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCPreferencesGetSpecificPrivate.h"   "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCSchemaDefinitionsPrivate.h"        "$SC_PRIVATE_HEADER_PATH"
     cp "$system_configuration_src/SCNetworkConfigurationPrivate.h"     "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCPreferencesKeychainPrivate.h"      "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCNetworkSignature.h"                "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/SCNetworkSignaturePrivate.h"         "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/VPNPrivate.h"                        "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/VPNConfiguration.h"                  "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/VPNTunnelPrivate.h"                  "$SC_PRIVATE_HEADER_PATH"
-    cp "$system_configuration_src/VPNTunnel.h"                         "$SC_PRIVATE_HEADER_PATH"
 }
 
 # ---------------- SystemConfiguration framework headers ----------------
@@ -63,7 +45,6 @@ SC_HEADER_PATH="$SC_PRIVATE_HEADER_PATH"
 
 cat > "${SCRIPT_ROOT_PATH}/sc_private_wrapper.h" <<'EOF'
 #include <SystemConfiguration/SystemConfiguration.h>
-#include <SystemConfiguration/SCPrivate.h>
 #include <SystemConfiguration/SCValidation.h>
 #include <SystemConfiguration/SCNetworkConfigurationPrivate.h>
 EOF
