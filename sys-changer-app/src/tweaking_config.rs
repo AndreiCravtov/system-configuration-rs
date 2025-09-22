@@ -81,7 +81,7 @@ pub fn add_missing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
         .map(|i| {
             let mut service = helper::create_service(prefs, i);
             assert!(service.add_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring()));
-            service.establish_default_configuration();
+            // service.establish_default_configuration();
             service
         })
         .collect::<Vec<_>>();
