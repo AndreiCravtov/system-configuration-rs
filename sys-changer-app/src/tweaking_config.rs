@@ -2,13 +2,15 @@ use crate::ext::CFArrayExt;
 use crate::helper;
 use crate::interfaces::Interface;
 use core_foundation::array::CFArray;
-use core_foundation::base::TCFType;
+use core_foundation::base::{CFType, TCFType};
+use core_foundation::dictionary::CFMutableDictionary;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::{
     SCNetworkInterface, SCNetworkInterfaceType, SCNetworkProtocolType, SCNetworkService,
     SCNetworkSet,
 };
 use system_configuration::preferences::SCPreferences;
+use system_configuration_sys::preferences_path::SCPreferencesPathSetValue;
 use system_configuration_sys::schema_definitions::{
     kSCEntNetIPv6, kSCPrefNetworkServices, kSCPropNetIPv6ConfigMethod,
     kSCValNetIPv6ConfigMethodAutomatic,
@@ -73,12 +75,29 @@ fn add_ipv6(prefs: &SCPreferences, service: &mut SCNetworkService) {
     // KV-pair manually with `kSCPropNetIPv6ConfigMethod: kSCValNetIPv6ConfigMethodAutomatic`
     assert!(service.add_network_protocol(SCNetworkProtocolType::IPv6.to_cfstring()));
 
-    // grab info from network service
+    // grab info from network service about IPv6
     let service_id = service.id().unwrap();
     let service_ipv6_path: CFString =
         (&*format!("/{}/{}/{}", services_key, service_id, ipv6_entity_key)).into();
-    let service_ipv6_values = helper::get_path_dictionary(prefs, &service_ipv6_path).unwrap();
-    println!("ipv6 values: {:#?}", service_ipv6_values);
+    let old_service_ipv6_values = helper::get_path_dictionary(prefs, &service_ipv6_path).unwrap();
+
+    // modify the values to include `kSCPropNetIPv6ConfigMethod: kSCValNetIPv6ConfigMethodAutomatic`
+    // and attach it as new value at that path
+    let mut new_service_ipv6_values =
+        CFMutableDictionary::<CFString, CFType>::from(&old_service_ipv6_values);
+    new_service_ipv6_values.set(
+        ipv6_config_method,
+        ipv6_config_method_automatic.into_CFType(),
+    );
+    unsafe {
+        helper::panic_err(
+            SCPreferencesPathSetValue(
+                prefs.as_concrete_TypeRef(),
+                service_ipv6_path.as_concrete_TypeRef(),
+                new_service_ipv6_values.as_concrete_TypeRef(),
+            ) != 0,
+        );
+    };
 }
 
 pub fn modify_existing_services(prefs: &SCPreferences, set: &mut SCNetworkSet) {
