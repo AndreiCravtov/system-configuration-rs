@@ -6,6 +6,7 @@ mod simpler_auth;
 mod tweaking_config;
 
 use crate::ext::CFArrayExt;
+use crate::interfaces::get_interfaces;
 use crate::simpler_auth::SimpleAuthorization;
 use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
@@ -46,6 +47,10 @@ pub fn main() {
 
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
+
+    for i in get_interfaces() {
+        println!("found interface: {:?}", i);
+    }
 
     // grab current set and duplicate it
     let current = SCNetworkSet::get_current(&prefs).unwrap();
