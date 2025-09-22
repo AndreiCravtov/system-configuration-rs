@@ -20,6 +20,7 @@ function select_macos_vendored_version() { # makes sure to select the right vers
   echo "i am in $(pwd), and here is $(git status)"
   git checkout "$version"
   cd "$SCRIPT_ROOT_PATH"
+  echo "i am now in $(pwd)"
 }
 
 # ---------------- MacOS SDK ----------------
