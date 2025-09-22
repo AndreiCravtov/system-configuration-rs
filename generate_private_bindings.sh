@@ -24,8 +24,14 @@ function select_macos_vendored_version() {
 }
 MACOS_VENDORED_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/apple-open-source/"
 MACOS_PRIVATE_STAGING_HEADERS_PATH="${SCRIPT_ROOT_PATH}/system-configuration-sys/private-staging-headers/"
-rm -rf "$MACOS_PRIVATE_STAGING_HEADERS_PATH"
-mkdir -p "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration"
+function configure_macos_private_staging_headers() {
+  # ensure that appropriate private headers are added to included path
+  local system_configuration_src="$1"
+  rm -rf "$MACOS_PRIVATE_STAGING_HEADERS_PATH"
+  mkdir -p "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration"
+
+#  cp "$system_configuration_src/" "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration/"
+}
 
 # ---------------- MacOS SDK ----------------
 SDK_VERSION=`xcodebuild -sdk macosx -version SDKVersion`
@@ -35,8 +41,7 @@ FRAMEWORK_PATH="${SDK_PATH}/System/Library/Frameworks/"
 # ---------------- SystemConfiguration framework headers ----------------
 select_macos_vendored_version "$SDK_VERSION"
 SC_HEADER_PATH="${MACOS_VENDORED_PATH}/configd/SystemConfiguration.fproj/"
-INC_SCVALIDATION_PATH="${SC_HEADER_PATH}/SCValidation.h" # <<-----   remove this...???
-$RSYNC -a --include='*.h' --exclude='*' "${SC_HEADER_PATH}/" "${MACOS_PRIVATE_STAGING_HEADERS_PATH}/SystemConfiguration/"
+configure_macos_private_staging_headers "$SC_HEADER_PATH"
 
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreCopySpecificPrivate.h"
