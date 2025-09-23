@@ -36,6 +36,7 @@ pub use crate::private::network_configuration_private::*;
 ///
 /// [`SCNetworkInterface`]: struct.SCNetworkInterface.html
 pub unsafe trait SCNetworkInterfaceSubClass: TCFType {
+    /// Determines what the type subclass of [`SCNetworkInterface`] this is.
     const INTERFACE_TYPE: SCNetworkInterfaceType;
 
     /// Create an instance of the superclass type [`SCNetworkInterface`] for this instance.
