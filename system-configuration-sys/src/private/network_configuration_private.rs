@@ -5,7 +5,7 @@ use core_foundation_sys::string::CFStringRef;
 use crate::network_configuration::SCNetworkInterfaceRef;
 use crate::preferences::SCPreferencesRef;
 
-type SCBridgeInterfaceRef = SCNetworkInterfaceRef;
+pub type SCBridgeInterfaceRef = SCNetworkInterfaceRef;
 
 extern "C" {
     pub static kSCNetworkInterfaceTypeBridge: CFStringRef;

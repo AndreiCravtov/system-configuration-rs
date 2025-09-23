@@ -30,6 +30,17 @@ use crate::helpers::create_empty_array;
 #[cfg(feature = "private")]
 pub use crate::private::network_configuration_private::*;
 
+/// Trait for all subclasses of [`SCNetworkInterface`].
+///
+/// [`SCNetworkInterface`]: struct.SCNetworkInterface.html
+pub unsafe trait SCNetworkInterfaceSubClass: TCFType {
+    fn foo() -> String;
+}
+
+fn some(t: impl SCNetworkInterfaceSubClass) {
+    let a = t.foo();
+}
+
 core_foundation::declare_TCFType!(
     /// Represents a network interface.
     ///
