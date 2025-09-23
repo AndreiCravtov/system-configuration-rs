@@ -94,7 +94,7 @@ pub fn main() {
     helper::save_prefs(&prefs);
 
     // --------------------------------
-    let path = "/tmp/FOO_socket.sock";
+    let path = "/tmp/FOO_socket.sock".to_string();
     let rt = tokio::runtime::Runtime::new().unwrap();
     let handle = rt.spawn(run_server(path));
 
