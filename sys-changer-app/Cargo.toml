@@ -13,8 +13,14 @@ system-configuration = { path = "../system-configuration", version = "0.6", feat
 system-configuration-sys = { path = "../system-configuration-sys", version = "0.6", features=["private"] }
 security-framework = "2.11"
 security-framework-sys = "2.11"
-bitflags = "2"
 mac_address = "1.1"
 libc = "0.2"
-
 extend = "1.2"
+
+zbus = "5.11"
+tokio = { version = "1.47", features = ["full"] }
+futures = "0.3"
+futures-util = "0.3"
+serde = "1.0"
+event-listener = "5.4"
+procspawn = "1.0"

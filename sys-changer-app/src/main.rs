@@ -4,6 +4,7 @@ mod dynstore;
 mod interfaces;
 mod simpler_auth;
 mod tweaking_config;
+mod zbus_service;
 
 use core_foundation::array::CFArray;
 use crate::ext::CFArrayExt;
@@ -38,6 +39,8 @@ pub(crate) mod ext {
 
 #[cfg(target_os = "macos")]
 pub fn main() {
+    procspawn::init();
+
     // constants
     let proc_name = CFString::new("sys-changer-app");
     let my_networkset_name = CFString::new("sys-changer-app-networkset");
@@ -86,6 +89,17 @@ pub fn main() {
 
     // commit and apply new changes
     helper::save_prefs(&prefs);
+
+    // --------------------------------
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let handle = rt.spawn(zbus_service::server_main);
+
+    let handle_proc = procspawn::spawn((), |()| {
+        tokio::runtime::Runtime::new().unwrap().block_on(zbus_service::client_main);
+    });
+
+    rt.block_on(handle).unwrap();
+    handle_proc.join().unwrap();
 }
 
 #[cfg(not(target_os = "macos"))]
