@@ -52,9 +52,8 @@ pub fn main() {
 
     for i in &SCBridgeInterface::get_interfaces(&prefs) {
         let i = i.clone();
-        let i_downcast = i.to_SCNetworkInterface();
-        let i_reupcast = i_downcast.downcast_SCNetworkInterface::<SCBridgeInterface>().unwrap();
-        println!("found bridge {:?}, {:?}, {:?}", i, i_downcast, i_reupcast);
+        let members = i.member_interfaces();
+        println!("found bridge {:?}\n{:?}", i, members);
     }
 
     // helper::save_prefs(&prefs);

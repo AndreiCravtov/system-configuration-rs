@@ -4,9 +4,9 @@ use core_foundation::base::{CFRetain, CFTypeID, CFTypeRef, TCFType, TCFTypeRef, 
 use core_foundation::propertylist::CFPropertyList;
 use sys::network_configuration::SCNetworkInterfaceGetTypeID;
 use sys::preferences::SCPreferencesRef;
-use sys::private::network_configuration_private::{SCBridgeInterfaceCopyAll, SCBridgeInterfaceRef};
+use sys::private::network_configuration_private::{SCBridgeInterfaceCopyAll, SCBridgeInterfaceCopyAvailableMemberInterfaces, SCBridgeInterfaceCreate, SCBridgeInterfaceGetMemberInterfaces, SCBridgeInterfaceRef, SCBridgeInterfaceRemove};
 use crate::helpers::create_empty_array;
-use crate::network_configuration::{SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
+use crate::network_configuration::{SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
 use crate::preferences::SCPreferences;
 
 core_foundation::declare_TCFType! {
@@ -96,6 +96,17 @@ const _: () = {
 
 
 impl SCBridgeInterface {
+    /// Retrieve all network capable devices on the system that can be added to a bridge interface.
+    pub fn get_available_member_interfaces(prefs: &SCPreferences) -> CFArray<SCNetworkInterface> {
+        unsafe {
+            let array_ptr = SCBridgeInterfaceCopyAvailableMemberInterfaces(prefs.as_concrete_TypeRef());
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<SCNetworkInterface>::wrap_under_create_rule(array_ptr)
+        }
+    }
+
     /// Retrieve all current bridge interfaces.
     pub fn get_interfaces(prefs: &SCPreferences) -> CFArray<Self> {
         unsafe {
@@ -103,7 +114,37 @@ impl SCBridgeInterface {
             if array_ptr.is_null() {
                 return create_empty_array();
             }
-            CFArray::<Self>::wrap_under_get_rule(array_ptr)
+            CFArray::<Self>::wrap_under_create_rule(array_ptr)
         }
+    }
+
+    /// Creates a new SCBridgeInterface interface. Or `None` if an error occurred.
+    pub fn create(prefs: &SCPreferences) -> Option<Self> {
+        unsafe {
+            let bridge_ref = SCBridgeInterfaceCreate(prefs.as_concrete_TypeRef());
+            if !bridge_ref.is_null() {
+                Some(Self::wrap_under_create_rule(bridge_ref))
+            } else {
+                None
+            }
+        }
+    }
+
+    /// Returns the member interfaces for the specified bridge interface.
+    pub fn member_interfaces(&self) -> CFArray<SCNetworkInterface> {
+        unsafe {
+            let array_ptr = SCBridgeInterfaceGetMemberInterfaces(self.0);
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<SCNetworkInterface>::wrap_under_get_rule(array_ptr)
+        }
+    }
+
+    /// Removes the SCBridgeInterface from the configuration.
+    ///
+    /// Returns: `true` if the interface was removed; `false` if an error was encountered.
+    pub fn remove(self) -> bool {
+        (unsafe { SCBridgeInterfaceRemove(self.0) }) != 0
     }
 }
