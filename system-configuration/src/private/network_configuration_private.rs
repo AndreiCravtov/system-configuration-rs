@@ -10,6 +10,7 @@ use crate::network_configuration::{SCNetworkInterface, SCNetworkInterfaceType};
 use crate::preferences::SCPreferences;
 
 core_foundation::declare_TCFType! {
+    /// DOCS
     SCBridgeInterface, SCBridgeInterfaceRef
 }
 core_foundation::impl_CFTypeDescription!(SCBridgeInterface);
