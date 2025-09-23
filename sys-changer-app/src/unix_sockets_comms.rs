@@ -8,7 +8,7 @@ use tokio::net::{UnixListener, UnixStream};
 use zbus::{connection, Guid};
 use crate::zbus_service::{SysChangerAppService, SysChangerAppServiceProxy};
 
-pub async fn run_server<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error>> {
+pub async fn run_server<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     // bind on socket to begin a listening server
     let unix_socket_path = path.as_ref().to_path_buf();
     let listener = UnixListener::bind(unix_socket_path)?;
@@ -42,7 +42,7 @@ pub async fn run_server<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error>> {
     }
 }
 
-pub async fn run_client<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error>> {
+pub async fn run_client<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     let socket = UnixStream::connect(path).await?;
     let conn = connection::Builder::unix_stream(socket).p2p().build().await?;
     let service = SysChangerAppServiceProxy::builder(&conn)
