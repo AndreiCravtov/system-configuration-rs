@@ -5,14 +5,16 @@ mod interfaces;
 mod simpler_auth;
 mod tweaking_config;
 
+use core_foundation::array::CFArray;
 use crate::ext::CFArrayExt;
 use crate::interfaces::get_interfaces;
 use crate::simpler_auth::SimpleAuthorization;
 use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
-use system_configuration::network_configuration::SCNetworkSet;
+use system_configuration::network_configuration::{SCNetworkInterface, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
+use system_configuration_sys::private::network_configuration_private::SCBridgeInterfaceCopyAll;
 
 pub(crate) mod ext {
     use core_foundation::array::CFArray;
@@ -34,6 +36,28 @@ pub(crate) mod ext {
     }
 }
 
+fn create_empty_array<T>() -> CFArray<T> {
+    use std::ptr::null;
+    unsafe {
+        CFArray::wrap_under_create_rule(core_foundation::array::CFArrayCreate(
+            null() as *const _,
+            null() as *const _,
+            0,
+            null() as *const _,
+        ))
+    }
+}
+
+fn bridge_interface_all(prefs: &SCPreferences) -> CFArray<SCNetworkInterface> {
+    unsafe {
+        let array_ptr = SCBridgeInterfaceCopyAll(prefs.as_concrete_TypeRef());
+        if array_ptr.is_null() {
+            return create_empty_array();
+        }
+        CFArray::<SCNetworkInterface>::wrap_under_create_rule(array_ptr)
+    }
+}
+
 #[cfg(target_os = "macos")]
 pub fn main() {
     // constants
@@ -48,9 +72,12 @@ pub fn main() {
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
 
+    for i in &bridge_interface_all(&prefs) {
+        println!("found bridge interface: {:?}", &i);
+    }
+
     // helper::save_prefs(&prefs);
     // return;
-
     for i in get_interfaces() {
         println!("found interface: {:?}", i);
     }
