@@ -44,6 +44,7 @@ pub async fn run_server<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error + S
 
 pub async fn run_client<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     let socket = UnixStream::connect(path).await?;
+    println!("connected to socket");
     let conn = connection::Builder::unix_stream(socket).p2p().build().await?;
     let service = SysChangerAppServiceProxy::builder(&conn)
         .path("/org/zbus/SysChangerAppService")?
