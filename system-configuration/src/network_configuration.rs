@@ -28,9 +28,7 @@ use crate::preferences::SCPreferences;
 use crate::helpers::create_empty_array;
 
 #[cfg(feature = "private")]
-pub mod private {
-    pub use crate::private::network_configuration_private::*;
-}
+pub use crate::private::network_configuration_private::*;
 
 core_foundation::declare_TCFType!(
     /// Represents a network interface.
