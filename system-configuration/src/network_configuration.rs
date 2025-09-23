@@ -34,6 +34,7 @@ pub use crate::private::network_configuration_private::*;
 ///
 /// [`SCNetworkInterface`]: struct.SCNetworkInterface.html
 pub unsafe trait SCNetworkInterfaceSubClass: TCFType {
+    /// Docs....
     fn foo(&self) -> String;
 }
 
