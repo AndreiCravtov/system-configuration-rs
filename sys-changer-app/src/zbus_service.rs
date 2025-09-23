@@ -110,7 +110,7 @@ pub async fn client_main() -> zbus::Result<()> {
     }
 }
 
-pub fn client_server_pair() -> zbus::Result<()> {
+pub async fn client_server_pair() -> zbus::Result<()> {
     let service = SysChangerAppService {
         name: "SysChangerAppService_p2p_Name".to_string(),
         done: Event::new(),
