@@ -52,8 +52,11 @@ pub fn main() {
 
     for i in &SCBridgeInterface::get_interfaces(&prefs) {
         let i = i.clone();
+        let members_allowed = i.configured_members_allowed();
         let members = i.member_interfaces();
-        println!("found bridge {:?}\n{:?}", i, members);
+        let opts = i.options();
+
+        println!("found bridge {:?}\n{:?}\n{:?}\n{:?}", i, members_allowed, members, opts);
     }
 
     // helper::save_prefs(&prefs);

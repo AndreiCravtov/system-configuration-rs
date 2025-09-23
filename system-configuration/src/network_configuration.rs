@@ -8,24 +8,9 @@ use core_foundation::{
     base::{Boolean, TCFType, ToVoid, TCFTypeRef},
     string::CFString,
 };
-use sys::network_configuration::{
-    SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName,
-    SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface,
-    SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName,
-    SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
-    SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef, SCNetworkProtocolGetEnabled,
-    SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
-    SCNetworkProtocolSetEnabled, SCNetworkServiceAddProtocolType, SCNetworkServiceCopy,
-    SCNetworkServiceCopyAll, SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols,
-    SCNetworkServiceCreate, SCNetworkServiceEstablishDefaultConfiguration,
-    SCNetworkServiceGetEnabled, SCNetworkServiceGetInterface, SCNetworkServiceGetServiceID,
-    SCNetworkServiceGetTypeID, SCNetworkServiceRef, SCNetworkServiceRemove,
-    SCNetworkServiceSetEnabled, SCNetworkSetAddService, SCNetworkSetContainsInterface,
-    SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyCurrent, SCNetworkSetCopyServices,
-    SCNetworkSetGetName, SCNetworkSetGetServiceOrder, SCNetworkSetGetSetID, SCNetworkSetGetTypeID,
-    SCNetworkSetRef, SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
-    SCNetworkSetSetServiceOrder,
-};
+use core_foundation::base::CFType;
+use core_foundation::dictionary::CFDictionary;
+use sys::network_configuration::{SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface, SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef, SCNetworkProtocolGetConfiguration, SCNetworkProtocolGetEnabled, SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef, SCNetworkProtocolSetConfiguration, SCNetworkProtocolSetEnabled, SCNetworkServiceAddProtocolType, SCNetworkServiceCopy, SCNetworkServiceCopyAll, SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols, SCNetworkServiceCreate, SCNetworkServiceEstablishDefaultConfiguration, SCNetworkServiceGetEnabled, SCNetworkServiceGetInterface, SCNetworkServiceGetServiceID, SCNetworkServiceGetTypeID, SCNetworkServiceRef, SCNetworkServiceRemove, SCNetworkServiceSetEnabled, SCNetworkSetAddService, SCNetworkSetContainsInterface, SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyCurrent, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetServiceOrder, SCNetworkSetGetSetID, SCNetworkSetGetTypeID, SCNetworkSetRef, SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent, SCNetworkSetSetServiceOrder};
 use crate::preferences::SCPreferences;
 use crate::helpers::create_empty_array;
 
@@ -453,11 +438,35 @@ impl SCNetworkProtocol {
         }
     }
 
+    /// Returns the configuration settings associated with the specified protocol. Or `None` if no
+    /// configuration settings are associated with the protocol or an error occurred.
+    ///
+    /// See [`SCNetworkProtocolGetConfiguration`] for details.
+    ///
+    /// [`SCNetworkProtocolGetConfiguration`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkprotocolgetconfiguration(_:)?language=objc
+    pub fn configuration(&self) -> Option<CFDictionary<CFString, CFType>> {
+        unsafe {
+            let dictionary_ref = SCNetworkProtocolGetConfiguration(self.as_concrete_TypeRef());
+            if !dictionary_ref.is_null() {
+                Some(CFDictionary::wrap_under_get_rule(dictionary_ref))
+            } else {
+                None
+            }
+        }
+    }
+
     /// Enables or disables the specified protocol.
     ///
     /// Returns: `true` if the enabled status was saved; `false` if an error occurred.
     pub fn set_enabled(&mut self, enabled: bool) -> bool {
         (unsafe { SCNetworkProtocolSetEnabled(self.0, enabled as Boolean) }) != 0
+    }
+
+    /// Stores the configuration settings for the specified network protocol.
+    ///
+    /// Returns: `true` if the configuration was stored; `false` if an error occurred.
+    pub fn set_configuration(&mut self, config: &CFDictionary<CFString, CFType>) -> bool {
+        (unsafe { SCNetworkProtocolSetConfiguration(self.0, config.as_concrete_TypeRef()) }) != 0
     }
 }
 

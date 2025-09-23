@@ -1,10 +1,12 @@
 use std::os;
 use core_foundation::array::CFArray;
-use core_foundation::base::{CFRetain, CFTypeID, CFTypeRef, TCFType, TCFTypeRef, ToVoid};
+use core_foundation::base::{Boolean, CFRetain, CFType, CFTypeID, CFTypeRef, TCFType, TCFTypeRef, ToVoid};
+use core_foundation::dictionary::CFDictionary;
 use core_foundation::propertylist::CFPropertyList;
+use core_foundation::string::CFString;
 use sys::network_configuration::SCNetworkInterfaceGetTypeID;
 use sys::preferences::SCPreferencesRef;
-use sys::private::network_configuration_private::{SCBridgeInterfaceCopyAll, SCBridgeInterfaceCopyAvailableMemberInterfaces, SCBridgeInterfaceCreate, SCBridgeInterfaceGetMemberInterfaces, SCBridgeInterfaceRef, SCBridgeInterfaceRemove};
+use sys::private::network_configuration_private::{SCBridgeInterfaceCopyAll, SCBridgeInterfaceCopyAvailableMemberInterfaces, SCBridgeInterfaceCreate, SCBridgeInterfaceGetAllowConfiguredMembers, SCBridgeInterfaceGetMemberInterfaces, SCBridgeInterfaceGetOptions, SCBridgeInterfaceRef, SCBridgeInterfaceRemove, SCBridgeInterfaceSetAllowConfiguredMembers, SCBridgeInterfaceSetMemberInterfaces, SCBridgeInterfaceSetOptions};
 use crate::helpers::create_empty_array;
 use crate::network_configuration::{SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
 use crate::preferences::SCPreferences;
@@ -130,6 +132,12 @@ impl SCBridgeInterface {
         }
     }
 
+    /// Returns a [`bool`] value indicating whether the bridge interface allows members with
+    /// configured services.
+    pub fn configured_members_allowed(&self) -> bool {
+        unsafe { SCBridgeInterfaceGetAllowConfiguredMembers(self.0) != 0 }
+    }
+
     /// Returns the member interfaces for the specified bridge interface.
     pub fn member_interfaces(&self) -> CFArray<SCNetworkInterface> {
         unsafe {
@@ -141,10 +149,44 @@ impl SCBridgeInterface {
         }
     }
 
+    /// Returns the configuration settings associated with the bridge interface. Or `None` if no
+    /// changes to the default configuration have been saved.
+    pub fn options(&self) -> Option<CFDictionary<CFString, CFType>> {
+        unsafe {
+            let dictionary_ref = SCBridgeInterfaceGetOptions(self.as_concrete_TypeRef());
+            if !dictionary_ref.is_null() {
+                Some(CFDictionary::wrap_under_get_rule(dictionary_ref))
+            } else {
+                None
+            }
+        }
+    }
+
     /// Removes the SCBridgeInterface from the configuration.
     ///
     /// Returns: `true` if the interface was removed; `false` if an error was encountered.
     pub fn remove(self) -> bool {
         (unsafe { SCBridgeInterfaceRemove(self.0) }) != 0
+    }
+
+    /// Allow adding member interfaces to the bridge that have configured services.
+    ///
+    /// Returns: `true` if the change was successful; `false` otherwise.
+    pub fn set_configured_members_allowed(&mut self, enable: bool) -> bool {
+        (unsafe { SCBridgeInterfaceSetAllowConfiguredMembers(self.0, enable as Boolean) }) != 0
+    }
+
+    /// Sets the member interfaces for the specified bridge interface.
+    ///
+    /// Returns: `true` if the configuration was stored; `false` if an error was encountered.
+    pub fn set_member_interfaces(&mut self, members: &CFArray<SCNetworkInterface>) -> bool {
+        (unsafe { SCBridgeInterfaceSetMemberInterfaces(self.0, members.as_concrete_TypeRef()) }) != 0
+    }
+
+    /// Sets the configuration settings for the specified bridge interface.
+    ///
+    /// Returns: `true` if the configuration was stored; `false` if an error occurred.
+    pub fn set_options(&mut self, new_options: &CFDictionary<CFString, CFType>) -> bool {
+        (unsafe { SCBridgeInterfaceSetOptions(self.0, new_options.as_concrete_TypeRef()) }) != 0
     }
 }
