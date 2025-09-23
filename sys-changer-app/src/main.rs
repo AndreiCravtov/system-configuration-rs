@@ -72,9 +72,7 @@ pub fn main() {
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
 
-    for i in &bridge_interface_all(&prefs) {
-        println!("found bridge interface: {:?}", &i);
-    }
+    println!("found bridge interfaces: {:?}", bridge_interface_all(&prefs));
 
     // helper::save_prefs(&prefs);
     // return;
