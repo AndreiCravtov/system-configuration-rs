@@ -18,6 +18,8 @@ pub async fn run_server<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error + S
     loop {
         match listener.accept().await {
             Ok((socket, _)) => {
+                println!("Accepted a new connection.");
+
                 // this thing here should be thin copy to the "true" service, e.g.
                 // clone a thin wrapper around a bunch of Arc-Mutexes around the REAL state
                 //
