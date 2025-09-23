@@ -7,6 +7,8 @@ mod tweaking_config;
 mod zbus_service;
 mod unix_sockets_comms;
 
+use std::thread;
+use std::time::Duration;
 use core_foundation::array::CFArray;
 use crate::ext::CFArrayExt;
 use crate::interfaces::get_interfaces;
@@ -97,6 +99,8 @@ pub fn main() {
     let path = "/tmp/FOO_socket.sock".to_string();
     let rt = tokio::runtime::Runtime::new().unwrap();
     let handle = rt.spawn(run_server(path.clone()));
+
+    thread::sleep(Duration::from_secs(1));
 
     let handle_proc = procspawn::spawn((path), |(path)| {
         tokio::runtime::Runtime::new().unwrap().block_on(run_client(path)).unwrap();
