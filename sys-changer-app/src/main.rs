@@ -73,7 +73,7 @@ pub fn main() {
     helper::delete_old_if_exits(&prefs);
 
     for i in &bridge_interface_all(&prefs) {
-        println!("found bridge {:?}", &i);
+        println!("found bridge {:?}", (&i).clone());
     }
 
     // helper::save_prefs(&prefs);
