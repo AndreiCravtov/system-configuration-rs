@@ -6,11 +6,12 @@ use sys::network_configuration::SCNetworkInterfaceGetTypeID;
 use sys::preferences::SCPreferencesRef;
 use sys::private::network_configuration_private::{SCBridgeInterfaceCopyAll, SCBridgeInterfaceRef};
 use crate::helpers::create_empty_array;
-use crate::network_configuration::{SCNetworkInterface, SCNetworkInterfaceType};
+use crate::network_configuration::{SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
 use crate::preferences::SCPreferences;
 
 core_foundation::declare_TCFType! {
-    /// DOCS
+    /// Represents a bridge interface, which is a subclass of
+    /// [`SCNetworkInterface`](crate::network_configuration::SCNetworkInterface).
     SCBridgeInterface, SCBridgeInterfaceRef
 }
 core_foundation::impl_CFTypeDescription!(SCBridgeInterface);
@@ -19,6 +20,8 @@ core_foundation::impl_CFTypeDescription!(SCBridgeInterface);
 //
 // only difference is the lack of `ConcreteCFType` implementation, to prevent `CFType::downcast`
 // from being implemented, as that would be unsound behavior.
+//
+// also implements `SCNetworkInterfaceSubClass` to allow up/downcasting to/from `SCNetworkInterface`
 const _: () = {
     impl TCFType for SCBridgeInterface {
         type Ref = SCBridgeInterfaceRef;
@@ -85,53 +88,22 @@ const _: () = {
             self.as_void_ptr()
         }
     }
+    unsafe impl SCNetworkInterfaceSubClass for SCBridgeInterface {
+        const INTERFACE_TYPE: SCNetworkInterfaceType = SCNetworkInterfaceType::Bridge;
+    }
 };
 
 
 
-// /// A thin wrapper around [`SCNetworkInterface`] for those which happen to be **bridge interfaces**.
-// #[repr(transparent)]
-// pub struct SCBridgeInterface(SCNetworkInterface);
-//
-// impl SCBridgeInterface {
-//     /// Retrieve all current network interfaces
-//     ///
-//     /// See [`SCNetworkInterfaceCopyAll`] for more details.
-//     ///
-//     /// [`SCNetworkInterfaceCopyAll`]: https://developer.apple.com/documentation/systemconfiguration/1517090-scnetworkinterfacecopyall?language=objc
-//     pub fn get_interfaces(prefs: &SCPreferences) -> CFArray<Self> {
-//         // CFPropertyList
-//
-//         unsafe {
-//             let array_ptr = SCBridgeInterfaceCopyAll(prefs.as_concrete_TypeRef());
-//             if array_ptr.is_null() {
-//                 return create_empty_array();
-//             }
-//             CFArray::<Self>::wrap_under_get_rule(array_ptr)
-//         }
-//     }
-//
-//     /// Dangerously wrap [`SCNetworkInterface`] to obtain a wrapper for **bridge interfaces**.
-//     ///
-//     /// Returns the **bridge interface** wrapper, but **doesn't check** that the underlying
-//     /// interface is _actually_ a _bridge_ interface.
-//     pub unsafe fn from_network_interface_unchecked(interface: SCNetworkInterface) -> SCBridgeInterface {
-//         SCBridgeInterface(interface)
-//     }
-//
-//     /// Try to wrap [`SCNetworkInterface`] to obtain a wrapper for **bridge interfaces**.
-//     ///
-//     /// Returns the **bridge interface** wrapper, or `None` if the interface type is wrong.
-//     pub fn try_from_network_interface(interface: SCNetworkInterface) -> Option<Self> {
-//         if let SCNetworkInterfaceType::Bridge = interface.interface_type()? {
-//             Some(SCBridgeInterface(interface))
-//         } else {
-//             None
-//         }
-//     }
-//
-//     /// Unwrap the underlying [`SCNetworkInterface`] instance of this **bridge interface**.
-//     pub fn into_network_interface(self) -> SCNetworkInterface {
-//         self.0
-//     }
-// }
+impl SCBridgeInterface {
+    /// Retrieve all current bridge interfaces.
+    pub fn get_interfaces(prefs: &SCPreferences) -> CFArray<Self> {
+        unsafe {
+            let array_ptr = SCBridgeInterfaceCopyAll(prefs.as_concrete_TypeRef());
+            if array_ptr.is_null() {
+                return create_empty_array();
+            }
+            CFArray::<Self>::wrap_under_get_rule(array_ptr)
+        }
+    }
+}

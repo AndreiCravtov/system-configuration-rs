@@ -1,9 +1,11 @@
 //! Bindings for [`SCNetworkConfiguration`].
 //!
 //! [`SCNetworkConfiguration`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkconfiguration?language=objc
+
+use std::mem;
 use core_foundation::{
     array::CFArray,
-    base::{Boolean, TCFType, ToVoid},
+    base::{Boolean, TCFType, ToVoid, TCFTypeRef},
     string::CFString,
 };
 use sys::network_configuration::{
@@ -34,12 +36,28 @@ pub use crate::private::network_configuration_private::*;
 ///
 /// [`SCNetworkInterface`]: struct.SCNetworkInterface.html
 pub unsafe trait SCNetworkInterfaceSubClass: TCFType {
-    /// Docs....
-    fn foo(&self) -> String;
-}
+    const INTERFACE_TYPE: SCNetworkInterfaceType;
 
-fn some(t: impl SCNetworkInterfaceSubClass) {
-    let a = t.foo();
+    /// Create an instance of the superclass type [`SCNetworkInterface`] for this instance.
+    ///
+    /// [`SCNetworkInterface`]: struct.SCNetworkInterface.html
+    #[inline]
+    fn to_SCNetworkInterface(&self) -> SCNetworkInterface {
+        unsafe { SCNetworkInterface::wrap_under_get_rule(self.as_concrete_TypeRef().as_void_ptr()) }
+    }
+
+    /// Equal to [`to_SCNetworkInterface`], but consumes self and avoids changing the reference count.
+    ///
+    /// [`to_SCNetworkInterface`]: #method.to_SCNetworkInterface
+    #[inline]
+    fn into_SCNetworkInterface(self) -> SCNetworkInterface
+    where
+        Self: Sized,
+    {
+        let reference = self.as_concrete_TypeRef().as_void_ptr();
+        mem::forget(self);
+        unsafe { SCNetworkInterface::wrap_under_create_rule(reference) }
+    }
 }
 
 core_foundation::declare_TCFType!(
@@ -68,6 +86,37 @@ impl SCNetworkInterface {
     /// [`SCNetworkInterfaceCopyAll`]: https://developer.apple.com/documentation/systemconfiguration/1517090-scnetworkinterfacecopyall?language=objc
     pub fn get_interfaces() -> CFArray<Self> {
         get_interfaces()
+    }
+
+    /// Try to downcast the [`SCNetworkInterface`] to a subclass. Checking if the instance is the
+    /// correct subclass happens at runtime and `None` is returned if it is not the correct type.
+    /// Works similar to [`CFPropertyList::downcast`](core_foundation::propertylist::CFPropertyList::downcast)
+    /// and [`CFType::downcast`](core_foundation::base::CFType::downcast).
+    pub fn downcast_SCNetworkInterface<T: SCNetworkInterfaceSubClass>(&self) -> Option<T> {
+        if self.instance_of::<T>() && self.interface_type()? == T::INTERFACE_TYPE {
+            unsafe {
+                let subclass_ref = T::Ref::from_void_ptr(self.0);
+                Some(T::wrap_under_get_rule(subclass_ref))
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Similar to [`downcast_SCNetworkInterface`], but consumes self and can thus avoid touching
+    /// the retain count.
+    ///
+    /// [`downcast_SCNetworkInterface`]: #method.downcast_SCNetworkInterface
+    pub fn downcast_into_SCNetworkInterface<T: SCNetworkInterfaceSubClass>(self) -> Option<T> {
+        if self.instance_of::<T>() && self.interface_type()? == T::INTERFACE_TYPE {
+            unsafe {
+                let subclass_ref = T::Ref::from_void_ptr(self.0);
+                mem::forget(self);
+                Some(T::wrap_under_create_rule(subclass_ref))
+            }
+        } else {
+            None
+        }
     }
 
     /// Get type of the network interface, if the type is recognized, returns `None` otherwise.
@@ -198,7 +247,7 @@ impl SCNetworkInterface {
 /// See [_Network Interface Types_] documentation for details.
 ///
 /// [_Network Interface Types_]: https://developer.apple.com/documentation/systemconfiguration/scnetworkconfiguration/network_interface_types?language=objc
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum SCNetworkInterfaceType {
     /// A 6to4 interface.
     SixToFour,
@@ -416,7 +465,7 @@ impl SCNetworkProtocol {
 /// See [_Network Protocol Types_] documentation for details.
 ///
 /// [_Network Protocol Types_]: https://developer.apple.com/documentation/systemconfiguration/network-protocol-types?language=objc
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum SCNetworkProtocolType {
     /// DNS protocol.
     DNS,
