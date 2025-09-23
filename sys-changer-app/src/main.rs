@@ -98,7 +98,7 @@ pub fn main() {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let handle = rt.spawn(run_server(path));
 
-    let handle_proc = procspawn::spawn((), |()| {
+    let handle_proc = procspawn::spawn((path), |(path)| {
         tokio::runtime::Runtime::new().unwrap().block_on(run_client(path)).unwrap();
     });
 
