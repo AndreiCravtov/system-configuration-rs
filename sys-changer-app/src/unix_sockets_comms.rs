@@ -30,12 +30,21 @@ pub async fn run_server<P: AsRef<Path>>(path: P) -> Result<(), Box<dyn Error + S
                     done: Event::new(),
                 };
 
-                let _connection = connection::Builder::unix_stream(socket)
+                let connection = connection::Builder::unix_stream(socket)
                     .server(guid.clone())?
                     .serve_at("/org/zbus/SysChangerAppService", service)? // this thing here SHOULD have a constant!!!!
                     .p2p()
                     .build()
                     .await?;
+                tokio::spawn(async move {
+                    let _connection = connection;
+
+                    loop {
+                        // do something else, wait forever or timeout here:
+                        // handling D-Bus messages is done in the background
+                        std::future::pending::<()>().await;
+                    }
+                });
             }
             Err(e) => {
                 eprintln!("accept error = {:?}", e);
