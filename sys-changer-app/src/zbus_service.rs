@@ -29,7 +29,7 @@ impl SysChangerAppService {
         &self,
         #[zbus(signal_emitter)]
         emitter: SignalEmitter<'_>,
-    ) -> zbus::Result<()> {
+    ) -> zbus::fdo::Result<()> {
         emitter.greeted_everyone().await?;
         self.done.notify(1);
 
