@@ -9,7 +9,7 @@ name = "sys-changer-app"
 
 [dependencies]
 core-foundation = "0.9"
-system-configuration = { path = "../system-configuration", version = "0.6" }
+system-configuration = { path = "../system-configuration", version = "0.6", features = ["private"] }
 system-configuration-sys = { path = "../system-configuration-sys", version = "0.6", features=["private"] }
 security-framework = "2.11"
 security-framework-sys = "2.11"

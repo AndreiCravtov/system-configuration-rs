@@ -24,8 +24,13 @@ use sys::network_configuration::{
     SCNetworkSetRef, SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
     SCNetworkSetSetServiceOrder,
 };
-
 use crate::preferences::SCPreferences;
+use crate::helpers::create_empty_array;
+
+#[cfg(feature = "private")]
+pub mod private {
+    pub use crate::private::network_configuration_private::*;
+}
 
 core_foundation::declare_TCFType!(
     /// Represents a network interface.
@@ -42,6 +47,7 @@ core_foundation::impl_TCFType!(
     SCNetworkInterfaceRef,
     SCNetworkInterfaceGetTypeID
 );
+core_foundation::impl_CFTypeDescription!(SCNetworkInterface);
 
 // TODO: implement all the other methods a SCNetworkInterface has
 impl SCNetworkInterface {
@@ -223,7 +229,9 @@ pub enum SCNetworkInterfaceType {
 }
 
 /// Bridge interface type referred to as `kSCNetworkInterfaceTypeBridge` in private headers.
+#[cfg(not(feature = "private"))]
 static BRIDGE_INTERFACE_TYPE_ID: &str = "Bridge";
+
 
 /// IrDA interface referenced as `kSCNetworkInterfaceTypeIrDA` but deprecated since macOS 12.
 static IRDA_INTERFACE_TYPE_ID: &str = "IrDA";
@@ -232,6 +240,8 @@ impl SCNetworkInterfaceType {
     /// Tries to construct a type by matching it to string constants used to identify a network
     /// interface type. If no constants match it, `None` is returned.
     pub fn from_cfstring(type_id: &CFString) -> Option<Self> {
+        #[cfg(feature = "private")]
+        use system_configuration_sys::private::network_configuration_private::*;
         use system_configuration_sys::network_configuration::*;
 
         let id_is_equal_to = |const_str| -> bool {
@@ -243,7 +253,15 @@ impl SCNetworkInterfaceType {
                 Some(SCNetworkInterfaceType::SixToFour)
             } else if id_is_equal_to(kSCNetworkInterfaceTypeBluetooth) {
                 Some(SCNetworkInterfaceType::Bluetooth)
-            } else if type_id == &BRIDGE_INTERFACE_TYPE_ID {
+            } else if {
+                #[cfg(feature = "private")]
+                let matches = id_is_equal_to(kSCNetworkInterfaceTypeBridge);
+
+                #[cfg(not(feature = "private"))]
+                let matches = type_id == &BRIDGE_INTERFACE_TYPE_ID;
+
+                matches
+            } {
                 Some(SCNetworkInterfaceType::Bridge)
             } else if id_is_equal_to(kSCNetworkInterfaceTypeBond) {
                 Some(SCNetworkInterfaceType::Bond)
@@ -281,13 +299,23 @@ impl SCNetworkInterfaceType {
 
     /// Returns the string constants used to identify this network interface type.
     pub fn to_cfstring(&self) -> CFString {
+        #[cfg(feature = "private")]
+        use system_configuration_sys::private::network_configuration_private::*;
         use system_configuration_sys::network_configuration::*;
         let wrap_const = |const_str| unsafe { CFString::wrap_under_get_rule(const_str) };
         unsafe {
             match self {
                 SCNetworkInterfaceType::SixToFour => wrap_const(kSCNetworkInterfaceType6to4),
                 SCNetworkInterfaceType::Bluetooth => wrap_const(kSCNetworkInterfaceTypeBluetooth),
-                SCNetworkInterfaceType::Bridge => BRIDGE_INTERFACE_TYPE_ID.into(),
+                SCNetworkInterfaceType::Bridge => {
+                    #[cfg(feature = "private")]
+                    let val = wrap_const(kSCNetworkInterfaceTypeBridge);
+
+                    #[cfg(not(feature = "private"))]
+                    let val = BRIDGE_INTERFACE_TYPE_ID.into();
+
+                    val
+                },
                 SCNetworkInterfaceType::Bond => wrap_const(kSCNetworkInterfaceTypeBond),
                 SCNetworkInterfaceType::Ethernet => wrap_const(kSCNetworkInterfaceTypeEthernet),
                 SCNetworkInterfaceType::FireWire => wrap_const(kSCNetworkInterfaceTypeFireWire),
@@ -331,6 +359,7 @@ core_foundation::impl_TCFType!(
     SCNetworkProtocolRef,
     SCNetworkProtocolGetTypeID
 );
+core_foundation::impl_CFTypeDescription!(SCNetworkProtocol);
 
 // TODO: implement all the other methods a SCNetworkProtocol has
 impl SCNetworkProtocol {
@@ -450,6 +479,7 @@ core_foundation::impl_TCFType!(
     SCNetworkServiceRef,
     SCNetworkServiceGetTypeID
 );
+core_foundation::impl_CFTypeDescription!(SCNetworkService);
 
 impl SCNetworkService {
     /// Returns an array of all network services
@@ -613,8 +643,8 @@ core_foundation::declare_TCFType!(
     SCNetworkSet,
     SCNetworkSetRef
 );
-
 core_foundation::impl_TCFType!(SCNetworkSet, SCNetworkSetRef, SCNetworkSetGetTypeID);
+core_foundation::impl_CFTypeDescription!(SCNetworkSet);
 
 impl SCNetworkSet {
     /// Returns all available sets for the specified preferences session.
@@ -757,18 +787,6 @@ impl SCNetworkSet {
     pub fn set_service_order(&mut self, new_order: CFArray<CFString>) -> bool {
         let cf_order_ref = new_order.as_concrete_TypeRef();
         (unsafe { SCNetworkSetSetServiceOrder(self.0, cf_order_ref) }) != 0
-    }
-}
-
-fn create_empty_array<T>() -> CFArray<T> {
-    use std::ptr::null;
-    unsafe {
-        CFArray::wrap_under_create_rule(core_foundation::array::CFArrayCreate(
-            null() as *const _,
-            null() as *const _,
-            0,
-            null() as *const _,
-        ))
     }
 }
 
