@@ -97,7 +97,7 @@ pub async fn client_main() -> ZbusResult<()> {
     loop {
         tokio::select! {
             got_got = greeted_everyone_stream.select_next_some() => {
-                println!("signal received {:?}", got_got?);
+                println!("signal received {:?}", got_got);
             },
             _ = tokio::time::sleep(Duration::from_secs(1)) => {
                 service.go_away().await?;
