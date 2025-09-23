@@ -92,6 +92,7 @@ pub async fn client_main() -> zbus::Result<()> {
     println!("{}", service.say_hello("foobar").await?);
     println!("{}", service.greeter_name().await?);
     service.set_greeter_name("aiaio".to_string()).await?;
+    tokio::time::sleep(Duration::from_secs(1)).await;
     println!("{}", service.greeter_name().await?);
 
     loop {
