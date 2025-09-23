@@ -63,8 +63,8 @@ pub fn main() {
         }
     }
 
-    // helper::save_prefs(&prefs);
-    // return;
+    helper::save_prefs(&prefs);
+    return;
     for i in get_interfaces() {
         println!("found interface: {:?}", i);
     }
