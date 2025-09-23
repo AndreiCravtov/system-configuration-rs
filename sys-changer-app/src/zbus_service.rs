@@ -5,6 +5,8 @@ use event_listener::{Event, Listener};
 use futures_util::StreamExt;
 use zbus::{connection, interface, Connection};
 use zbus::object_server::SignalEmitter;
+use tokio::net::UnixStream;
+use zbus::{Guid};
 
 struct SysChangerAppService {
     name: String,
@@ -106,4 +108,25 @@ pub async fn client_main() -> zbus::Result<()> {
             }
         }
     }
+}
+
+pub fn client_server_pair() -> zbus::Result<()> {
+    let service = SysChangerAppService {
+        name: "SysChangerAppService_p2p_Name".to_string(),
+        done: Event::new(),
+    };
+
+    let guid = Guid::generate();
+
+    let (p0, p1) = UnixStream::pair()?;
+    let (client_conn, server_conn) = futures_util::try_join!(
+        // Client
+        connection::Builder::unix_stream(p0).p2p().build(),
+        // Server
+        connection::Builder::unix_stream(p1).server(guid)?
+
+            .p2p()
+            .build(),
+    )?;
+    Ok(())
 }
