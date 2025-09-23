@@ -5,12 +5,12 @@
 use std::mem;
 use core_foundation::{
     array::CFArray,
-    base::{Boolean, TCFType, ToVoid, TCFTypeRef},
+    base::{Boolean, TCFType, ToVoid, TCFTypeRef, CFType},
     string::CFString,
+    dictionary::CFDictionary,
 };
-use core_foundation::base::CFType;
-use core_foundation::dictionary::CFDictionary;
 use sys::network_configuration::{SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface, SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef, SCNetworkProtocolGetConfiguration, SCNetworkProtocolGetEnabled, SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef, SCNetworkProtocolSetConfiguration, SCNetworkProtocolSetEnabled, SCNetworkServiceAddProtocolType, SCNetworkServiceCopy, SCNetworkServiceCopyAll, SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols, SCNetworkServiceCreate, SCNetworkServiceEstablishDefaultConfiguration, SCNetworkServiceGetEnabled, SCNetworkServiceGetInterface, SCNetworkServiceGetServiceID, SCNetworkServiceGetTypeID, SCNetworkServiceRef, SCNetworkServiceRemove, SCNetworkServiceSetEnabled, SCNetworkSetAddService, SCNetworkSetContainsInterface, SCNetworkSetCopy, SCNetworkSetCopyAll, SCNetworkSetCopyCurrent, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetServiceOrder, SCNetworkSetGetSetID, SCNetworkSetGetTypeID, SCNetworkSetRef, SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent, SCNetworkSetSetServiceOrder};
+
 use crate::preferences::SCPreferences;
 use crate::helpers::create_empty_array;
 
