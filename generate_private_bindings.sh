@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# TODO: right now this script does NOT work, it keeps giving errors to the effect of `expected: ","` so it is some
+#       weird preprocessor macro error, not sure why how who what ;(((((
+#       as of now I handroll the private bindings, for the bits that I need
+
 # Always have the latest version of bindgen and rustfmt installed before using this script.
 # This script require GNU sed, and expects it to be available as `gsed`. Adjust SED var if needed.
 
@@ -151,9 +155,7 @@ bindgen \
     -o $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH \
     $NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH -- \
     -I$SDK_PATH/usr/include \
-    -F$FRAMEWORK_PATH \
-    -isysroot "$SDK_PATH"\
-    -D"API_AVAILABLE(...)=" -D"API_UNAVAILABLE(...)="
+    -F$FRAMEWORK_PATH
 
 cleanup_binding $NETWORK_CONFIGURATION_PRIVATE_BINDING_PATH
 
