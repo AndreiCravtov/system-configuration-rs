@@ -51,12 +51,16 @@ pub fn main() {
     helper::delete_old_if_exits(&prefs);
 
     for i in &SCBridgeInterface::get_interfaces(&prefs) {
-        let i = i.clone();
+        let mut i = i.clone();
         let members_allowed = i.configured_members_allowed();
         let members = i.member_interfaces();
         let opts = i.options();
 
         println!("found bridge {:?}\n{:?}\n{:?}\n{:?}", i, members_allowed, members, opts);
+        if !members_allowed {
+            println!("allowing this to have configured members");
+            assert!(i.set_configured_members_allowed(true));
+        }
     }
 
     // helper::save_prefs(&prefs);
