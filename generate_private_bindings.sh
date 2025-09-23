@@ -43,19 +43,10 @@ configure_macos_private_staging_headers "${MACOS_VENDORED_PATH}/configd/SystemCo
 echo "got past here.."
 SC_HEADER_PATH="$SC_PRIVATE_HEADER_PATH"
 
-cat > "${SCRIPT_ROOT_PATH}/sc_private_wrapper.h" <<'EOF'
-#include <SystemConfiguration/SystemConfiguration.h>
-#include <SystemConfiguration/SCValidation.h>
-#include <SystemConfiguration/SCNetworkConfigurationPrivate.h>
-EOF
-
 #DYNAMIC_STORE_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStorePrivate.h"
 #DYNAMIC_STORE_COPY_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreCopySpecificPrivate.h"
 #DYNAMIC_STORE_SET_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCDynamicStoreSetSpecificPrivate.h"
-
-#NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCNetworkConfigurationPrivate.h"
-NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH="${SCRIPT_ROOT_PATH}/sc_private_wrapper.h"
-
+NETWORK_CONFIGURATION_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCNetworkConfigurationPrivate.h"
 #NETWORK_CONNECTION_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCNetworkConnectionPrivate.h"
 #PREFERENCES_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCPreferencesPrivate.h"
 #PREFERENCES_GET_SPECIFIC_PRIVATE_HEADER_PATH="${SC_HEADER_PATH}/SCPreferencesGetSpecificPrivate.h"
