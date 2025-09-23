@@ -3,7 +3,7 @@
 use std::time::Duration;
 use event_listener::{Event, Listener};
 use futures_util::StreamExt;
-use zbus::{connection, fdo, interface, Connection, Result as ZbusResult};
+use zbus::{connection, interface, Connection};
 use zbus::object_server::SignalEmitter;
 
 struct SysChangerAppService {
@@ -29,7 +29,7 @@ impl SysChangerAppService {
         &self,
         #[zbus(signal_emitter)]
         emitter: SignalEmitter<'_>,
-    ) -> fdo::Result<()> {
+    ) -> zbus::Result<()> {
         emitter.greeted_everyone().await?;
         self.done.notify(1);
 
@@ -54,11 +54,11 @@ impl SysChangerAppService {
 
     /// A signal; the implementation is provided by the macro.
     #[zbus(signal)]
-    async fn greeted_everyone(emitter: &SignalEmitter<'_>) -> ZbusResult<()>;
+    async fn greeted_everyone(emitter: &SignalEmitter<'_>) -> zbus::Result<()>;
 }
 
 // Although we use `tokio` here, you can use any async runtime of choice.
-pub async fn server_main() -> ZbusResult<()> {
+pub async fn server_main() -> zbus::Result<()> {
     let service = SysChangerAppService {
         name: "SysChangerAppService_Name".to_string(),
         done: Event::new(),
@@ -84,7 +84,7 @@ pub async fn server_main() -> ZbusResult<()> {
 }
 
 
-pub async fn client_main() -> ZbusResult<()> {
+pub async fn client_main() -> zbus::Result<()> {
     let conn = Connection::system().await?;
     let service = SysChangerAppServiceProxy::new(&conn).await?;
     let mut greeted_everyone_stream = service.receive_greeted_everyone().await?;
