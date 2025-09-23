@@ -5,6 +5,7 @@ mod interfaces;
 mod simpler_auth;
 mod tweaking_config;
 mod zbus_service;
+mod unix_sockets_comms;
 
 use core_foundation::array::CFArray;
 use crate::ext::CFArrayExt;
@@ -16,6 +17,8 @@ use core_foundation::string::CFString;
 use system_configuration::network_configuration::{SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
 use system_configuration_sys::private::network_configuration_private::SCBridgeInterfaceCopyAll;
+use crate::unix_sockets_comms::{run_client, run_server};
+use crate::zbus_service::server_main;
 
 pub(crate) mod ext {
     use core_foundation::array::CFArray;
@@ -91,11 +94,12 @@ pub fn main() {
     helper::save_prefs(&prefs);
 
     // --------------------------------
+    let path = "/tmp/FOO_socket.sock";
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let handle = rt.spawn(zbus_service::server_main());
+    let handle = rt.spawn(run_server(path));
 
     let handle_proc = procspawn::spawn((), |()| {
-        tokio::runtime::Runtime::new().unwrap().block_on(zbus_service::client_main()).unwrap();
+        tokio::runtime::Runtime::new().unwrap().block_on(run_client(path)).unwrap();
     });
 
     rt.block_on(handle).unwrap().unwrap();

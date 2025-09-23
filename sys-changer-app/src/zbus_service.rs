@@ -8,9 +8,9 @@ use zbus::object_server::SignalEmitter;
 use tokio::net::UnixStream;
 use zbus::{Guid};
 
-struct SysChangerAppService {
-    name: String,
-    done: Event,
+pub struct SysChangerAppService {
+    pub name: String,
+    pub done: Event,
 }
 
 #[interface(
@@ -121,12 +121,18 @@ pub async fn client_server_pair() -> zbus::Result<()> {
     let (p0, p1) = UnixStream::pair()?;
     let (client_conn, server_conn) = futures_util::try_join!(
         // Client
-        connection::Builder::unix_stream(p0).p2p().build(),
+        connection::Builder::unix_stream(p0)
+            .p2p()
+            .build(),
         // Server
         connection::Builder::unix_stream(p1).server(guid)?
-
+            .serve_at("/org/zbus/SysChangerAppService", service)?
             .p2p()
             .build(),
     )?;
+
+    let service = SysChangerAppServiceProxy::new(&client_conn).await?;
+    let mut greeted_everyone_stream = service.receive_greeted_everyone().await?;
+
     Ok(())
 }
