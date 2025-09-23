@@ -92,13 +92,13 @@ pub fn main() {
 
     // --------------------------------
     let rt = tokio::runtime::Runtime::new().unwrap();
-    let handle = rt.spawn(zbus_service::server_main);
+    let handle = rt.spawn(zbus_service::server_main());
 
     let handle_proc = procspawn::spawn((), |()| {
-        tokio::runtime::Runtime::new().unwrap().block_on(zbus_service::client_main);
+        tokio::runtime::Runtime::new().unwrap().block_on(zbus_service::client_main()).unwrap();
     });
 
-    rt.block_on(handle).unwrap();
+    rt.block_on(handle).unwrap().unwrap();
     handle_proc.join().unwrap();
 }
 
