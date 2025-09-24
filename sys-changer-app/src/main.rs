@@ -16,7 +16,7 @@ use crate::simpler_auth::SimpleAuthorization;
 use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
-use system_configuration::network_configuration::{SCBondInterface, SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkSet};
+use system_configuration::network_configuration::{SCBondInterface, SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceMTU, SCNetworkInterfaceSubClass, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
 use system_configuration_sys::network_configuration::SCBondInterfaceRef;
 use system_configuration_sys::private::network_configuration_private::SCBridgeInterfaceCopyAll;
@@ -61,10 +61,16 @@ pub fn main() {
         println!("interface type: {:?}", i.to_SCNetworkInterface().interface_type());
     }
 
+    for i in &SCNetworkInterface::get_interfaces() {
+        let mut i = i.clone();
+        if let Some(SCNetworkInterfaceMTU { mtu_max_bytes: Some(mtu_max_bytes), .. }) = i.mtu() {
+            i.set_mtu(mtu_max_bytes);
+        }
+    }
+
     for i in get_interfaces() {
         println!("found interface {}, with {:?}", i.bsd_name, i.mtu_opts);
     }
-    return;
 
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
