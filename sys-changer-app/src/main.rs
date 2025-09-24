@@ -64,7 +64,7 @@ pub fn main() {
     for i in &SCNetworkInterface::get_interfaces() {
         let mut i = i.clone();
         if let Some(SCNetworkInterfaceMTU { mtu_max_bytes: Some(mtu_max_bytes), .. }) = i.mtu() {
-            i.set_mtu(mtu_max_bytes);
+            println!("{}", i.set_mtu(mtu_max_bytes));
         }
     }
 
