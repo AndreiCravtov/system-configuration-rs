@@ -56,11 +56,6 @@ pub fn main() {
     let prefs =
         unsafe { SCPreferences::default_with_authorization(&proc_name, authorization.get_ref()) };
 
-    for i in &SCBondInterface::get_interfaces(&prefs) {
-        println!("found bond interface {:?}", &i);
-        println!("interface type: {:?}", i.to_SCNetworkInterface().interface_type());
-    }
-
     for i in get_interfaces() {
         println!("found interface {}, with {:?}", i.bsd_name, i.mtu_opts);
     }
@@ -68,7 +63,6 @@ pub fn main() {
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
     helper::save_prefs(&prefs);
-    return;
 
     for i in &SCBridgeInterface::get_interfaces(&prefs) {
         let mut i = i.clone();
@@ -100,20 +94,6 @@ pub fn main() {
 
     // commit and apply new changes
     helper::save_prefs(&prefs);
-
-    // --------------------------------
-    let path = "/tmp/FOO_soc23423423.sock".to_string();
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    let handle = rt.spawn(run_server(path.clone()));
-
-    thread::sleep(Duration::from_secs(1));
-
-    let handle_proc = procspawn::spawn((path), |(path)| {
-        tokio::runtime::Runtime::new().unwrap().block_on(run_client(path)).unwrap();
-    });
-
-    rt.block_on(handle).unwrap().unwrap();
-    handle_proc.join().unwrap();
 }
 
 #[cfg(not(target_os = "macos"))]
