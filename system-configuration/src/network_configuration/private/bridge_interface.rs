@@ -25,7 +25,7 @@ use crate::helpers::create_empty_array;
 
 core_foundation::declare_TCFType! {
     /// Represents a bridge interface, which is a subclass of
-    /// [`SCNetworkInterface`](crate::network_configuration::SCNetworkInterface).
+    /// [`SCNetworkInterface`](SCNetworkInterface).
     SCBridgeInterface, SCBridgeInterfaceRef
 }
 core_foundation::impl_CFTypeDescription!(SCBridgeInterface);

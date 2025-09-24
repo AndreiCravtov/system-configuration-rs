@@ -55,6 +55,10 @@ pub fn main() {
     let prefs =
         unsafe { SCPreferences::default_with_authorization(&proc_name, authorization.get_ref()) };
 
+    for i in SCBridgeInterface::get_interfaces(&prefs) {
+        println!("found bond interface {:?}", i);
+    }
+
     for i in get_interfaces() {
         println!("found interface: {:?}", i);
     }

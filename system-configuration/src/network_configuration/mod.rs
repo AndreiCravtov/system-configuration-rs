@@ -6,6 +6,7 @@ mod network_interface;
 mod network_protocol;
 mod network_service;
 mod network_set;
+mod bond_interface;
 
 #[cfg(feature = "private")]
 mod private {
