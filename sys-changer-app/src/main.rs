@@ -48,7 +48,12 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
-    unsafe { SCErrorString(-1234); }
+    unsafe {
+        let a = SCErrorString(-1234);
+        if a.is_null() {
+            println!("it is null");
+        }
+    }
 
     // constants
     let proc_name = CFString::new("sys-changer-app");
