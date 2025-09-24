@@ -190,15 +190,15 @@ impl SCNetworkInterface {
 
     /// TODO: docs
     pub fn mtu(&self) -> Option<SCNetworkInterfaceMTU> {
-        let mut mtu_cur: std::ffi::c_int = 0;
-        let mut mtu_min: std::ffi::c_int = 0;
-        let mut mtu_max: std::ffi::c_int = 0;
+        let mut mtu_cur: std::ffi::c_int;
+        let mut mtu_min: std::ffi::c_int;
+        let mut mtu_max: std::ffi::c_int;
         unsafe {
             SCNetworkInterfaceCopyMTU(
                 self.as_concrete_TypeRef(),
-                *mtu_cur,
-                *mtu_min,
-                *mtu_max,
+                &mut mtu_cur,
+                &mut mtu_min,
+                &mut mtu_max,
             );
         }
 
