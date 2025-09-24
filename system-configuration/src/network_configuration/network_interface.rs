@@ -246,6 +246,7 @@ impl SCNetworkInterface {
         }
     }
 
+    /// TODO docs
     pub fn set_mtu(&self, mtu: u32) {
         let mtu: Result<std::ffi::c_int, _> = TryFrom::try_from(mtu);
     }
