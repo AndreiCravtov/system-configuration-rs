@@ -188,6 +188,7 @@ impl SCNetworkInterface {
         }
     }
 
+    /// TODO: docs
     pub fn mtu(&self) -> Option<SCNetworkInterfaceMTU> {
         let mut mtu_cur: std::ffi::c_int = 0;
         let mut mtu_min: std::ffi::c_int = 0;
