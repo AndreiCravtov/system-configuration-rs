@@ -1,3 +1,4 @@
 [submodule "system-configuration-sys/apple-open-source"]
 	path = system-configuration-sys/apple-open-source
 	url = https://github.com/apple-open-source/macos.git
+    update = none
