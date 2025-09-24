@@ -9,7 +9,7 @@ use core_foundation::{
 };
 use sys::{
     network_configuration::SCNetworkInterfaceGetTypeID,
-    private::network_configuration_private::{
+    network_configuration_private::{
         SCBridgeInterfaceCopyAll, SCBridgeInterfaceCopyAvailableMemberInterfaces, SCBridgeInterfaceCreate,
         SCBridgeInterfaceGetAllowConfiguredMembers, SCBridgeInterfaceGetMemberInterfaces, SCBridgeInterfaceGetOptions,
         SCBridgeInterfaceRef, SCBridgeInterfaceRemove, SCBridgeInterfaceSetAllowConfiguredMembers,
