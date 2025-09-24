@@ -7,6 +7,7 @@ mod tweaking_config;
 mod zbus_service;
 mod unix_sockets_comms;
 
+use std::ffi::CStr;
 use std::thread;
 use std::time::Duration;
 use core_foundation::array::CFArray;
@@ -52,6 +53,9 @@ pub fn main() {
         let a = SCErrorString(-1234);
         if a.is_null() {
             println!("it is null");
+        } else {
+            let cstr = CStr::from_ptr(a).to_str();
+            println!("not null: {:?}", cstr);
         }
     }
 
