@@ -47,10 +47,6 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
-    let foo: u32 = 22;
-    let ooo: Result<std::ffi::c_int, _> = TryFrom::try_from(foo);
-    println!("{:?}", ooo.unwrap());
-
     // constants
     let proc_name = CFString::new("sys-changer-app");
     let my_networkset_name = CFString::new("sys-changer-app-networkset");

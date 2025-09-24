@@ -247,8 +247,10 @@ impl SCNetworkInterface {
     }
 
     /// TODO docs
-    pub fn set_mtu(&self, mtu: u32) {
-        let mtu: Result<std::ffi::c_int, _> = TryFrom::try_from(mtu);
+    pub fn set_mtu(&self, mtu: u32) -> bool {
+        let Some(mtu): std::ffi::c_int = mtu.try_into() else { return false; };
+
+        return true;
     }
 }
 
