@@ -61,8 +61,8 @@ pub fn main() {
         println!("interface type: {:?}", i.to_SCNetworkInterface().interface_type());
     }
 
-    for i in &SCNetworkInterface::get_interfaces() {
-        let mut i = i.clone();
+    for i in &SCBondInterface::get_interfaces(&prefs) {
+        let mut i = i.clone().into_SCNetworkInterface();
         if let Some(SCNetworkInterfaceMTU { mtu_max_bytes: Some(mtu_max_bytes), .. }) = i.mtu() {
             println!("{}", i.set_mtu(mtu_max_bytes));
         }
