@@ -203,7 +203,7 @@ impl SCNetworkInterface {
             self.as_concrete_TypeRef(), &mut mtu_cur, &mut mtu_min, &mut mtu_max) }) != 0;
 
         // if succeeded, `mtu_cur` MUST be non-negative
-        let mtu_cur = if !succeeded {
+        let mtu_cur_bytes = if !succeeded {
             return None;
         } else {
             assert!(mtu_cur >= 0);
@@ -211,10 +211,10 @@ impl SCNetworkInterface {
         };
 
         // if `mtu_min` and `mtu_max` are negative, then those settings could not be determined
-        let mtu_min = if mtu_min >= 0 { Some(mtu_min as u32) } else { None };
-        let mtu_max = if mtu_max >= 0 { Some(mtu_max as u32) } else { None };
+        let mtu_min_bytes = if mtu_min >= 0 { Some(mtu_min as u32) } else { None };
+        let mtu_max_bytes = if mtu_max >= 0 { Some(mtu_max as u32) } else { None };
 
-        Some(SCNetworkInterfaceMTU { mtu_cur, mtu_min, mtu_max})
+        Some(SCNetworkInterfaceMTU { mtu_cur_bytes, mtu_min_bytes, mtu_max_bytes })
     }
 
     /// Get all the raw network interface type identifiers, such as PPP, that can be layered on top
@@ -257,9 +257,9 @@ impl SCNetworkInterface {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct SCNetworkInterfaceMTU {
-    pub mtu_cur: u32,
-    pub mtu_min: Option<u32>,
-    pub mtu_max: Option<u32>,
+    pub mtu_cur_bytes: u32,
+    pub mtu_min_bytes: Option<u32>,
+    pub mtu_max_bytes: Option<u32>,
 }
 
 /// Represents the possible network interface types.

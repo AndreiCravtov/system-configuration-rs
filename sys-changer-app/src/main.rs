@@ -62,7 +62,7 @@ pub fn main() {
     }
 
     for i in get_interfaces() {
-        println!("found interface {:#?}", i);
+        println!("found interface {}, with {:?}", i.bsd_name, i.mtu_opts);
     }
     return;
 
