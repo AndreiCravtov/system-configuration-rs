@@ -1,6 +1,6 @@
 use core_foundation::{
     array::CFArray,
-    base::{Boolean, TCFType, ToVoid, TCFTypeRef},
+    base::{Boolean, TCFType, ToVoid},
     string::CFString,
 };
 use sys::network_configuration::{
