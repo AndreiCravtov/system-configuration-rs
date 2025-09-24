@@ -16,7 +16,7 @@ use crate::simpler_auth::SimpleAuthorization;
 use crate::tweaking_config::{add_missing_services, modify_existing_services};
 use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
-use system_configuration::network_configuration::{SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkSet};
+use system_configuration::network_configuration::{SCBondInterface, SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
 use system_configuration_sys::private::network_configuration_private::SCBridgeInterfaceCopyAll;
 use crate::unix_sockets_comms::{run_client, run_server};
@@ -55,7 +55,7 @@ pub fn main() {
     let prefs =
         unsafe { SCPreferences::default_with_authorization(&proc_name, authorization.get_ref()) };
 
-    for i in &SCBridgeInterface::get_interfaces(&prefs) {
+    for i in &SCBondInterface::get_interfaces(&prefs) {
         println!("found bond interface {:?}", &i);
     }
 

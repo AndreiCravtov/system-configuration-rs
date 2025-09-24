@@ -3,10 +3,10 @@
 //! [`SCNetworkConfiguration`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkconfiguration?language=objc
 
 mod network_interface;
+mod bond_interface;
 mod network_protocol;
 mod network_service;
 mod network_set;
-mod bond_interface;
 
 #[cfg(feature = "private")]
 mod private {
@@ -17,6 +17,7 @@ mod private {
 }
 
 pub use network_interface::*;
+pub use bond_interface::*;
 pub use network_protocol::*;
 pub use network_service::*;
 pub use network_set::*;
