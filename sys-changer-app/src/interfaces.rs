@@ -1,8 +1,6 @@
 use mac_address::MacAddress;
 use std::str::FromStr;
-use system_configuration::network_configuration::{
-    SCNetworkInterface, SCNetworkInterfaceType, SCNetworkProtocolType,
-};
+use system_configuration::network_configuration::{SCNetworkInterface, SCNetworkInterfaceMTU, SCNetworkInterfaceType, SCNetworkProtocolType};
 
 #[derive(Debug)]
 pub struct Interface {
@@ -12,6 +10,7 @@ pub struct Interface {
     pub supported_iface_types: Vec<SCNetworkInterfaceType>,
     pub supported_proto_types: Vec<SCNetworkProtocolType>,
     pub underlying_iface: Option<Box<Interface>>,
+    pub mtu_opts: Option<SCNetworkInterfaceMTU>
 }
 
 impl Interface {
@@ -34,6 +33,7 @@ impl Interface {
             .underlying_interface()
             .and_then(|i| Self::from_scnetwork_interface(&i))
             .map(Box::new);
+        let mtu_opts = scnetwork_interface.mtu();
 
         Some(Interface {
             iface_type,
@@ -42,6 +42,7 @@ impl Interface {
             supported_iface_types,
             supported_proto_types,
             underlying_iface,
+            mtu_opts
         })
     }
 }

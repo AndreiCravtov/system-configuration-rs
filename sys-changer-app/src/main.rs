@@ -18,6 +18,7 @@ use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::{SCBondInterface, SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
+use system_configuration_sys::network_configuration::SCBondInterfaceRef;
 use system_configuration_sys::private::network_configuration_private::SCBridgeInterfaceCopyAll;
 use crate::unix_sockets_comms::{run_client, run_server};
 use crate::zbus_service::server_main;
@@ -55,10 +56,13 @@ pub fn main() {
     let prefs =
         unsafe { SCPreferences::default_with_authorization(&proc_name, authorization.get_ref()) };
 
-    for i in &SCNetworkInterface::get_interfaces() {
-        println!("found interface {:?}", &i);
-        println!("interface name: {:?}", i.interface_type());
-        println!("interface mtu: {:?}", i.mtu())
+    for i in &SCBondInterface::get_interfaces(&prefs) {
+        println!("found bond interface {:?}", &i);
+        println!("interface type: {:?}", i.to_SCNetworkInterface().interface_type());
+    }
+
+    for i in get_interfaces() {
+        println!("found interface {:?}", i);
     }
     return;
 
