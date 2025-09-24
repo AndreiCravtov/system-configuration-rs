@@ -30,10 +30,6 @@ pub mod network_configuration;
 pub mod network_reachability;
 pub mod preferences;
 
-#[cfg(feature = "private")]
-pub(crate) mod private;
-
-
 pub(crate) mod helpers {
     use core_foundation::array::CFArray;
     use core_foundation::base::TCFType;
