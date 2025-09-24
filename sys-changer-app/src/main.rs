@@ -19,7 +19,7 @@ use core_foundation::string::CFString;
 use system_configuration::network_configuration::{SCBondInterface, SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceMTU, SCNetworkInterfaceSubClass, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
 use system_configuration_sys::network_configuration::SCBondInterfaceRef;
-use system_configuration_sys::private::network_configuration_private::SCBridgeInterfaceCopyAll;
+use system_configuration_sys::network_configuration_private::SCBridgeInterfaceCopyAll;
 use crate::unix_sockets_comms::{run_client, run_server};
 use crate::zbus_service::server_main;
 
