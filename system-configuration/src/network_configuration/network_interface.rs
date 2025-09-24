@@ -6,7 +6,7 @@ use core_foundation::{
     base::{TCFType, TCFTypeRef},
     string::CFString,
 };
-use sys::network_configuration::{SCNetworkInterfaceCopyAll, SCNetworkInterfaceCopyMTU, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface, SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef};
+use sys::network_configuration::{SCNetworkInterfaceCopyAll, SCNetworkInterfaceCopyMTU, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface, SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef, SCNetworkInterfaceSetMTU};
 
 use crate::helpers::create_empty_array;
 
@@ -200,7 +200,7 @@ impl SCNetworkInterface {
         let mut mtu_min: std::ffi::c_int = -1;
         let mut mtu_max: std::ffi::c_int = -1;
         let succeeded = (unsafe { SCNetworkInterfaceCopyMTU(
-            self.as_concrete_TypeRef(), &mut mtu_cur, &mut mtu_min, &mut mtu_max) }) != 0;
+            self.0, &mut mtu_cur, &mut mtu_min, &mut mtu_max) }) != 0;
 
         let mtu_cur_bytes = if !succeeded { return None; } else {
             assert!(mtu_cur >= 0, "if `SCNetworkInterfaceCopyMTU` succeeded, `mtu_cur` MUST be non-negative");
@@ -246,11 +246,12 @@ impl SCNetworkInterface {
         }
     }
 
-    /// TODO docs
-    pub fn set_mtu(&self, mtu: u32) -> bool {
+    /// Sets the requested MTU setting for the specified network interface.
+    ///
+    /// Returns: `true` if the configuration was updated; `false` if an error occurred.
+    pub fn set_mtu(&mut self, mtu: u32) -> bool {
         let Ok(mtu) = TryInto::<std::ffi::c_int>::try_into(mtu) else { return false; };
-
-        return true;
+        (unsafe { SCNetworkInterfaceSetMTU(self.0, mtu) }) != 0
     }
 }
 
