@@ -8,9 +8,9 @@ use core::ffi::c_void;
 use core_foundation_sys::array::CFArrayRef;
 use core_foundation_sys::base::{Boolean, CFAllocatorRef, CFIndex, CFTypeID};
 use core_foundation_sys::dictionary::CFDictionaryRef;
+use core_foundation_sys::number::CFNumberRef;
 use core_foundation_sys::runloop::CFRunLoopRef;
 use core_foundation_sys::string::CFStringRef;
-use core_foundation_sys::number::CFNumberRef;
 
 use crate::dispatch_queue_t;
 use crate::preferences::SCPreferencesRef;
