@@ -202,11 +202,8 @@ impl SCNetworkInterface {
         let succeeded = (unsafe { SCNetworkInterfaceCopyMTU(
             self.as_concrete_TypeRef(), &mut mtu_cur, &mut mtu_min, &mut mtu_max) }) != 0;
 
-        // if succeeded, `mtu_cur` MUST be non-negative
-        let mtu_cur_bytes = if !succeeded {
-            return None;
-        } else {
-            assert!(mtu_cur >= 0);
+        let mtu_cur_bytes = if !succeeded { return None; } else {
+            assert!(mtu_cur >= 0, "if `SCNetworkInterfaceCopyMTU` succeeded, `mtu_cur` MUST be non-negative");
             mtu_cur as u32
         };
 
@@ -247,6 +244,10 @@ impl SCNetworkInterface {
             }
             CFArray::<CFString>::wrap_under_get_rule(array_ptr)
         }
+    }
+
+    pub fn set_mtu(&self, mtu: u32) {
+        let mtu: Result<std::ffi::c_int, _> = TryFrom::try_from(mtu);
     }
 }
 
