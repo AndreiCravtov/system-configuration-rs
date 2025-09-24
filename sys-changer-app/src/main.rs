@@ -49,7 +49,7 @@ pub fn main() {
 
     let foo: u32 = u32::MAX;
     let ooo: Result<std::ffi::c_int, _> = TryFrom::try_from(foo);
-    println!("{:?}", ooo);
+    println!("{:?}", ooo.unwrap());
 
     // constants
     let proc_name = CFString::new("sys-changer-app");
