@@ -324,7 +324,7 @@ impl SCNetworkInterfaceType {
     /// interface type. If no constants match it, `None` is returned.
     pub fn from_cfstring(type_id: &CFString) -> Option<Self> {
         #[cfg(feature = "private")]
-        use system_configuration_sys::private::network_configuration_private::*;
+        use system_configuration_sys::network_configuration_private::*;
         use system_configuration_sys::network_configuration::*;
 
         let id_is_equal_to = |const_str| -> bool {
@@ -383,7 +383,7 @@ impl SCNetworkInterfaceType {
     /// Returns the string constants used to identify this network interface type.
     pub fn to_cfstring(&self) -> CFString {
         #[cfg(feature = "private")]
-        use system_configuration_sys::private::network_configuration_private::*;
+        use system_configuration_sys::network_configuration_private::*;
         use system_configuration_sys::network_configuration::*;
         let wrap_const = |const_str| unsafe { CFString::wrap_under_get_rule(const_str) };
         unsafe {
