@@ -350,7 +350,7 @@ extern "C" {
     ) -> Boolean;
 
     pub fn SCNetworkProtocolSetEnabled(protocol: SCNetworkProtocolRef, enabled: Boolean)
-                                       -> Boolean;
+        -> Boolean;
 
     pub fn SCNetworkServiceGetTypeID() -> CFTypeID;
 
