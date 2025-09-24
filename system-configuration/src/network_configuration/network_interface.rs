@@ -248,7 +248,7 @@ impl SCNetworkInterface {
 
     /// TODO docs
     pub fn set_mtu(&self, mtu: u32) -> bool {
-        let Some(mtu) = TryInto::<std::ffi::c_int>::try_into(mtu) else { return false; };
+        let Ok(mtu) = TryInto::<std::ffi::c_int>::try_into(mtu) else { return false; };
 
         return true;
     }
