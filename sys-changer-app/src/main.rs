@@ -57,6 +57,7 @@ pub fn main() {
 
     for i in &SCBondInterface::get_interfaces(&prefs) {
         println!("found bond interface {:?}", &i);
+        println!("interface name: {:?}", i.to_SCNetworkInterface().interface_type().unwrap());
     }
 
     for i in get_interfaces() {
