@@ -49,16 +49,6 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
-    unsafe {
-        let a = SCErrorString(-1234);
-        if a.is_null() {
-            println!("it is null");
-        } else {
-            let cstr = CStr::from_ptr(a).to_str();
-            println!("not null: {:?}", cstr);
-        }
-    }
-
     // constants
     let proc_name = CFString::new("sys-changer-app");
     let my_networkset_name = CFString::new("sys-changer-app-networkset");
