@@ -55,14 +55,10 @@ pub fn main() {
     let prefs =
         unsafe { SCPreferences::default_with_authorization(&proc_name, authorization.get_ref()) };
 
-    for i in &SCBondInterface::get_interfaces(&prefs) {
-        println!("found bond interface {:?}", &i);
-        println!("interface name: {:?}", i.to_SCNetworkInterface().interface_type().unwrap());
-        println!("interface mtu: {:?}", i.to_SCNetworkInterface().mtu())
-    }
-
-    for i in get_interfaces() {
-        println!("found interface: {:?}", i);
+    for i in &SCNetworkInterface::get_interfaces() {
+        println!("found interface {:?}", &i);
+        println!("interface name: {:?}", i.interface_type());
+        println!("interface mtu: {:?}", i.mtu())
     }
     return;
 
