@@ -11,8 +11,8 @@ use sys::network_configuration::{
 };
 
 use super::{SCNetworkInterface, SCNetworkProtocol};
-
 use crate::preferences::SCPreferences;
+
 use crate::helpers::create_empty_array;
 
 core_foundation::declare_TCFType!(

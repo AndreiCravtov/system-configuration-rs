@@ -7,16 +7,26 @@ mod network_protocol;
 mod network_service;
 mod network_set;
 
+#[cfg(feature = "private")]
+mod private {
+    mod bridge_interface;
+
+    use super::*;
+    pub use bridge_interface::*;
+}
+
 pub use network_interface::*;
 pub use network_protocol::*;
 pub use network_service::*;
 pub use network_set::*;
+#[cfg(feature = "private")]
+pub use private::*;
 
 #[cfg(test)]
 mod test {
     use core_foundation::string::CFString;
     use crate::preferences::SCPreferences;
-    
+
     use crate::helpers::create_empty_array;
     use super::*;
 

@@ -1,6 +1,6 @@
 use core_foundation::{
     array::CFArray,
-    base::{TCFType, ToVoid, TCFTypeRef},
+    base::{TCFType, ToVoid},
     string::CFString,
 };
 use sys::network_configuration::{
@@ -11,8 +11,8 @@ use sys::network_configuration::{
 };
 
 use super::{SCNetworkInterface, SCNetworkService};
-
 use crate::preferences::SCPreferences;
+
 use crate::helpers::create_empty_array;
 
 core_foundation::declare_TCFType!(
