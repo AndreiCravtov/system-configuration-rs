@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use std::os;
 use core_foundation::{
     array::CFArray,
@@ -7,7 +9,7 @@ use core_foundation::{
 };
 use sys::{
     network_configuration::SCNetworkInterfaceGetTypeID,
-    private::network_configuration_private::{
+    network_configuration_private::{
         SCBridgeInterfaceCopyAll, SCBridgeInterfaceCopyAvailableMemberInterfaces, SCBridgeInterfaceCreate,
         SCBridgeInterfaceGetAllowConfiguredMembers, SCBridgeInterfaceGetMemberInterfaces, SCBridgeInterfaceGetOptions,
         SCBridgeInterfaceRef, SCBridgeInterfaceRemove, SCBridgeInterfaceSetAllowConfiguredMembers,
@@ -15,13 +17,15 @@ use sys::{
     },
 };
 
-use crate::helpers::create_empty_array;
-use crate::network_configuration::{SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
+use super::{SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
 use crate::preferences::SCPreferences;
+
+use crate::helpers::create_empty_array;
+
 
 core_foundation::declare_TCFType! {
     /// Represents a bridge interface, which is a subclass of
-    /// [`SCNetworkInterface`](crate::network_configuration::SCNetworkInterface).
+    /// [`SCNetworkInterface`](SCNetworkInterface).
     SCBridgeInterface, SCBridgeInterfaceRef
 }
 core_foundation::impl_CFTypeDescription!(SCBridgeInterface);

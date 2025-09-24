@@ -8,6 +8,7 @@ use core::ffi::c_void;
 use core_foundation_sys::array::CFArrayRef;
 use core_foundation_sys::base::{Boolean, CFAllocatorRef, CFIndex, CFTypeID};
 use core_foundation_sys::dictionary::CFDictionaryRef;
+use core_foundation_sys::number::CFNumberRef;
 use core_foundation_sys::runloop::CFRunLoopRef;
 use core_foundation_sys::string::CFStringRef;
 
@@ -169,6 +170,7 @@ extern "C" {
 
     pub static kSCBondStatusDeviceDistributing: CFStringRef;
 }
+pub type SCVLANInterfaceRef = SCNetworkInterfaceRef;
 pub type SCNetworkProtocolRef = *const __SCNetworkProtocol;
 extern "C" {
     pub static kSCNetworkProtocolTypeDNS: CFStringRef;
@@ -299,6 +301,40 @@ extern "C" {
     ) -> Boolean;
 
     pub fn SCBondInterfaceCopyStatus(bond: SCBondInterfaceRef) -> SCBondStatusRef;
+
+    pub fn SCVLANInterfaceCopyAll(prefs: SCPreferencesRef) -> CFArrayRef;
+
+    pub fn SCVLANInterfaceCopyAvailablePhysicalInterfaces() -> CFArrayRef;
+
+    pub fn SCVLANInterfaceCreate(
+        prefs: SCPreferencesRef,
+        physical: SCNetworkInterfaceRef,
+        tag: CFNumberRef,
+    ) -> SCVLANInterfaceRef;
+
+    pub fn SCVLANInterfaceRemove(vlan: SCVLANInterfaceRef) -> Boolean;
+
+    pub fn SCVLANInterfaceGetPhysicalInterface(vlan: SCVLANInterfaceRef) -> SCNetworkInterfaceRef;
+
+    pub fn SCVLANInterfaceGetTag(vlan: SCVLANInterfaceRef) -> CFNumberRef;
+
+    pub fn SCVLANInterfaceGetOptions(vlan: SCVLANInterfaceRef) -> CFDictionaryRef;
+
+    pub fn SCVLANInterfaceSetPhysicalInterfaceAndTag(
+        vlan: SCVLANInterfaceRef,
+        physical: SCNetworkInterfaceRef,
+        tag: CFNumberRef,
+    ) -> Boolean;
+
+    pub fn SCVLANInterfaceSetLocalizedDisplayName(
+        vlan: SCVLANInterfaceRef,
+        newName: CFStringRef,
+    ) -> Boolean;
+
+    pub fn SCVLANInterfaceSetOptions(
+        vlan: SCVLANInterfaceRef,
+        newOptions: CFDictionaryRef,
+    ) -> Boolean;
 
     pub fn SCNetworkProtocolGetTypeID() -> CFTypeID;
 
