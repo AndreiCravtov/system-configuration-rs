@@ -47,7 +47,7 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
-    let foo: u32 = u32::MAX;
+    let foo: u32 = 22;
     let ooo: Result<std::ffi::c_int, _> = TryFrom::try_from(foo);
     println!("{:?}", ooo.unwrap());
 
