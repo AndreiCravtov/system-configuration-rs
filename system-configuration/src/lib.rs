@@ -24,11 +24,13 @@
 pub extern crate core_foundation;
 /// Low-level SystemConfiguration bindings
 pub extern crate system_configuration_sys as sys;
+extern crate core;
 
 pub mod dynamic_store;
 pub mod network_configuration;
 pub mod network_reachability;
 pub mod preferences;
+mod base;
 
 pub(crate) mod helpers {
     use core_foundation::array::CFArray;

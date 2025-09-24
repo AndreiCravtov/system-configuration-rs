@@ -20,6 +20,7 @@ use system_configuration::network_configuration::{SCBondInterface, SCBridgeInter
 use system_configuration::preferences::SCPreferences;
 use system_configuration_sys::network_configuration::SCBondInterfaceRef;
 use system_configuration_sys::network_configuration_private::SCBridgeInterfaceCopyAll;
+use system_configuration_sys::system_configuration::SCErrorString;
 use crate::unix_sockets_comms::{run_client, run_server};
 use crate::zbus_service::server_main;
 
@@ -46,6 +47,8 @@ pub(crate) mod ext {
 #[cfg(target_os = "macos")]
 pub fn main() {
     procspawn::init();
+
+    unsafe { SCErrorString(-1234); }
 
     // constants
     let proc_name = CFString::new("sys-changer-app");
