@@ -55,8 +55,15 @@ pub fn main() {
     let prefs =
         unsafe { SCPreferences::default_with_authorization(&proc_name, authorization.get_ref()) };
 
+    for i in get_interfaces() {
+        println!("found interface: {:?}", i);
+    }
+    return;
+
     // clean up previous sets/services that existed
     helper::delete_old_if_exits(&prefs);
+    helper::save_prefs(&prefs);
+    return;
 
     for i in &SCBridgeInterface::get_interfaces(&prefs) {
         let mut i = i.clone();
@@ -69,12 +76,6 @@ pub fn main() {
             println!("allowing this to have configured members");
             assert!(i.set_configured_members_allowed(true));
         }
-    }
-
-    // helper::save_prefs(&prefs);
-    // return;
-    for i in get_interfaces() {
-        println!("found interface: {:?}", i);
     }
 
     // grab current set and duplicate it
