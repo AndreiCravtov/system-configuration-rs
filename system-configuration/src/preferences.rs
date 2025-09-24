@@ -14,14 +14,11 @@
 
 use crate::sys::preferences::{SCPreferencesCreate, SCPreferencesGetTypeID, SCPreferencesRef};
 use core_foundation::array::CFArray;
-use core_foundation::base::{CFAllocator, TCFType};
+use core_foundation::base::{Boolean, CFAllocator, TCFType};
 use core_foundation::propertylist::CFPropertyList;
 use core_foundation::string::CFString;
 use std::ptr;
-use sys::preferences::{
-    AuthorizationRef, SCPreferencesCopyKeyList, SCPreferencesCreateWithAuthorization,
-    SCPreferencesGetValue,
-};
+use sys::preferences::{AuthorizationRef, SCPreferencesApplyChanges, SCPreferencesCommitChanges, SCPreferencesCopyKeyList, SCPreferencesCreateWithAuthorization, SCPreferencesGetValue, SCPreferencesLock, SCPreferencesSynchronize, SCPreferencesUnlock};
 #[cfg(feature = "private")]
 use sys::preferences_private::kSCPreferencesUseEntitlementAuthorization;
 
@@ -170,6 +167,52 @@ impl SCPreferences {
                 None
             }
         }
+    }
+
+    /// Obtains exclusive access to the configuration preferences. The `wait` flag indicates whether
+    /// the calling process should block, waiting for another process to complete its update operation
+    /// and release its lock.
+    ///
+    /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    pub fn lock(&mut self, wait: bool) -> bool {
+        (unsafe { SCPreferencesLock(self.0, wait as Boolean) }) != 0
+    }
+
+    /// Releases exclusive access to the configuration preferences.
+    ///
+    /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    pub fn unlock(&mut self) -> bool {
+        (unsafe { SCPreferencesUnlock(self.0) }) != 0
+    }
+
+    /// Commits changes made to the configuration preferences to persistent storage. Implicit calls
+    /// to the [`lock`](Self::lock) and [`unlock`](Self::lock) functions are made if exclusive
+    /// access has not already been established.
+    ///
+    /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    ///
+    /// Note: this function commits changes to persistent storage; to apply the changes to the
+    ///       running system, use the [`apply_changes`](Self::apply_changes) function.
+    pub fn commit_changes(&mut self) -> bool {
+        (unsafe { SCPreferencesCommitChanges(self.0) }) != 0
+    }
+
+    /// Requests that the currently stored configuration preferences be applied to the active
+    /// configuration.
+    ///
+    /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    pub fn apply_changes(&mut self) -> bool {
+        (unsafe { SCPreferencesApplyChanges(self.0) }) != 0
+    }
+
+    /// Synchronizes accessed preferences with committed changes. Any preference values that were
+    /// updated (added, set, or removed), but not committed, are discarded.
+    ///
+    /// See [`SCPreferencesSynchronize`] for more details.
+    ///
+    /// [`SCPreferencesSynchronize`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencessynchronize(_:)?language=objc
+    pub fn synchronize(&mut self) {
+        unsafe { SCPreferencesSynchronize(self.0) };
     }
 }
 
