@@ -22,6 +22,8 @@ use sys::preferences::{
     AuthorizationRef, SCPreferencesCopyKeyList, SCPreferencesCreateWithAuthorization,
     SCPreferencesGetValue,
 };
+#[cfg(feature = "private")]
+use sys::preferences_private::kSCPreferencesUseEntitlementAuthorization;
 
 declare_TCFType! {
     /// The handle to an open preferences session for accessing system configuration preferences.
@@ -47,8 +49,8 @@ impl SCPreferences {
 
     /// Initiates access to the per-system set of configuration preferences with a given
     /// allocator and preference group to access. See the underlying [SCPreferencesCreate] function
-    /// documentation for details. Use the helper constructors [`default`] and [`group`] to easier
-    /// create an instance using the default allocator.
+    /// documentation for details. Use the helper constructors [`default`] and [`group`] for easier
+    /// creation of an instance using the default allocator.
     ///
     /// [SCPreferencesCreate]: https://developer.apple.com/documentation/systemconfiguration/1516807-scpreferencescreate?language=objc
     /// [`default`]: #method.default
@@ -106,12 +108,12 @@ impl SCPreferences {
     /// Initiates access to the per-system set of configuration preferences with a given allocator
     /// and preference group to access, as well as authorization. See the underlying
     /// [SCPreferencesCreateWithAuthorization] function documentation for details. Use the helper
-    /// constructors [`default_with_authorization`] and [`group_with_authorization`] to easier
-    /// create an instance using the default allocator.
+    /// constructors [`default_with_authorization`] and [`group_with_authorization`] for easier
+    /// creation of an instance using the default allocator.
     ///
     /// [SCPreferencesCreateWithAuthorization]: https://developer.apple.com/documentation/systemconfiguration/1516807-scpreferencescreate?language=objc
-    /// [`default_with_authorization`]: #method.default
-    /// [`group_with_authorization`]: #method.group
+    /// [`default_with_authorization`]: #method.default_with_authorization
+    /// [`group_with_authorization`]: #method.group_with_authorization
     pub unsafe fn new_with_authorization(
         allocator: Option<&CFAllocator>,
         calling_process_name: &CFString,
@@ -170,6 +172,53 @@ impl SCPreferences {
         }
     }
 }
+
+#[cfg(feature = "private")]
+const _: () = {
+    impl SCPreferences {
+        /// Initiates access to the default system preferences using the default allocator, using
+        /// an implicit authorization derived from the entitlements of the current process.
+        pub unsafe fn default_with_current_authorization(calling_process_name: &CFString) -> Self {
+            Self::new_with_current_authorization(None, calling_process_name, None)
+        }
+
+        /// Initiates access to the given (`prefs_id`) group of configuration preferences using the
+        /// default allocator, as well as an implicit authorization derived from the entitlements of
+        /// the current process. To access the default system preferences with the given authorization,
+        /// use the [`default_with_current_authorization`] constructor.
+        ///
+        /// [`default_with_current_authorization`]: #method.default_with_current_authorization
+        pub fn group_with_current_authorization(
+            calling_process_name: &CFString,
+            prefs_id: &CFString
+        ) -> Self {
+            Self::new_with_current_authorization(
+                None,
+                calling_process_name,
+                Some(prefs_id),
+            )
+        }
+
+        /// Initiates access to the per-system set of configuration preferences with a given allocator
+        /// and preference group to access, as well as an implicit authorization derived from the
+        /// entitlements of the current process. See the underlying [SCPreferencesCreateWithAuthorization]
+        /// function documentation for details. Use the helper constructors
+        /// [`default_with_current_authorization`] and [`group_with_current_authorization`]
+        /// for easier creation of an instance using the default allocator.
+        ///
+        /// [SCPreferencesCreateWithAuthorization]: https://developer.apple.com/documentation/systemconfiguration/1516807-scpreferencescreate?language=objc
+        /// [`default_with_current_authorization`]: #method.default_with_current_authorization
+        /// [`group_with_current_authorization`]: #method.group_with_current_authorization
+        pub fn new_with_current_authorization(
+            allocator: Option<&CFAllocator>,
+            calling_process_name: &CFString,
+            prefs_id: Option<&CFString>,
+        ) -> Self {
+            unsafe { Self::new_with_authorization(allocator, calling_process_name, prefs_id,
+                                                  kSCPreferencesUseEntitlementAuthorization) }
+        }
+    }
+};
 
 #[cfg(test)]
 mod tests {
