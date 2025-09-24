@@ -10,17 +10,17 @@ pub type Result<T, E = Error> = result::Result<T, E>;
 #[derive(Copy, Clone)]
 pub struct Error(NonZeroI32);
 
-impl fmt::Debug for Error {
-    #[cold]
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut builder = fmt.debug_struct("Error");
-        builder.field("code", &self.0);
-        if let Some(message) = self.message() {
-            builder.field("message", &message);
-        }
-        builder.finish()
-    }
-}
+// impl fmt::Debug for Error {
+//     #[cold]
+//     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let mut builder = fmt.debug_struct("Error");
+//         builder.field("code", &self.0);
+//         if let Some(message) = self.message() {
+//             builder.field("message", &message);
+//         }
+//         builder.finish()
+//     }
+// }
 
 impl Error {
     /// Creates a new [`Error`] from a status code. The code must not be zero.
