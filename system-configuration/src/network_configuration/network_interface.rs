@@ -255,6 +255,7 @@ impl SCNetworkInterface {
 ///
 /// See [`mtu`](SCNetworkInterface::mtu) for more details.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub struct SCNetworkInterfaceMTU {
     pub mtu_cur: u32,
     pub mtu_min: Option<u32>,
