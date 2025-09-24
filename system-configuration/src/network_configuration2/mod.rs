@@ -14,6 +14,10 @@ pub use network_set::*;
 
 #[cfg(test)]
 mod test {
+    use core_foundation::string::CFString;
+    use crate::preferences::SCPreferences;
+    
+    use crate::helpers::create_empty_array;
     use super::*;
 
     #[test]
