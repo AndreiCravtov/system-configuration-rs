@@ -188,21 +188,33 @@ impl SCNetworkInterface {
         }
     }
 
-    /// TODO: docs
+    /// Returns the current MTU setting and the range of allowable values for the specified network
+    /// interface. Or `None` if the requested information could not be found.
+    ///
+    /// See [`SCNetworkInterfaceCopyMTU`] for more details.
+    ///
+    /// [`SCNetworkInterfaceCopyMTU`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacecopymtu(_:_:_:_:)?language=objc
     pub fn mtu(&self) -> Option<SCNetworkInterfaceMTU> {
-        let mut mtu_cur: std::ffi::c_int;
-        let mut mtu_min: std::ffi::c_int;
-        let mut mtu_max: std::ffi::c_int;
-        unsafe {
-            SCNetworkInterfaceCopyMTU(
-                self.as_concrete_TypeRef(),
-                &mut mtu_cur,
-                &mut mtu_min,
-                &mut mtu_max,
-            );
-        }
+        // perform call w/ out parameters
+        let mut mtu_cur: std::ffi::c_int = -1;
+        let mut mtu_min: std::ffi::c_int = -1;
+        let mut mtu_max: std::ffi::c_int = -1;
+        let succeeded = (unsafe { SCNetworkInterfaceCopyMTU(
+            self.as_concrete_TypeRef(), &mut mtu_cur, &mut mtu_min, &mut mtu_max) }) != 0;
 
-        todo!()
+        // if succeeded, `mtu_cur` MUST be non-negative
+        let mtu_cur = if !succeeded {
+            return None;
+        } else {
+            assert!(mtu_cur >= 0);
+            mtu_cur as u32
+        };
+
+        // if `mtu_min` and `mtu_max` are negative, then those settings could not be determined
+        let mtu_min = if mtu_min >= 0 { Some(mtu_min as u32) } else { None };
+        let mtu_max = if mtu_max >= 0 { Some(mtu_max as u32) } else { None };
+
+        Some(SCNetworkInterfaceMTU { mtu_cur, mtu_min, mtu_max})
     }
 
     /// Get all the raw network interface type identifiers, such as PPP, that can be layered on top
@@ -242,10 +254,11 @@ impl SCNetworkInterface {
 /// potentially then minimum/maximum allowed MTU values for that interface.
 ///
 /// See [`mtu`](SCNetworkInterface::mtu) for more details.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SCNetworkInterfaceMTU {
-    mtu_cur: u32,
-    mtu_min: Option<u32>,
-    mtu_max: Option<u32>,
+    pub mtu_cur: u32,
+    pub mtu_min: Option<u32>,
+    pub mtu_max: Option<u32>,
 }
 
 /// Represents the possible network interface types.
