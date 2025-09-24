@@ -19,6 +19,7 @@ use core_foundation::propertylist::CFPropertyList;
 use core_foundation::string::CFString;
 use std::ptr;
 use sys::preferences::{AuthorizationRef, SCPreferencesApplyChanges, SCPreferencesCommitChanges, SCPreferencesCopyKeyList, SCPreferencesCreateWithAuthorization, SCPreferencesGetValue, SCPreferencesLock, SCPreferencesSynchronize, SCPreferencesUnlock};
+use sys::preferences_path::SCPreferencesPathCreateUniqueChild;
 #[cfg(feature = "private")]
 use sys::preferences_private::kSCPreferencesUseEntitlementAuthorization;
 
@@ -216,6 +217,7 @@ impl SCPreferences {
     }
 }
 
+// this is implementation of private-specific methods for SCPreferences
 #[cfg(feature = "private")]
 const _: () = {
     impl SCPreferences {
@@ -262,6 +264,37 @@ const _: () = {
         }
     }
 };
+
+// this is implementation of SCPreferencesPath methods for SCPreferences
+impl SCPreferences {
+    /// Creates a new path component rooted at the specified path in the dictionary hierarchy.
+    /// Returns a string representing the new (unique) child path. Or `None` if the specified path
+    /// does not exist.
+    ///
+    /// See [`SCPreferencesPathCreateUniqueChild`] for more details.
+    ///
+    /// [`SCPreferencesPathCreateUniqueChild`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencespathcreateuniquechild(_:_:)?language=objc
+    pub fn path_create_unique_child<S: Into<CFString>>(&mut self, prefix: S) -> Option<CFString> {
+        let prefix_ref = prefix.into().as_concrete_TypeRef();
+        unsafe {
+            let string_ref = SCPreferencesPathCreateUniqueChild(self.0, prefix_ref);
+            if !string_ref.is_null() {
+                Some(CFString::wrap_under_create_rule(string_ref))
+            } else {
+                None
+            }
+        }
+    }
+
+    /// Obtains exclusive access to the configuration preferences. The `wait` flag indicates whether
+    /// the calling process should block, waiting for another process to complete its update operation
+    /// and release its lock.
+    ///
+    /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    pub fn path_set_value(&mut self, wait: bool) -> bool {
+        (unsafe { SCPreferencesLock(self.0, wait as Boolean) }) != 0
+    }
+}
 
 #[cfg(test)]
 mod tests {
