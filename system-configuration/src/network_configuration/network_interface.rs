@@ -1,17 +1,12 @@
 #![allow(non_snake_case)]
 
-use std::mem;
+use std::{mem, ptr};
 use core_foundation::{
     array::CFArray,
     base::{TCFType, TCFTypeRef},
     string::CFString,
 };
-use sys::network_configuration::{
-    SCNetworkInterfaceCopyAll, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetHardwareAddressString,
-    SCNetworkInterfaceGetInterface, SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName,
-    SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
-    SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef,
-};
+use sys::network_configuration::{SCNetworkInterfaceCopyAll, SCNetworkInterfaceCopyMTU, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface, SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef};
 
 use crate::helpers::create_empty_array;
 
@@ -193,6 +188,27 @@ impl SCNetworkInterface {
         }
     }
 
+    pub fn mtu(&self) -> Option<SCNetworkInterfaceMTU> {
+        let mut mtu_cur: std::ffi::c_int;
+        let mut mtu_min: std::ffi::c_int;
+        let mut mtu_max: std::ffi::c_int;
+
+        let mtu_cur_ref = &mut mtu_cur;
+        let mtu_min_ref = &mut mtu_min;
+        let mtu_max_ref = &mut mtu_max;
+
+        unsafe {
+            SCNetworkInterfaceCopyMTU(
+                self.as_concrete_TypeRef(),
+                mtu_cur_ref,
+                mtu_min_ref,
+                mtu_max_ref
+            );
+        }
+
+        todo!()
+    }
+
     /// Get all the raw network interface type identifiers, such as PPP, that can be layered on top
     /// of the specified interface.
     ///
@@ -224,6 +240,16 @@ impl SCNetworkInterface {
             CFArray::<CFString>::wrap_under_get_rule(array_ptr)
         }
     }
+}
+
+/// Represents the current MTU settings of an [`SCNetworkInterface`], including the current MTU and
+/// potentially then minimum/maximum allowed MTU values for that interface.
+///
+/// See [`mtu`](SCNetworkInterface::mtu) for more details.
+pub struct SCNetworkInterfaceMTU {
+    mtu_cur: u32,
+    mtu_min: Option<u32>,
+    mtu_max: Option<u32>,
 }
 
 /// Represents the possible network interface types.
@@ -274,7 +300,6 @@ pub enum SCNetworkInterfaceType {
 /// Bridge interface type referred to as `kSCNetworkInterfaceTypeBridge` in private headers.
 #[cfg(not(feature = "private"))]
 static BRIDGE_INTERFACE_TYPE_ID: &str = "Bridge";
-
 
 /// IrDA interface referenced as `kSCNetworkInterfaceTypeIrDA` but deprecated since macOS 12.
 static IRDA_INTERFACE_TYPE_ID: &str = "IrDA";
