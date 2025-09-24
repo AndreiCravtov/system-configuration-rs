@@ -33,4 +33,7 @@ pub mod schema_definitions;
 pub mod system_configuration;
 
 #[cfg(feature = "private")]
-pub mod private;
+mod private;
+
+#[cfg(feature = "private")]
+pub use private::*;
