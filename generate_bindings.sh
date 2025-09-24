@@ -165,6 +165,7 @@ bindgen \
     "${BINDGEN_COMMON_ARGUMENTS[@]}" \
     --allowlist-function "SCNetwork.*" \
     --allowlist-function "SCBondInterface.*" \
+    --allowlist-function "SCVLANInterface.*" \
     --allowlist-var "kSC(NetworkInterface|NetworkProtocol|BondStatus).*" \
     --blocklist-type "SCNetworkReachability.*" \
     --blocklist-function "SCNetworkReachability.*" \
