@@ -196,9 +196,9 @@ impl SCNetworkInterface {
         unsafe {
             SCNetworkInterfaceCopyMTU(
                 self.as_concrete_TypeRef(),
-                &mut mtu_cur,
-                &mut mtu_min,
-                &mut mtu_max,
+                *mtu_cur,
+                *mtu_min,
+                *mtu_max,
             );
         }
 
