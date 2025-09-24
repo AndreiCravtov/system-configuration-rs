@@ -1,5 +1,5 @@
 use core_foundation::{
-    base::{Boolean, TCFType, TCFTypeRef, CFType},
+    base::{Boolean, TCFType, CFType},
     string::CFString,
     dictionary::CFDictionary,
 };
