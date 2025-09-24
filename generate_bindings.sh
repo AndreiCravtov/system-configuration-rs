@@ -179,6 +179,7 @@ bindgen \
     --raw-line "use core_foundation_sys::array::CFArrayRef;" \
     --raw-line "use core_foundation_sys::base::{Boolean, CFIndex, CFAllocatorRef, CFTypeID};" \
     --raw-line "use core_foundation_sys::string::CFStringRef;" \
+    --raw-line "use core_foundation_sys::number::CFNumberRef;" \
     --raw-line "use core_foundation_sys::dictionary::CFDictionaryRef;" \
     --raw-line "use core_foundation_sys::runloop::CFRunLoopRef;" \
     --raw-line "" \
