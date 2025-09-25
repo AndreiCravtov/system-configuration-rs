@@ -77,15 +77,10 @@ mod status_type_impls {
         #[cold]
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
             let variant_name: &str = self.as_ref();
-            fmt.debug_struct("SCStatusType");
-
-            todo!()
-
-
-            // let mut builder = fmt.debug_struct("Error");
-            // builder.field("code", &self.0)
-            //     .field("message", &self.message())
-            //     .finish()
+            fmt.debug_struct(&*format!("SCStatusType::{variant_name}"))
+                .field("code", &self.code())
+                .field("message", &self.message())
+                .finish()
         }
     }
 
