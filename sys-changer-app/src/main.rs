@@ -1,4 +1,4 @@
-#![allow(unused_imports, non_upper_case_globals, dead_code, private_interfaces, unused_variables)]
+#![allow(unused_imports, non_upper_case_globals, dead_code, private_interfaces, unused_variables, unused_variables)]
 
 mod dynstore;
 mod interfaces;
