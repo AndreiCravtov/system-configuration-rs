@@ -89,7 +89,7 @@ mod status_type_impls {
 
     impl From<SCStatusType> for OSStatus {
         fn from(value: SCStatusType) -> Self {
-            Into::<u8>::into(value).into()
+            Into::<u32>::into(value).into()
         }
     }
 }
