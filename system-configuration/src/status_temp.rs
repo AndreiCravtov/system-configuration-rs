@@ -1,15 +1,17 @@
-use num_enum::{IntoPrimitive, TryFromPrimitive};
-use strum::{AsRefStr, IntoStaticStr, VariantArray};
-use core_foundation::base::OSStatus;
-use sys::system_configuration::{
-    kSCStatusAccessError, kSCStatusConnectionIgnore, kSCStatusConnectionNoService, kSCStatusFailed,
-    kSCStatusInvalidArgument, kSCStatusKeyExists, kSCStatusLocked, kSCStatusMaxLink, kSCStatusNeedLock,
-    kSCStatusNoConfigFile, kSCStatusNoKey, kSCStatusNoLink, kSCStatusNoPrefsSession, kSCStatusNoStoreServer,
-    kSCStatusNoStoreSession, kSCStatusNotifierActive, kSCStatusOK, kSCStatusPrefsBusy, kSCStatusReachabilityUnknown,
-    kSCStatusStale
-};
+use std::convert::identity;
 use crate::base::get_error_string;
 use crate::helpers::u32_into_u16_unchecked;
+use core_foundation::base::OSStatus;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
+use strum::{AsRefStr, IntoStaticStr, VariantArray};
+use sys::system_configuration::{
+    kSCStatusAccessError, kSCStatusConnectionIgnore, kSCStatusConnectionNoService, kSCStatusFailed,
+    kSCStatusInvalidArgument, kSCStatusKeyExists, kSCStatusLocked, kSCStatusMaxLink,
+    kSCStatusNeedLock, kSCStatusNoConfigFile, kSCStatusNoKey, kSCStatusNoLink,
+    kSCStatusNoPrefsSession, kSCStatusNoStoreServer, kSCStatusNoStoreSession,
+    kSCStatusNotifierActive, kSCStatusOK, kSCStatusPrefsBusy, kSCStatusReachabilityUnknown,
+    kSCStatusStale,
+};
 
 /// This is a thin wrapper around [`SCStatusKind`] which allows for potentially ***unknown types***
 /// of status or error codes.
@@ -18,14 +20,12 @@ use crate::helpers::u32_into_u16_unchecked;
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct SCStatus(Result<SCStatusKind, OSStatus>);
 
-
 impl SCStatus {
     /// Returns the code of the current status.
     pub fn code(&self) -> OSStatus {
-        match self.0 {
-            Ok(s) => { s.code() },
-            Err(s) => { s }
-        }
+        self.0.map_or_else(
+            identity,
+            SCStatusKind::code)
     }
 
     // pub fn message
@@ -38,9 +38,18 @@ impl SCStatus {
 ///
 /// [Apple Documentation]: https://developer.apple.com/documentation/systemconfiguration/1518026-status-and-error-codes?language=objc
 #[derive(
-    Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash,
-    IntoPrimitive, TryFromPrimitive, VariantArray,
-    IntoStaticStr, AsRefStr,
+    Copy,
+    Clone,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Hash,
+    IntoPrimitive,
+    TryFromPrimitive,
+    VariantArray,
+    IntoStaticStr,
+    AsRefStr,
 )]
 #[repr(u16)]
 pub enum SCStatusKind {
@@ -108,9 +117,9 @@ impl SCStatusKind {
 
 // trait implementations for status type
 mod status_type_trait_impls {
+    use crate::status_temp::SCStatusKind;
     use std::{error, fmt};
     use sys::core_foundation_sys::base::OSStatus;
-    use crate::status_temp::SCStatusKind;
 
     impl fmt::Debug for SCStatusKind {
         #[cold]
@@ -142,16 +151,3 @@ mod status_type_trait_impls {
     }
     impl error::Error for SCStatusKind {}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
