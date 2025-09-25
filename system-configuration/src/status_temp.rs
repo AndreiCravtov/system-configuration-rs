@@ -68,22 +68,26 @@ pub enum SCStatusType {
 
 // implementations for status type
 mod status_type_impls {
+    use std::fmt;
     use sys::core_foundation_sys::base::OSStatus;
     use crate::base2::get_error_string;
     use crate::status_temp::SCStatusType;
 
-    // impl fmt::Debug for SCStatusType {
-    //     #[cold]
-    //     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-    //         // fmt.debug
-    //
-    //
-    //         // let mut builder = fmt.debug_struct("Error");
-    //         // builder.field("code", &self.0)
-    //         //     .field("message", &self.message())
-    //         //     .finish()
-    //     }
-    // }
+    impl fmt::Debug for SCStatusType {
+        #[cold]
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            let variant_name: &str = self.as_ref();
+            fmt.debug_struct("SCStatusType");
+
+            todo!()
+
+
+            // let mut builder = fmt.debug_struct("Error");
+            // builder.field("code", &self.0)
+            //     .field("message", &self.message())
+            //     .finish()
+        }
+    }
 
     impl SCStatusType {
         /// TODO: docs
