@@ -88,9 +88,8 @@ mod status_type_impls {
     impl SCStatusType {
         /// TODO: docs
         pub fn try_from_code(code: OSStatus) -> Result<Self, OSStatus> {
-            TryInto::<u16>::try_into(code).map_err(|_| code).and_then(
-                |code_u16| TryInto::<Self>::try_into(code_u16).map_err(|_| code)
-            )
+            let code_u16: u16 = code.try_into().map_err(|_| code)?;
+            code_u16.try_into().map_err(|_| code)
         }
 
         /// TODO: docs
