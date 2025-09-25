@@ -102,10 +102,16 @@ mod status_type_impls {
             get_error_string((*self).into())
         }
     }
-
     impl From<SCStatusType> for OSStatus {
         fn from(value: SCStatusType) -> Self {
             value.code()
+        }
+    }
+    impl TryFrom<OSStatus> for SCStatusType {
+        type Error = OSStatus;
+
+        fn try_from(value: OSStatus) -> Result<Self, Self::Error> {
+            Self::try_from_code(value)
         }
     }
 }
