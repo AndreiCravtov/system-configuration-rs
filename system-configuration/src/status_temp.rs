@@ -64,11 +64,12 @@ mod status_trait_impls {
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
             let a: &str = self.0.as_ref().map_or("Unknown", |s| (*s).as_ref());
 
-            let variant_name: &str = self.as_ref();
-            fmt.debug_struct(&*format!("SCStatusKind::{variant_name}"))
-                .field("code", &self.code())
-                .field("message", &self.message())
-                .finish()
+            // let variant_name: &str = self.as_ref();
+            // fmt.debug_struct(&*format!("SCStatusKind::{variant_name}"))
+            //     .field("code", &self.code())
+            //     .field("message", &self.message())
+            //     .finish()
+            todo!()
         }
     }
 //     impl fmt::Display for SCStatus {
