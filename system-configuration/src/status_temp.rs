@@ -89,7 +89,8 @@ mod status_type_impls {
 
     impl From<SCStatusType> for OSStatus {
         fn from(value: SCStatusType) -> Self {
-            Into::<u32>::into(value).into()
+            Into::<u32>::into(value)
+                .try_into().expect("These values are known to fit within `i32`")
         }
     }
 }
