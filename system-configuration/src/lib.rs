@@ -28,9 +28,9 @@ pub mod dynamic_store;
 pub mod network_configuration;
 pub mod network_reachability;
 pub mod preferences;
-mod base;
-mod status_temp;
-mod base2;
+pub mod base;
+pub mod status_temp;
+pub mod base2;
 
 pub(crate) mod helpers {
     use core_foundation::array::CFArray;
