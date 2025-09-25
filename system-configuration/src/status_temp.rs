@@ -68,7 +68,7 @@ pub enum SCStatusType {
 
 // implementations for status type
 mod status_type_impls {
-    use std::fmt;
+    use std::{error, fmt};
     use sys::core_foundation_sys::base::OSStatus;
     use crate::base2::get_error_string;
     use crate::status_temp::SCStatusType;
@@ -81,6 +81,12 @@ mod status_type_impls {
                 .field("code", &self.code())
                 .field("message", &self.message())
                 .finish()
+        }
+    }
+    impl fmt::Display for SCStatusType {
+        #[cold]
+        fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(fmt, "{}", self.message())
         }
     }
 
@@ -113,6 +119,7 @@ mod status_type_impls {
             Self::try_from_code(value)
         }
     }
+    impl error::Error for SCStatusType {}
 }
 
 

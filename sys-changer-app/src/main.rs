@@ -50,6 +50,9 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
+    println!("{}", SCStatusType::AccessError);
+    println!("{:}", SCStatusType::AccessError);
+    println!("{:#}", SCStatusType::AccessError);
     println!("{:?}", SCStatusType::AccessError);
     println!("{:#?}", SCStatusType::AccessError);
 
