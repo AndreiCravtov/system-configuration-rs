@@ -62,7 +62,7 @@ mod status_trait_impls {
     impl fmt::Debug for SCStatus {
         #[cold]
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-            let a: &str = self.0.as_ref().map_or_else("Unknown", |s| (*s).as_ref());
+            let a: &str = self.0.as_ref().map_or("Unknown", |s| (*s).as_ref());
 
             let variant_name: &str = self.as_ref();
             fmt.debug_struct(&*format!("SCStatusKind::{variant_name}"))
