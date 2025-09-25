@@ -95,7 +95,7 @@ mod status_type_impls {
 
         /// TODO: docs
         pub fn code(&self) -> OSStatus {
-            Into::<u16>::into(self).into()
+            Into::<u16>::into(*self).into()
         }
 
         /// TODO: docs
