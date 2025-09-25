@@ -1,5 +1,5 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-use strum::{AsRefStr, AsStaticStr, IntoStaticStr};
+use strum::{AsRefStr, IntoStaticStr};
 use sys::system_configuration::{
     kSCStatusAccessError, kSCStatusConnectionIgnore, kSCStatusConnectionNoService, kSCStatusFailed,
     kSCStatusInvalidArgument, kSCStatusKeyExists, kSCStatusLocked, kSCStatusMaxLink, kSCStatusNeedLock,
@@ -88,8 +88,8 @@ mod status_type_impls {
     // }
 
     impl From<SCStatusType> for OSStatus {
-        fn from(value: Self) -> Self {
-            Into::<u8>::into(value).into();
+        fn from(value: SCStatusType) -> Self {
+            Into::<u8>::into(value).into()
         }
     }
 }
