@@ -23,9 +23,8 @@ pub struct SCStatus(Result<SCStatusKind, OSStatus>);
 impl SCStatus {
     /// Returns the code of the current status.
     pub fn code(&self) -> OSStatus {
-        self.0.map_or_else(
-            identity,
-            SCStatusKind::code)
+        let a = self.0.as_ref().map_or_else(|s| *s, SCStatusKind::code);
+        todo!()
     }
 
     // pub fn message
@@ -106,7 +105,11 @@ impl SCStatusKind {
 
     /// Returns the code of the current status.
     pub fn code(&self) -> OSStatus {
-        (*self).into()
+        (*self).into_code()
+    }
+
+    pub fn into_code(self) -> OSStatus {
+        self.into()
     }
 
     /// Returns a string describing the current status.
