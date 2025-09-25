@@ -47,12 +47,12 @@ pub(crate) mod helpers {
             ))
         }
     }
-
-    macro_rules! into_u8_unchecked {
-        () => {};
-    }
-
-    pub const fn into_u8_unchecked(value: u32) -> u8 {
-        TryInto::<u8>::try_into(value).unwrap()
+    
+    pub const fn u32_into_u8_unchecked(value: u32) -> u8 {
+        if value <= u8::MAX as u32 {
+            value as u8
+        } else {
+            panic!()
+        }
     }
 }
