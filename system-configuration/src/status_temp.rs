@@ -17,7 +17,7 @@ use crate::helpers::u32_into_u16_unchecked;
 ///
 /// [Apple Documentation]: https://developer.apple.com/documentation/systemconfiguration/1518026-status-and-error-codes?language=objc
 #[derive(
-    Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash,
+    Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash,
     IntoPrimitive, TryFromPrimitive, VariantArray,
     IntoStaticStr, AsRefStr,
 )]
