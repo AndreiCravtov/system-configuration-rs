@@ -47,10 +47,10 @@ pub(crate) mod helpers {
             ))
         }
     }
-    
-    pub const fn u32_into_u8_unchecked(value: u32) -> u8 {
-        if value <= u8::MAX as u32 {
-            value as u8
+
+    pub const fn u32_into_u16_unchecked(value: u32) -> u16 {
+        if value <= u16::MAX as u32 {
+            value as u16
         } else {
             panic!()
         }
