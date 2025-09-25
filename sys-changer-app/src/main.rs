@@ -50,6 +50,8 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
+    println!("{:?}", SCStatusKind::NoPrefsSession);
+
     // constants
     let proc_name = CFString::new("sys-changer-app");
     let my_networkset_name = CFString::new("sys-changer-app-networkset");
