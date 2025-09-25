@@ -50,12 +50,6 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
-    println!("{}", SCStatusType::AccessError);
-    println!("{:}", SCStatusType::AccessError);
-    println!("{:#}", SCStatusType::AccessError);
-    println!("{:?}", SCStatusType::AccessError);
-    println!("{:#?}", SCStatusType::AccessError);
-
     // constants
     let proc_name = CFString::new("sys-changer-app");
     let my_networkset_name = CFString::new("sys-changer-app-networkset");

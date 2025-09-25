@@ -1,74 +1,43 @@
-use core::fmt;
 use std::ffi::CStr;
-use std::num::NonZeroI32;
-use std::{error, result};
-use core_foundation::base::OSStatus;
-use sys::system_configuration::SCErrorString;
+use core_foundation::{base::TCFType, error::CFError};
+use sys::core_foundation_sys::base::OSStatus;
+use sys::system_configuration::{SCCopyLastError, SCError, SCErrorString};
 
-/// A `Result` type commonly returned by functions.
-pub type Result<T, E = Error> = result::Result<T, E>;
-
-/// A System Configuration framework error.
-#[derive(Copy, Clone)]
-pub struct Error(NonZeroI32);
-
-impl fmt::Debug for Error {
-    #[cold]
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut builder = fmt.debug_struct("Error");
-        builder.field("code", &self.0)
-            .field("message", &self.message())
-            .finish()
-    }
+/// Returns the most recent status or error code generated as the result of calling a function
+/// defined by the System Configuration framework. The code is represented by a Core Foundation
+/// [`CFError`] opaque type.
+///
+/// TODO: rest of docs
+///
+/// See [`SCCopyLastError`] for details.
+///
+/// [`SCCopyLastError`]: https://developer.apple.com/documentation/systemconfiguration/sccopylasterror()?language=objc
+pub fn get_last_error() -> CFError {
+    unsafe { CFError::wrap_under_create_rule(SCCopyLastError()) }
 }
 
-impl Error {
-    /// Creates a new [`Error`] from a status code. The code must not be zero.
-    #[inline]
-    #[must_use]
-    pub fn from_code(code: OSStatus) -> Self {
-        Self(NonZeroI32::new(code).unwrap_or_else(|| NonZeroI32::new(1).unwrap()))
-    }
-
-    /// Returns a string describing the current error.
-    #[inline(always)]
-    #[must_use]
-    pub fn message(self) -> String {
-        self.inner_message()
-    }
-
-    #[cold]
-    fn inner_message(self) -> String {
-        let cstr = unsafe {
-            let cstr_ptr = SCErrorString(self.code());
-            assert!(!cstr_ptr.is_null(), "error string must never be null");
-
-            CStr::from_ptr(cstr_ptr)
-        };
-        cstr.to_str().expect("should always be valid UTF-8").to_string()
-    }
-
-    /// Returns the code of the current error.
-    #[inline(always)]
-    #[must_use]
-    pub fn code(self) -> OSStatus {
-        self.0.get() as _
-    }
+/// Returns most recent status or error code generated as the result of calling a function defined
+/// by the System Configuration framework. See [Status and Error Codes] for descriptions of these
+/// codes.
+///
+/// TODO: rest of docs
+///
+/// See [`SCError`] for details.
+///
+/// [Status and Error Codes]: https://developer.apple.com/documentation/systemconfiguration/1518026-status-and-error-codes?language=objc
+/// [`SCError`]: https://developer.apple.com/documentation/systemconfiguration/scerror()?language=objc
+pub fn get_last_error_code() -> OSStatus {
+    unsafe { SCError() }
 }
 
-impl From<OSStatus> for Error {
-    #[inline(always)]
-    #[must_use]
-    fn from(code: OSStatus) -> Self {
-        Self::from_code(code)
-    }
+/// Returns a string describing the specified status code or error code.
+///
+/// TODO: rest of docs
+pub fn get_error_string(status: OSStatus) -> String {
+    let cstr = unsafe {
+        let cstr_ptr = SCErrorString(status);
+        assert!(!cstr_ptr.is_null(), "pointer to error string is never null");
+        CStr::from_ptr(cstr_ptr)
+    };
+    cstr.to_str().expect("error string is always valid UTF-8").to_string()
 }
-
-impl fmt::Display for Error {
-    #[cold]
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(fmt, "{}", self.message())
-    }
-}
-
-impl error::Error for Error {}
