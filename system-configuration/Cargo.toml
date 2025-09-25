@@ -14,7 +14,23 @@ rust-version = "1.64.0"
 [features]
 private = ["system-configuration-sys/private"]
 
+[lints.rust]
+missing_doc = "deny"
+
+[lints.clippy]
+missind_assert_message = "warn"
+missing_const_for_fn = "warn"
+missing_const_for_thread_local = "warn"
+missing_errors_doc = "warn"
+missing_inline_in_public_items = "warn"
+missing_panics_doc = "warn"
+missing_safety_doc = "warn"
+must_use_unit = "warn"
+
 [dependencies]
 core-foundation = "0.9"
 system-configuration-sys = { path = "../system-configuration-sys", version = "0.6", default-features = false }
 bitflags = "2"
+num_enum = "0.7"
+either = "1.15"
+strum = { version = "0.27", features = ["derive"] }

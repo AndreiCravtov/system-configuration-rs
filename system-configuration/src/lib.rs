@@ -17,8 +17,6 @@
 //! [SystemConfiguration]: https://developer.apple.com/documentation/systemconfiguration?language=objc
 //! [`system-configuration-sys`]: https://crates.io/crates/system-configuration-sys
 
-#![deny(missing_docs)]
-
 /// CoreFoundation wrappers
 #[macro_use]
 pub extern crate core_foundation;
@@ -31,6 +29,8 @@ pub mod network_configuration;
 pub mod network_reachability;
 pub mod preferences;
 mod base;
+mod status_temp;
+mod base2;
 
 pub(crate) mod helpers {
     use core_foundation::array::CFArray;
