@@ -66,13 +66,19 @@ pub enum SCStatusType {
 
 // implementations for status type
 mod status_type_impls {
-    use std::fmt;
+    use strum::VariantArray;
     use sys::core_foundation_sys::base::OSStatus;
     use crate::status_temp::SCStatusType;
 
-    const _: () = (|| {
-        
-    })();
+    // // enforces at compile time that all `SCStatusType` variants fit within `u8`
+    // const _: () = {
+    //     let mut i = 0; while i < SCStatusType::VARIANTS.len() {
+    //         i += 1;
+    //         TryInto::<u8>::try_into()
+    //
+    //         let variant = SCStatusType::VARIANTS[i].try_into();
+    //     }
+    // };
 
     // impl fmt::Debug for SCStatusType {
     //     #[cold]
