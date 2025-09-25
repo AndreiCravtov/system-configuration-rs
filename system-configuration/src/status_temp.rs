@@ -95,12 +95,12 @@ mod status_type_impls {
 
         /// TODO: docs
         pub fn code(&self) -> OSStatus {
-            Into::<u16>::into(*self).into()
+            Into::<u16>::into(self).into()
         }
 
         /// TODO: docs
         pub fn message(&self) -> String {
-            get_error_string(self.into())
+            get_error_string((*self).into())
         }
     }
 
