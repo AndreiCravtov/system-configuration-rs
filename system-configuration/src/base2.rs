@@ -12,7 +12,7 @@ use sys::system_configuration::{SCCopyLastError, SCError, SCErrorString};
 /// See [`SCCopyLastError`] for details.
 ///
 /// [`SCCopyLastError`]: https://developer.apple.com/documentation/systemconfiguration/sccopylasterror()?language=objc
-pub fn last_error() -> CFError {
+pub fn get_last_error() -> CFError {
     unsafe { CFError::wrap_under_create_rule(SCCopyLastError()) }
 }
 
@@ -26,14 +26,14 @@ pub fn last_error() -> CFError {
 ///
 /// [Status and Error Codes]: https://developer.apple.com/documentation/systemconfiguration/1518026-status-and-error-codes?language=objc
 /// [`SCError`]: https://developer.apple.com/documentation/systemconfiguration/scerror()?language=objc
-pub fn last_error_code() -> OSStatus {
+pub fn get_last_error_code() -> OSStatus {
     unsafe { SCError() }
 }
 
 /// Returns a string describing the specified status code or error code.
 ///
 /// TODO: rest of docs
-pub fn error_string(status: OSStatus) -> String {
+pub fn get_error_string(status: OSStatus) -> String {
     let cstr = unsafe {
         let cstr_ptr = SCErrorString(status);
         assert!(!cstr_ptr.is_null(), "pointer to error string is never null");
