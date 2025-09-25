@@ -19,7 +19,7 @@ use sys::system_configuration::{
     IntoPrimitive, TryFromPrimitive,
     IntoStaticStr, AsRefStr,
 )]
-#[repr(u8)]
+#[repr(u32)]
 pub enum SCStatusType {
     /// The call was successful.
     OK = kSCStatusOK,
