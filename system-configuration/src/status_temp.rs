@@ -1,5 +1,5 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
-use strum::{AsRefStr, IntoStaticStr};
+use strum::{AsRefStr, IntoStaticStr, VariantArray};
 use sys::system_configuration::{
     kSCStatusAccessError, kSCStatusConnectionIgnore, kSCStatusConnectionNoService, kSCStatusFailed,
     kSCStatusInvalidArgument, kSCStatusKeyExists, kSCStatusLocked, kSCStatusMaxLink, kSCStatusNeedLock,
@@ -16,7 +16,7 @@ use sys::system_configuration::{
 /// [Apple Documentation]: https://developer.apple.com/documentation/systemconfiguration/1518026-status-and-error-codes?language=objc
 #[derive(
     Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash,
-    IntoPrimitive, TryFromPrimitive,
+    IntoPrimitive, TryFromPrimitive, VariantArray,
     IntoStaticStr, AsRefStr,
 )]
 #[repr(u32)]
@@ -69,6 +69,10 @@ mod status_type_impls {
     use std::fmt;
     use sys::core_foundation_sys::base::OSStatus;
     use crate::status_temp::SCStatusType;
+
+    const _: () = (|| {
+        
+    })();
 
     // impl fmt::Debug for SCStatusType {
     //     #[cold]
