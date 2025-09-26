@@ -73,7 +73,7 @@ mod status_trait_impls {
         }
     }
     impl From<SCStatus> for OSStatus {
-        fn from(value: SCStatusKind) -> Self {
+        fn from(value: SCStatus) -> Self {
             value.code()
         }
     }
