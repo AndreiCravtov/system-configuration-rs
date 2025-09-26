@@ -12,11 +12,14 @@ use sys::system_configuration::{
     kSCStatusStale,
 };
 
+
+
 /// This is a thin wrapper around [`SCStatusKind`] which allows for potentially ***unknown types***
 /// of status or error codes.
 ///
 /// Other than that, there is no difference so refer to [`SCStatusKind`] for more information.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
+#[repr(transparent)]
 pub struct SCStatus(Result<SCStatusKind, OSStatus>);
 
 impl SCStatus {
@@ -51,7 +54,7 @@ impl SCStatus {
 
 // trait implementations for status type
 mod status_trait_impls {
-    use crate::status_temp::{SCStatus, SCStatusKind};
+    use crate::status::{SCStatus, SCStatusKind};
     use core_foundation::base::OSStatus;
     use num_enum::TryFromPrimitive;
     use std::{error, fmt};
@@ -182,7 +185,7 @@ impl SCStatusKind {
 
 // trait implementations for status type
 mod status_kind_trait_impls {
-    use crate::status_temp::SCStatusKind;
+    use crate::status::SCStatusKind;
     use std::{error, fmt};
     use sys::core_foundation_sys::base::OSStatus;
 
