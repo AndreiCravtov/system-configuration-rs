@@ -12,8 +12,6 @@ use sys::system_configuration::{
     kSCStatusStale,
 };
 
-
-
 /// This is a thin wrapper around [`SCStatusKind`] which allows for potentially ***unknown types***
 /// of status or error codes.
 ///
