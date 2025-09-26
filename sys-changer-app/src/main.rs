@@ -19,7 +19,7 @@ use core_foundation::base::TCFType;
 use core_foundation::string::CFString;
 use system_configuration::network_configuration::{SCBondInterface, SCBridgeInterface, SCNetworkInterface, SCNetworkInterfaceMTU, SCNetworkInterfaceSubClass, SCNetworkSet};
 use system_configuration::preferences::SCPreferences;
-use system_configuration::status_temp::SCStatusKind;
+use system_configuration::status_temp::{SCStatus, SCStatusKind};
 use system_configuration_sys::network_configuration::SCBondInterfaceRef;
 use system_configuration_sys::network_configuration_private::SCBridgeInterfaceCopyAll;
 use system_configuration_sys::system_configuration::SCErrorString;
@@ -50,7 +50,8 @@ pub(crate) mod ext {
 pub fn main() {
     procspawn::init();
 
-    println!("{:?}", SCStatusKind::NoPrefsSession);
+    println!("{:?}", SCStatus::from_code(0));
+    println!("{:?}", SCStatus::from_code(-1));
 
     // constants
     let proc_name = CFString::new("sys-changer-app");
