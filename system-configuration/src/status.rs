@@ -12,6 +12,9 @@ use sys::system_configuration::{
     kSCStatusStale,
 };
 
+/// A `Result` type commonly returned by functions.
+pub type SCResult<T> = Result<T, SCStatus>;
+
 /// This is a thin wrapper around [`SCStatusKind`] which allows for potentially ***unknown types***
 /// of status or error codes.
 ///

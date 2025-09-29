@@ -224,7 +224,7 @@ const _: () = {
     impl SCPreferences {
         /// Initiates access to the default system preferences using the default allocator, using
         /// an implicit authorization derived from the entitlements of the current process.
-        pub unsafe fn default_with_current_authorization(calling_process_name: &CFString) -> Self {
+        pub fn default_with_current_authorization(calling_process_name: &CFString) -> Self {
             Self::new_with_current_authorization(None, calling_process_name, None)
         }
 

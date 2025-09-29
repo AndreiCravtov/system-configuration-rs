@@ -12,6 +12,8 @@ edition = "2021"
 rust-version = "1.64.0"
 
 [features]
+full = ["rich-errors", "private"]
+rich-errors = []
 private = ["system-configuration-sys/private"]
 
 [lints.rust]

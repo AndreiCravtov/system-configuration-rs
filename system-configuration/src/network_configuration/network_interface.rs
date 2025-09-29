@@ -1,12 +1,18 @@
 #![allow(non_snake_case)]
 
-use std::{mem, ptr};
 use core_foundation::{
     array::CFArray,
     base::{TCFType, TCFTypeRef},
     string::CFString,
 };
-use sys::network_configuration::{SCNetworkInterfaceCopyAll, SCNetworkInterfaceCopyMTU, SCNetworkInterfaceGetBSDName, SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface, SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName, SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes, SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef, SCNetworkInterfaceSetMTU};
+use std::mem;
+use sys::network_configuration::{
+    SCNetworkInterfaceCopyAll, SCNetworkInterfaceCopyMTU, SCNetworkInterfaceGetBSDName,
+    SCNetworkInterfaceGetHardwareAddressString, SCNetworkInterfaceGetInterface,
+    SCNetworkInterfaceGetInterfaceType, SCNetworkInterfaceGetLocalizedDisplayName,
+    SCNetworkInterfaceGetSupportedInterfaceTypes, SCNetworkInterfaceGetSupportedProtocolTypes,
+    SCNetworkInterfaceGetTypeID, SCNetworkInterfaceRef, SCNetworkInterfaceSetMTU,
+};
 
 use crate::helpers::create_empty_array;
 
@@ -199,19 +205,37 @@ impl SCNetworkInterface {
         let mut mtu_cur: std::ffi::c_int = -1;
         let mut mtu_min: std::ffi::c_int = -1;
         let mut mtu_max: std::ffi::c_int = -1;
-        let succeeded = (unsafe { SCNetworkInterfaceCopyMTU(
-            self.0, &mut mtu_cur, &mut mtu_min, &mut mtu_max) }) != 0;
+        let succeeded = (unsafe {
+            SCNetworkInterfaceCopyMTU(self.0, &mut mtu_cur, &mut mtu_min, &mut mtu_max)
+        }) != 0;
 
-        let mtu_cur_bytes = if !succeeded { return None; } else {
-            assert!(mtu_cur >= 0, "if `SCNetworkInterfaceCopyMTU` succeeded, `mtu_cur` MUST be non-negative");
+        let mtu_cur_bytes = if !succeeded {
+            return None;
+        } else {
+            assert!(
+                mtu_cur >= 0,
+                "if `SCNetworkInterfaceCopyMTU` succeeded, `mtu_cur` MUST be non-negative"
+            );
             mtu_cur as u32
         };
 
         // if `mtu_min` and `mtu_max` are negative, then those settings could not be determined
-        let mtu_min_bytes = if mtu_min >= 0 { Some(mtu_min as u32) } else { None };
-        let mtu_max_bytes = if mtu_max >= 0 { Some(mtu_max as u32) } else { None };
+        let mtu_min_bytes = if mtu_min >= 0 {
+            Some(mtu_min as u32)
+        } else {
+            None
+        };
+        let mtu_max_bytes = if mtu_max >= 0 {
+            Some(mtu_max as u32)
+        } else {
+            None
+        };
 
-        Some(SCNetworkInterfaceMTU { mtu_cur_bytes, mtu_min_bytes, mtu_max_bytes })
+        Some(SCNetworkInterfaceMTU {
+            mtu_cur_bytes,
+            mtu_min_bytes,
+            mtu_max_bytes,
+        })
     }
 
     /// Get all the raw network interface type identifiers, such as PPP, that can be layered on top
@@ -250,7 +274,9 @@ impl SCNetworkInterface {
     ///
     /// Returns: `true` if the configuration was updated; `false` if an error occurred.
     pub fn set_mtu(&mut self, mtu: u32) -> bool {
-        let Ok(mtu) = TryInto::<std::ffi::c_int>::try_into(mtu) else { return false; };
+        let Ok(mtu) = TryInto::<std::ffi::c_int>::try_into(mtu) else {
+            return false;
+        };
         (unsafe { SCNetworkInterfaceSetMTU(self.0, mtu) }) != 0
     }
 }
@@ -323,9 +349,9 @@ impl SCNetworkInterfaceType {
     /// Tries to construct a type by matching it to string constants used to identify a network
     /// interface type. If no constants match it, `None` is returned.
     pub fn from_cfstring(type_id: &CFString) -> Option<Self> {
+        use system_configuration_sys::network_configuration::*;
         #[cfg(feature = "private")]
         use system_configuration_sys::network_configuration_private::*;
-        use system_configuration_sys::network_configuration::*;
 
         let id_is_equal_to = |const_str| -> bool {
             let const_str = unsafe { CFString::wrap_under_get_rule(const_str) };
@@ -382,9 +408,9 @@ impl SCNetworkInterfaceType {
 
     /// Returns the string constants used to identify this network interface type.
     pub fn to_cfstring(&self) -> CFString {
+        use system_configuration_sys::network_configuration::*;
         #[cfg(feature = "private")]
         use system_configuration_sys::network_configuration_private::*;
-        use system_configuration_sys::network_configuration::*;
         let wrap_const = |const_str| unsafe { CFString::wrap_under_get_rule(const_str) };
         unsafe {
             match self {
@@ -398,7 +424,7 @@ impl SCNetworkInterfaceType {
                     let val = BRIDGE_INTERFACE_TYPE_ID.into();
 
                     val
-                },
+                }
                 SCNetworkInterfaceType::Bond => wrap_const(kSCNetworkInterfaceTypeBond),
                 SCNetworkInterfaceType::Ethernet => wrap_const(kSCNetworkInterfaceTypeEthernet),
                 SCNetworkInterfaceType::FireWire => wrap_const(kSCNetworkInterfaceTypeFireWire),
