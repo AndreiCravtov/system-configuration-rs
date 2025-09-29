@@ -1,11 +1,12 @@
 use core_foundation::{
-    base::{Boolean, TCFType, CFType},
-    string::CFString,
+    base::{Boolean, CFType, TCFType},
     dictionary::CFDictionary,
+    string::CFString,
 };
 use sys::network_configuration::{
-    SCNetworkProtocolGetConfiguration, SCNetworkProtocolGetEnabled, SCNetworkProtocolGetProtocolType,
-    SCNetworkProtocolGetTypeID, SCNetworkProtocolRef, SCNetworkProtocolSetConfiguration, SCNetworkProtocolSetEnabled
+    SCNetworkProtocolGetConfiguration, SCNetworkProtocolGetEnabled,
+    SCNetworkProtocolGetProtocolType, SCNetworkProtocolGetTypeID, SCNetworkProtocolRef,
+    SCNetworkProtocolSetConfiguration, SCNetworkProtocolSetEnabled,
 };
 
 core_foundation::declare_TCFType!(
@@ -28,6 +29,7 @@ core_foundation::impl_CFTypeDescription!(SCNetworkProtocol);
 // TODO: implement all the other methods a SCNetworkProtocol has
 impl SCNetworkProtocol {
     /// Returns a [`bool`] value indicating whether the specified protocol is enabled.
+    #[inline]
     pub fn enabled(&self) -> bool {
         unsafe { SCNetworkProtocolGetEnabled(self.0) != 0 }
     }
@@ -37,6 +39,7 @@ impl SCNetworkProtocol {
     /// See [`SCNetworkProtocolGetProtocolType`] for details.
     ///
     /// [`SCNetworkProtocolGetProtocolType`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkprotocolgetprotocoltype(_:)?language=objc
+    #[inline]
     pub fn protocol_type(&self) -> Option<SCNetworkProtocolType> {
         SCNetworkProtocolType::from_cfstring(&self.protocol_type_string()?)
     }
@@ -46,6 +49,7 @@ impl SCNetworkProtocol {
     /// See [`SCNetworkProtocolGetProtocolType`] for details.
     ///
     /// [`SCNetworkProtocolGetProtocolType`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkprotocolgetprotocoltype(_:)?language=objc
+    #[inline]
     pub fn protocol_type_string(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkProtocolGetProtocolType(self.0);
@@ -63,6 +67,7 @@ impl SCNetworkProtocol {
     /// See [`SCNetworkProtocolGetConfiguration`] for details.
     ///
     /// [`SCNetworkProtocolGetConfiguration`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkprotocolgetconfiguration(_:)?language=objc
+    #[inline]
     pub fn configuration(&self) -> Option<CFDictionary<CFString, CFType>> {
         unsafe {
             let dictionary_ref = SCNetworkProtocolGetConfiguration(self.as_concrete_TypeRef());
@@ -77,6 +82,7 @@ impl SCNetworkProtocol {
     /// Enables or disables the specified protocol.
     ///
     /// Returns: `true` if the enabled status was saved; `false` if an error occurred.
+    #[inline]
     pub fn set_enabled(&mut self, enabled: bool) -> bool {
         (unsafe { SCNetworkProtocolSetEnabled(self.0, enabled as Boolean) }) != 0
     }
@@ -84,6 +90,7 @@ impl SCNetworkProtocol {
     /// Stores the configuration settings for the specified network protocol.
     ///
     /// Returns: `true` if the configuration was stored; `false` if an error occurred.
+    #[inline]
     pub fn set_configuration(&mut self, config: &CFDictionary<CFString, CFType>) -> bool {
         (unsafe { SCNetworkProtocolSetConfiguration(self.0, config.as_concrete_TypeRef()) }) != 0
     }
@@ -111,6 +118,7 @@ pub enum SCNetworkProtocolType {
 impl SCNetworkProtocolType {
     /// Tries to construct a type by matching it to string constants used to identify a network
     /// protocol type. If no constants match it, `None` is returned.
+    #[inline]
     pub fn from_cfstring(type_id: &CFString) -> Option<Self> {
         use system_configuration_sys::network_configuration::*;
 
@@ -136,6 +144,7 @@ impl SCNetworkProtocolType {
     }
 
     /// Returns the string constants used to identify this network protocol type.
+    #[inline]
     pub fn to_cfstring(&self) -> CFString {
         use system_configuration_sys::network_configuration::*;
         let wrap_const = |const_str| unsafe { CFString::wrap_under_get_rule(const_str) };

@@ -15,12 +15,19 @@
 use crate::sys::preferences::{SCPreferencesCreate, SCPreferencesGetTypeID, SCPreferencesRef};
 use core_foundation::array::CFArray;
 use core_foundation::base::{Boolean, CFAllocator, CFType, TCFType};
+use core_foundation::dictionary::CFDictionary;
 use core_foundation::propertylist::CFPropertyList;
 use core_foundation::string::CFString;
 use std::ptr;
-use core_foundation::dictionary::CFDictionary;
-use sys::preferences::{AuthorizationRef, SCPreferencesApplyChanges, SCPreferencesCommitChanges, SCPreferencesCopyKeyList, SCPreferencesCreateWithAuthorization, SCPreferencesGetValue, SCPreferencesLock, SCPreferencesSynchronize, SCPreferencesUnlock};
-use sys::preferences_path::{SCPreferencesPathCreateUniqueChild, SCPreferencesPathGetLink, SCPreferencesPathGetValue, SCPreferencesPathRemoveValue, SCPreferencesPathSetLink, SCPreferencesPathSetValue};
+use sys::preferences::{
+    AuthorizationRef, SCPreferencesApplyChanges, SCPreferencesCommitChanges,
+    SCPreferencesCopyKeyList, SCPreferencesCreateWithAuthorization, SCPreferencesGetValue,
+    SCPreferencesLock, SCPreferencesSynchronize, SCPreferencesUnlock,
+};
+use sys::preferences_path::{
+    SCPreferencesPathCreateUniqueChild, SCPreferencesPathGetLink, SCPreferencesPathGetValue,
+    SCPreferencesPathRemoveValue, SCPreferencesPathSetLink, SCPreferencesPathSetValue,
+};
 #[cfg(feature = "private")]
 use sys::preferences_private::kSCPreferencesUseEntitlementAuthorization;
 
@@ -33,6 +40,7 @@ impl_TCFType!(SCPreferences, SCPreferencesRef, SCPreferencesGetTypeID);
 
 impl SCPreferences {
     /// Initiates access to the default system preferences using the default allocator.
+    #[inline]
     pub fn default(calling_process_name: &CFString) -> Self {
         Self::new(None, calling_process_name, None)
     }
@@ -42,6 +50,7 @@ impl SCPreferences {
     /// constructor.
     ///
     /// [`default`]: #method.default
+    #[inline]
     pub fn group(calling_process_name: &CFString, prefs_id: &CFString) -> Self {
         Self::new(None, calling_process_name, Some(prefs_id))
     }
@@ -54,6 +63,7 @@ impl SCPreferences {
     /// [SCPreferencesCreate]: https://developer.apple.com/documentation/systemconfiguration/1516807-scpreferencescreate?language=objc
     /// [`default`]: #method.default
     /// [`group`]: #method.group
+    #[inline]
     pub fn new(
         allocator: Option<&CFAllocator>,
         calling_process_name: &CFString,
@@ -79,6 +89,13 @@ impl SCPreferences {
 
     /// Initiates access to the default system preferences using the default allocator with the
     /// given authorization.
+    ///
+    /// # Safety
+    ///
+    /// The reference `authorization_ref` must be a valid [`AuthorizationRef`].
+    ///
+    /// [`AuthorizationRef`]: https://developer.apple.com/documentation/security/authorizationref?language=objc
+    #[inline]
     pub unsafe fn default_with_authorization(
         calling_process_name: &CFString,
         authorization_ref: AuthorizationRef,
@@ -91,6 +108,13 @@ impl SCPreferences {
     /// with the given authorization, use the [`default_with_authorization`] constructor.
     ///
     /// [`default_with_authorization`]: #method.default_with_authorization
+    ///
+    /// # Safety
+    ///
+    /// The reference `authorization_ref` must be a valid [`AuthorizationRef`].
+    ///
+    /// [`AuthorizationRef`]: https://developer.apple.com/documentation/security/authorizationref?language=objc
+    #[inline]
     pub unsafe fn group_with_authorization(
         calling_process_name: &CFString,
         prefs_id: &CFString,
@@ -113,6 +137,13 @@ impl SCPreferences {
     /// [SCPreferencesCreateWithAuthorization]: https://developer.apple.com/documentation/systemconfiguration/1516807-scpreferencescreate?language=objc
     /// [`default_with_authorization`]: #method.default_with_authorization
     /// [`group_with_authorization`]: #method.group_with_authorization
+    ///
+    /// # Safety
+    ///
+    /// The reference `authorization_ref` must be a valid [`AuthorizationRef`].
+    ///
+    /// [`AuthorizationRef`]: https://developer.apple.com/documentation/security/authorizationref?language=objc
+    #[inline]
     pub unsafe fn new_with_authorization(
         allocator: Option<&CFAllocator>,
         calling_process_name: &CFString,
@@ -143,6 +174,8 @@ impl SCPreferences {
     /// See [`SCPreferencesCopyKeyList`] for details.
     ///
     /// [`SCPreferencesCopyKeyList`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencescopykeylist(_:)?language=objc
+    #[allow(clippy::missing_panics_doc)]
+    #[inline]
     pub fn get_keys(&self) -> CFArray<CFString> {
         unsafe {
             let array_ref = SCPreferencesCopyKeyList(self.as_concrete_TypeRef());
@@ -158,6 +191,7 @@ impl SCPreferences {
     /// See [`SCPreferencesGetValue`] for details.
     ///
     /// [`SCPreferencesGetValue`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencesgetvalue(_:_:)?language=objc
+    #[inline]
     pub fn get<S: Into<CFString>>(&self, key: S) -> Option<CFPropertyList> {
         let cf_key = key.into();
         unsafe {
@@ -176,6 +210,7 @@ impl SCPreferences {
     /// and release its lock.
     ///
     /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    #[inline]
     pub fn lock(&mut self, wait: bool) -> bool {
         (unsafe { SCPreferencesLock(self.0, wait as Boolean) }) != 0
     }
@@ -183,6 +218,7 @@ impl SCPreferences {
     /// Releases exclusive access to the configuration preferences.
     ///
     /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    #[inline]
     pub fn unlock(&mut self) -> bool {
         (unsafe { SCPreferencesUnlock(self.0) }) != 0
     }
@@ -195,6 +231,7 @@ impl SCPreferences {
     ///
     /// Note: this function commits changes to persistent storage; to apply the changes to the
     ///       running system, use the [`apply_changes`](Self::apply_changes) function.
+    #[inline]
     pub fn commit_changes(&mut self) -> bool {
         (unsafe { SCPreferencesCommitChanges(self.0) }) != 0
     }
@@ -203,6 +240,7 @@ impl SCPreferences {
     /// configuration.
     ///
     /// Returns: `true` if the lock was obtained; `false` if an error occurred.
+    #[inline]
     pub fn apply_changes(&mut self) -> bool {
         (unsafe { SCPreferencesApplyChanges(self.0) }) != 0
     }
@@ -213,6 +251,7 @@ impl SCPreferences {
     /// See [`SCPreferencesSynchronize`] for more details.
     ///
     /// [`SCPreferencesSynchronize`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencessynchronize(_:)?language=objc
+    #[inline]
     pub fn synchronize(&mut self) {
         unsafe { SCPreferencesSynchronize(self.0) };
     }
@@ -224,6 +263,7 @@ const _: () = {
     impl SCPreferences {
         /// Initiates access to the default system preferences using the default allocator, using
         /// an implicit authorization derived from the entitlements of the current process.
+        #[inline]
         pub fn default_with_current_authorization(calling_process_name: &CFString) -> Self {
             Self::new_with_current_authorization(None, calling_process_name, None)
         }
@@ -234,15 +274,12 @@ const _: () = {
         /// use the [`default_with_current_authorization`] constructor.
         ///
         /// [`default_with_current_authorization`]: #method.default_with_current_authorization
+        #[inline]
         pub fn group_with_current_authorization(
             calling_process_name: &CFString,
-            prefs_id: &CFString
+            prefs_id: &CFString,
         ) -> Self {
-            Self::new_with_current_authorization(
-                None,
-                calling_process_name,
-                Some(prefs_id),
-            )
+            Self::new_with_current_authorization(None, calling_process_name, Some(prefs_id))
         }
 
         /// Initiates access to the per-system set of configuration preferences with a given allocator
@@ -255,13 +292,20 @@ const _: () = {
         /// [SCPreferencesCreateWithAuthorization]: https://developer.apple.com/documentation/systemconfiguration/1516807-scpreferencescreate?language=objc
         /// [`default_with_current_authorization`]: #method.default_with_current_authorization
         /// [`group_with_current_authorization`]: #method.group_with_current_authorization
+        #[inline]
         pub fn new_with_current_authorization(
             allocator: Option<&CFAllocator>,
             calling_process_name: &CFString,
             prefs_id: Option<&CFString>,
         ) -> Self {
-            unsafe { Self::new_with_authorization(allocator, calling_process_name, prefs_id,
-                                                  kSCPreferencesUseEntitlementAuthorization) }
+            unsafe {
+                Self::new_with_authorization(
+                    allocator,
+                    calling_process_name,
+                    prefs_id,
+                    kSCPreferencesUseEntitlementAuthorization,
+                )
+            }
         }
     }
 };
@@ -273,7 +317,11 @@ impl SCPreferences {
     /// See [`SCPreferencesPathGetValue`] for more details.
     ///
     /// [`SCPreferencesPathGetValue`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencespathgetvalue(_:_:)?language=objc
-    pub fn path_get_value(&self, path: impl Into<CFString>) -> Option<CFDictionary<CFString, CFType>> {
+    #[inline]
+    pub fn path_get_value(
+        &self,
+        path: impl Into<CFString>,
+    ) -> Option<CFDictionary<CFString, CFType>> {
         let path_ref = path.into().as_concrete_TypeRef();
         unsafe {
             let dictionary_ref = SCPreferencesPathGetValue(self.0, path_ref);
@@ -291,6 +339,7 @@ impl SCPreferences {
     /// See [`SCPreferencesPathGetLink`] for more details.
     ///
     /// [`SCPreferencesPathGetLink`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencespathgetlink(_:_:)?language=objc
+    #[inline]
     pub fn path_get_link(&self, path: impl Into<CFString>) -> Option<CFString> {
         let path_ref = path.into().as_concrete_TypeRef();
         unsafe {
@@ -310,6 +359,7 @@ impl SCPreferences {
     /// See [`SCPreferencesPathCreateUniqueChild`] for more details.
     ///
     /// [`SCPreferencesPathCreateUniqueChild`]: https://developer.apple.com/documentation/systemconfiguration/scpreferencespathcreateuniquechild(_:_:)?language=objc
+    #[inline]
     pub fn path_create_unique_child(&mut self, prefix: impl Into<CFString>) -> Option<CFString> {
         let prefix_ref = prefix.into().as_concrete_TypeRef();
         unsafe {
@@ -325,7 +375,12 @@ impl SCPreferences {
     /// Associates the specified dictionary with the specified path.
     ///
     /// Returns: `true` if successful; `false` otherwise.
-    pub fn path_set_value(&mut self, path: impl Into<CFString>, value: &CFDictionary<CFString, CFType>) -> bool {
+    #[inline]
+    pub fn path_set_value(
+        &mut self,
+        path: impl Into<CFString>,
+        value: &CFDictionary<CFString, CFType>,
+    ) -> bool {
         let path_ref = path.into().as_concrete_TypeRef();
         (unsafe { SCPreferencesPathSetValue(self.0, path_ref, value.as_concrete_TypeRef()) }) != 0
     }
@@ -333,6 +388,7 @@ impl SCPreferences {
     /// Removes the data associated with the specified path.
     ///
     /// Returns: `true` if successful; `false` otherwise.
+    #[inline]
     pub fn path_remove_value(&mut self, path: impl Into<CFString>) -> bool {
         let path_ref = path.into().as_concrete_TypeRef();
         (unsafe { SCPreferencesPathRemoveValue(self.0, path_ref) }) != 0
@@ -341,7 +397,8 @@ impl SCPreferences {
     /// Associates a link to a second dictionary at the specified path.
     ///
     /// Returns: `true` if successful; `false` otherwise.
-    pub fn path_set_link(&mut self, path: impl Into<CFString>, link: impl Into<CFString>,) -> bool {
+    #[inline]
+    pub fn path_set_link(&mut self, path: impl Into<CFString>, link: impl Into<CFString>) -> bool {
         let path_ref = path.into().as_concrete_TypeRef();
         let link_ref = link.into().as_concrete_TypeRef();
         (unsafe { SCPreferencesPathSetLink(self.0, path_ref, link_ref) }) != 0

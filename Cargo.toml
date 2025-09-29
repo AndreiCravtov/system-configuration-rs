@@ -1,7 +1,10 @@
 [workspace]
 members = [
     "system-configuration-sys",
+    "system-configuration/system-configuration-proc",
     "system-configuration",
     "sys-changer-app"
 ]
 resolver = "2"
+
+

@@ -65,6 +65,7 @@ impl SCDynamicStoreBuilder<()> {
     /// [`SCDynamicStore`] session.
     ///
     /// [`SCDynamicStore`]: struct.SCDynamicStore.html
+    #[inline]
     pub fn new<S: Into<CFString>>(name: S) -> Self {
         SCDynamicStoreBuilder {
             name: name.into(),
@@ -75,14 +76,15 @@ impl SCDynamicStoreBuilder<()> {
 }
 
 impl<T> SCDynamicStoreBuilder<T> {
-    /// Set wether or not the created [`SCDynamicStore`] should have session keys or not.
+    /// Set weather or not the created [`SCDynamicStore`] should have session keys or not.
     /// See [`SCDynamicStoreCreateWithOptions`] for details.
     ///
     /// Defaults to `false`.
     ///
     /// [`SCDynamicStore`]: struct.SCDynamicStore.html
     /// [`SCDynamicStoreCreateWithOptions`]: https://developer.apple.com/documentation/systemconfiguration/1437818-scdynamicstorecreatewithoptions?language=objc
-    pub fn session_keys(mut self, session_keys: bool) -> Self {
+    #[inline]
+    pub const fn session_keys(mut self, session_keys: bool) -> Self {
         self.session_keys = session_keys;
         self
     }
@@ -90,6 +92,7 @@ impl<T> SCDynamicStoreBuilder<T> {
     /// Set a callback context (callback function and data to pass to each callback call).
     ///
     /// Defaults to having callbacks disabled.
+    #[inline]
     pub fn callback_context<T2>(
         self,
         callback_context: SCDynamicStoreCallBackContext<T2>,
@@ -102,6 +105,7 @@ impl<T> SCDynamicStoreBuilder<T> {
     }
 
     /// Create the dynamic store session.
+    #[inline]
     pub fn build(mut self) -> SCDynamicStore {
         let store_options = self.create_store_options();
         if let Some(callback_context) = self.callback_context.take() {
@@ -175,9 +179,10 @@ impl SCDynamicStore {
     }
 
     /// Returns the keys that represent the current dynamic store entries that match the specified
-    /// pattern. Or `None` if an error occured.
+    /// pattern. Or `None` if an error occurred.
     ///
     /// `pattern` - A regular expression pattern used to match the dynamic store keys.
+    #[inline]
     pub fn get_keys<S: Into<CFString>>(&self, pattern: S) -> Option<CFArray<CFString>> {
         let cf_pattern = pattern.into();
         unsafe {
@@ -194,7 +199,8 @@ impl SCDynamicStore {
     }
 
     /// Returns the key-value pairs that represent the current internet proxy settings. Or `None` if
-    /// no proxy settings have been defined or if an error occured.
+    /// no proxy settings have been defined or if an error occurred.
+    #[inline]
     pub fn get_proxies(&self) -> Option<CFDictionary<CFString, CFType>> {
         unsafe {
             let dictionary_ref = SCDynamicStoreCopyProxies(self.as_concrete_TypeRef());
@@ -209,6 +215,7 @@ impl SCDynamicStore {
     /// If the given key exists in the store, the associated value is returned.
     ///
     /// Use `CFPropertyList::downcast_into` to cast the result into the correct type.
+    #[inline]
     pub fn get<S: Into<CFString>>(&self, key: S) -> Option<CFPropertyList> {
         let cf_key = key.into();
         unsafe {
@@ -224,12 +231,14 @@ impl SCDynamicStore {
 
     /// Sets the value of the given key. Overwrites existing values.
     /// Returns `true` on success, false on failure.
+    #[inline]
     pub fn set<S: Into<CFString>, V: CFPropertyListSubClass>(&self, key: S, value: V) -> bool {
         self.set_raw(key, &value.into_CFPropertyList())
     }
 
     /// Sets the value of the given key. Overwrites existing values.
     /// Returns `true` on success, false on failure.
+    #[inline]
     pub fn set_raw<S: Into<CFString>>(&self, key: S, value: &CFPropertyList) -> bool {
         let cf_key = key.into();
         let success = unsafe {
@@ -243,6 +252,7 @@ impl SCDynamicStore {
     }
 
     /// Removes the value of the specified key from the dynamic store.
+    #[inline]
     pub fn remove<S: Into<CFString>>(&self, key: S) -> bool {
         let cf_key = key.into();
         let success = unsafe {
@@ -252,6 +262,7 @@ impl SCDynamicStore {
     }
 
     /// Specifies a set of keys and key patterns that should be monitored for changes.
+    #[inline]
     pub fn set_notification_keys<T1, T2>(
         &self,
         keys: &CFArray<T1>,
@@ -268,6 +279,7 @@ impl SCDynamicStore {
     }
 
     /// Creates a run loop source object that can be added to the application's run loop.
+    #[inline]
     pub fn create_run_loop_source(&self) -> CFRunLoopSource {
         unsafe {
             let run_loop_source_ref = SCDynamicStoreCreateRunLoopSource(

@@ -1134,6 +1134,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "system-configuration-proc"
+version = "0.6.1"
+dependencies = [
+ "syn",
+]
+
+[[package]]
 name = "system-configuration-sys"
 version = "0.6.0"
 dependencies = [

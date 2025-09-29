@@ -43,6 +43,7 @@ pub enum ReachabilityError {
 }
 
 impl Display for ReachabilityError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::FailedToDetermineReachability => write!(f, "Failed to determine reachability"),
@@ -60,6 +61,7 @@ impl Error for ReachabilityError {}
 pub struct SchedulingError(());
 
 impl Display for SchedulingError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Failed to schedule a reachability callback on a runloop")
     }
@@ -72,6 +74,7 @@ impl Error for SchedulingError {}
 pub struct UnschedulingError(());
 
 impl Display for UnschedulingError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -87,6 +90,7 @@ impl Error for UnschedulingError {}
 pub struct SetCallbackError {}
 
 impl Display for SetCallbackError {
+    #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Failed to set a callback for reachability")
     }
@@ -154,6 +158,7 @@ impl SCNetworkReachability {
     /// See [`SCNetworkReachabilityCreateWithAddressPair`] for details.
     ///
     /// [`SCNetworkReachabilityCreateWithAddressPair`]: https://developer.apple.com/documentation/systemconfiguration/1514908-scnetworkreachabilitycreatewitha?language=objc
+    #[inline]
     pub fn from_addr_pair(local: SocketAddr, remote: SocketAddr) -> SCNetworkReachability {
         let ptr = unsafe {
             SCNetworkReachabilityCreateWithAddressPair(
@@ -171,6 +176,7 @@ impl SCNetworkReachability {
     /// See [`SCNetworkReachabilityCreateWithName`] for details.
     ///
     /// [`SCNetworkReachabilityCreateWithName`]: https://developer.apple.com/documentation/systemconfiguration/1514904-scnetworkreachabilitycreatewithn?language=objc
+    #[inline]
     pub fn from_host(host: &CStr) -> Option<Self> {
         let ptr = unsafe { SCNetworkReachabilityCreateWithName(ptr::null(), host.as_ptr()) };
         if ptr.is_null() {
@@ -185,6 +191,10 @@ impl SCNetworkReachability {
     /// See [`SCNetworkReachabilityGetFlags`] for details.
     ///
     /// [`SCNetworkReachabilityGetFlags`]: https://developer.apple.com/documentation/systemconfiguration/1514924-scnetworkreachabilitygetflags?language=objc
+    ///
+    /// # Errors
+    /// Returns `Err` if there is failure to determine reachability.
+    #[inline]
     pub fn reachability(&self) -> Result<ReachabilityFlags, ReachabilityError> {
         let mut raw_flags = 0u32;
         if unsafe { SCNetworkReachabilityGetFlags(self.0, &mut raw_flags) } == 0u8 {
@@ -201,10 +211,14 @@ impl SCNetworkReachability {
     ///
     /// [`SCNetworkReachabilityScheduleFromRunLoop`]: https://developer.apple.com/documentation/systemconfiguration/1514894-scnetworkreachabilityschedulewit?language=objc
     ///
+    /// # Errors
+    /// Returns `Err` if there is failure to schedule a reachability callback on a runloop.
+    ///
     /// # Safety
     ///
     /// The `run_loop_mode` must not be NULL and must be a pointer to a valid run loop mode.
     /// Use `core_foundation::runloop::kCFRunLoopCommonModes` if you are unsure.
+    #[inline]
     pub unsafe fn schedule_with_runloop(
         &self,
         run_loop: &CFRunLoop,
@@ -228,10 +242,14 @@ impl SCNetworkReachability {
     ///
     /// [`SCNetworkReachabilityUnscheduleFromRunLoop`]: https://developer.apple.com/documentation/systemconfiguration/1514899-scnetworkreachabilityunschedulef?language=objc
     ///
+    /// # Errors
+    /// Returns `Err` if there is failure to unschedule a reachability callback on a runloop.
+    ///
     /// # Safety
     ///
     /// The `run_loop_mode` must not be NULL and must be a pointer to a valid run loop mode.
     /// Use `core_foundation::runloop::kCFRunLoopCommonModes` if you are unsure.
+    #[inline]
     pub unsafe fn unschedule_from_runloop(
         &self,
         run_loop: &CFRunLoop,
@@ -256,6 +274,10 @@ impl SCNetworkReachability {
     /// See [`SCNetworkReachabilityContext`] for details.
     ///
     /// [`SCNetworkReachabilityContext`]: https://developer.apple.com/documentation/systemconfiguration/1514903-scnetworkreachabilitysetcallback?language=objc
+    ///
+    /// # Errors
+    /// Returns `Err` if there is failure to set a callback for changes in reachability.
+    #[inline]
     pub fn set_callback<F: Fn(ReachabilityFlags) + Sync + Send>(
         &mut self,
         callback: F,
@@ -301,6 +323,7 @@ impl SCNetworkReachability {
 }
 
 impl From<SocketAddr> for SCNetworkReachability {
+    #[inline]
     fn from(addr: SocketAddr) -> Self {
         unsafe {
             let ptr =
@@ -316,7 +339,7 @@ struct NetworkReachabilityCallbackContext<T: Fn(ReachabilityFlags) + Sync + Send
 }
 
 impl<T: Fn(ReachabilityFlags) + Sync + Send> NetworkReachabilityCallbackContext<T> {
-    fn new(host: SCNetworkReachability, callback: T) -> Self {
+    const fn new(host: SCNetworkReachability, callback: T) -> Self {
         Self {
             _host: host,
             callback,

@@ -4,10 +4,11 @@ use core_foundation::{
     string::CFString,
 };
 use sys::network_configuration::{
-    SCNetworkServiceAddProtocolType, SCNetworkServiceCopy, SCNetworkServiceCopyAll, SCNetworkServiceCopyProtocol,
-    SCNetworkServiceCopyProtocols, SCNetworkServiceCreate, SCNetworkServiceEstablishDefaultConfiguration,
-    SCNetworkServiceGetEnabled, SCNetworkServiceGetInterface, SCNetworkServiceGetServiceID, SCNetworkServiceGetTypeID,
-    SCNetworkServiceRef, SCNetworkServiceRemove, SCNetworkServiceSetEnabled
+    SCNetworkServiceAddProtocolType, SCNetworkServiceCopy, SCNetworkServiceCopyAll,
+    SCNetworkServiceCopyProtocol, SCNetworkServiceCopyProtocols, SCNetworkServiceCreate,
+    SCNetworkServiceEstablishDefaultConfiguration, SCNetworkServiceGetEnabled,
+    SCNetworkServiceGetInterface, SCNetworkServiceGetServiceID, SCNetworkServiceGetTypeID,
+    SCNetworkServiceRef, SCNetworkServiceRemove, SCNetworkServiceSetEnabled,
 };
 
 use super::{SCNetworkInterface, SCNetworkProtocol};
@@ -35,6 +36,7 @@ core_foundation::impl_CFTypeDescription!(SCNetworkService);
 
 impl SCNetworkService {
     /// Returns an array of all network services
+    #[inline]
     pub fn get_services(prefs: &SCPreferences) -> CFArray<Self> {
         unsafe {
             let array_ptr = SCNetworkServiceCopyAll(prefs.to_void());
@@ -51,6 +53,7 @@ impl SCNetworkService {
     /// See [`SCNetworkServiceCopy`] for details.
     ///
     /// [`SCNetworkServiceCopy`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecopy(_:_:)?language=objc
+    #[inline]
     pub fn find_service<S: Into<CFString>>(prefs: &SCPreferences, service_id: S) -> Option<Self> {
         let cf_service_id = service_id.into();
         unsafe {
@@ -72,6 +75,7 @@ impl SCNetworkService {
     /// See [`SCNetworkServiceCreate`] for details.
     ///
     /// [`SCNetworkServiceCreate`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecreate(_:_:)?language=objc
+    #[inline]
     pub fn create(prefs: &SCPreferences, interface: &SCNetworkInterface) -> Option<Self> {
         unsafe {
             let service_ref = SCNetworkServiceCreate(
@@ -87,11 +91,13 @@ impl SCNetworkService {
     }
 
     /// Returns a [`bool`] value indicating whether the specified service is enabled.
+    #[inline]
     pub fn enabled(&self) -> bool {
         unsafe { SCNetworkServiceGetEnabled(self.0) != 0 }
     }
 
     /// Returns the service identifier.
+    #[inline]
     pub fn id(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkServiceGetServiceID(self.0);
@@ -104,6 +110,7 @@ impl SCNetworkService {
     }
 
     /// Returns the network interface backing this network service, if it has one.
+    #[inline]
     pub fn network_interface(&self) -> Option<SCNetworkInterface> {
         unsafe {
             let ptr = SCNetworkServiceGetInterface(self.0);
@@ -120,6 +127,7 @@ impl SCNetworkService {
     /// See [`SCNetworkServiceCopyProtocols`] for details.
     ///
     /// [`SCNetworkServiceCopyProtocols`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecopyprotocols(_:)?language=objc
+    #[inline]
     pub fn network_protocols(&self) -> CFArray<SCNetworkProtocol> {
         unsafe {
             let array_ptr = SCNetworkServiceCopyProtocols(self.0);
@@ -136,6 +144,7 @@ impl SCNetworkService {
     /// See [`SCNetworkServiceCopyProtocol`] for details.
     ///
     /// [`SCNetworkServiceCopyProtocol`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkservicecopyprotocol(_:_:)?language=objc
+    #[inline]
     pub fn find_network_protocol<S: Into<CFString>>(
         &self,
         protocol_type: S,
@@ -156,6 +165,7 @@ impl SCNetworkService {
     /// configuration options).
     ///
     /// Returns: `true` if the configuration was updated; `false` if an error occurred.
+    #[inline]
     pub fn establish_default_configuration(&mut self) -> bool {
         (unsafe { SCNetworkServiceEstablishDefaultConfiguration(self.0) }) != 0
     }
@@ -166,6 +176,7 @@ impl SCNetworkService {
     ///
     /// Returns: `true` if the protocol was added to the service; `false` if the protocol was
     ///          already present or an error occurred.
+    #[inline]
     pub fn add_network_protocol<S: Into<CFString>>(&mut self, protocol_type: S) -> bool {
         let protocol_type_ref = protocol_type.into().as_concrete_TypeRef();
         (unsafe { SCNetworkServiceAddProtocolType(self.0, protocol_type_ref) }) != 0
@@ -174,6 +185,7 @@ impl SCNetworkService {
     /// Removes the specified network service from the configuration.
     ///
     /// Returns: `true` if the service was removed; `false` if an error occurred.
+    #[inline]
     pub fn remove(self) -> bool {
         (unsafe { SCNetworkServiceRemove(self.0) }) != 0
     }
@@ -181,6 +193,7 @@ impl SCNetworkService {
     /// Enables or disables the specified service.
     ///
     /// Returns: `true` if the enabled status was saved; `false` if an error occurred.
+    #[inline]
     pub fn set_enabled(&mut self, enabled: bool) -> bool {
         (unsafe { SCNetworkServiceSetEnabled(self.0, enabled as Boolean) }) != 0
     }

@@ -20,9 +20,9 @@
 /// CoreFoundation wrappers
 #[macro_use]
 pub extern crate core_foundation;
+extern crate core;
 /// Low-level SystemConfiguration bindings
 pub extern crate system_configuration_sys as sys;
-extern crate core;
 
 pub mod dynamic_store;
 pub mod network_configuration;
@@ -32,8 +32,8 @@ pub mod status;
 
 // this corresponds to the base bindings in SystemConfiguration.h
 pub mod base {
-    use std::ffi::CStr;
     use core_foundation::{base::TCFType, error::CFError};
+    use std::ffi::CStr;
     use sys::core_foundation_sys::base::OSStatus;
     use sys::system_configuration::{SCCopyLastError, SCError, SCErrorString};
 
@@ -44,6 +44,7 @@ pub mod base {
     /// See [`SCCopyLastError`] for details.
     ///
     /// [`SCCopyLastError`]: https://developer.apple.com/documentation/systemconfiguration/sccopylasterror()?language=objc
+    #[inline]
     pub fn get_last_error() -> CFError {
         unsafe { CFError::wrap_under_create_rule(SCCopyLastError()) }
     }
@@ -56,6 +57,7 @@ pub mod base {
     ///
     /// [Status and Error Codes]: https://developer.apple.com/documentation/systemconfiguration/1518026-status-and-error-codes?language=objc
     /// [`SCError`]: https://developer.apple.com/documentation/systemconfiguration/scerror()?language=objc
+    #[inline]
     pub fn get_last_error_code() -> OSStatus {
         unsafe { SCError() }
     }
@@ -65,13 +67,17 @@ pub mod base {
     /// See [`SCErrorString`] for details.
     ///
     /// [`SCErrorString`]: https://developer.apple.com/documentation/systemconfiguration/scerrorstring(_:)?language=objc
+    #[allow(clippy::missing_panics_doc)]
+    #[inline]
     pub fn get_error_string(status: OSStatus) -> String {
         let cstr = unsafe {
             let cstr_ptr = SCErrorString(status);
             assert!(!cstr_ptr.is_null(), "pointer to error string is never null");
             CStr::from_ptr(cstr_ptr)
         };
-        cstr.to_str().expect("error string is always valid UTF-8").to_string()
+        cstr.to_str()
+            .expect("error string is always valid UTF-8")
+            .to_string()
     }
 }
 

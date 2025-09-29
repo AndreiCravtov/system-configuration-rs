@@ -1,22 +1,22 @@
 #![allow(non_snake_case)]
 
-use std::os;
+use super::{SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
+use crate::preferences::SCPreferences;
 use core_foundation::{
     array::CFArray,
     base::{CFRetain, CFType, CFTypeID, CFTypeRef, TCFType, TCFTypeRef, ToVoid},
     dictionary::CFDictionary,
     string::CFString,
 };
+use std::os;
 use sys::network_configuration::{
-    SCNetworkInterfaceGetTypeID, SCBondInterfaceCopyAll, SCBondInterfaceRef, SCBondInterfaceCopyAvailableMemberInterfaces,
-    SCBondInterfaceCreate, SCBondInterfaceGetMemberInterfaces, SCBondInterfaceGetOptions, SCBondInterfaceRemove,
-    SCBondInterfaceSetMemberInterfaces, SCBondInterfaceSetOptions
+    SCBondInterfaceCopyAll, SCBondInterfaceCopyAvailableMemberInterfaces, SCBondInterfaceCreate,
+    SCBondInterfaceGetMemberInterfaces, SCBondInterfaceGetOptions, SCBondInterfaceRef,
+    SCBondInterfaceRemove, SCBondInterfaceSetMemberInterfaces, SCBondInterfaceSetOptions,
+    SCNetworkInterfaceGetTypeID,
 };
-use super::{SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkInterfaceType};
-use crate::preferences::SCPreferences;
 
 use crate::helpers::create_empty_array;
-
 
 core_foundation::declare_TCFType! {
     /// Represents a bond interface, which is a subclass of [`SCNetworkInterface`](SCNetworkInterface).
@@ -52,9 +52,7 @@ const _: () = {
 
         #[inline]
         fn type_id() -> CFTypeID {
-            unsafe {
-                SCNetworkInterfaceGetTypeID()
-            }
+            unsafe { SCNetworkInterfaceGetTypeID() }
         }
 
         #[inline]
@@ -72,9 +70,7 @@ const _: () = {
     impl Clone for SCBondInterface {
         #[inline]
         fn clone(&self) -> SCBondInterface {
-            unsafe {
-                SCBondInterface::wrap_under_get_rule(self.0)
-            }
+            unsafe { SCBondInterface::wrap_under_get_rule(self.0) }
         }
     }
     impl PartialEq for SCBondInterface {
@@ -84,19 +80,22 @@ const _: () = {
         }
     }
     impl Eq for SCBondInterface {}
-    unsafe impl<'a> ToVoid<SCBondInterface> for &'a SCBondInterface {
+    unsafe impl ToVoid<SCBondInterface> for &SCBondInterface {
+        #[inline]
         fn to_void(&self) -> *const os::raw::c_void {
             use TCFTypeRef;
             self.as_concrete_TypeRef().as_void_ptr()
         }
     }
     unsafe impl ToVoid<SCBondInterface> for SCBondInterface {
+        #[inline]
         fn to_void(&self) -> *const os::raw::c_void {
             use TCFTypeRef;
             self.as_concrete_TypeRef().as_void_ptr()
         }
     }
     unsafe impl ToVoid<SCBondInterface> for SCBondInterfaceRef {
+        #[inline]
         fn to_void(&self) -> *const os::raw::c_void {
             use TCFTypeRef;
             self.as_void_ptr()
@@ -114,9 +113,11 @@ impl SCBondInterface {
     /// See [`SCBondInterfaceCopyAvailableMemberInterfaces`] for more details.
     ///
     /// [`SCBondInterfaceCopyAvailableMemberInterfaces`]: https://developer.apple.com/documentation/systemconfiguration/scbondinterfacecopyavailablememberinterfaces(_:)?language=objc
+    #[inline]
     pub fn get_available_member_interfaces(prefs: &SCPreferences) -> CFArray<SCNetworkInterface> {
         unsafe {
-            let array_ptr = SCBondInterfaceCopyAvailableMemberInterfaces(prefs.as_concrete_TypeRef());
+            let array_ptr =
+                SCBondInterfaceCopyAvailableMemberInterfaces(prefs.as_concrete_TypeRef());
             if array_ptr.is_null() {
                 return create_empty_array();
             }
@@ -129,6 +130,7 @@ impl SCBondInterface {
     /// See [`SCBondInterfaceCopyAll`] for more details.
     ///
     /// [`SCBondInterfaceCopyAll`]: https://developer.apple.com/documentation/systemconfiguration/scbondinterfacecopyall(_:)?language=objc
+    #[inline]
     pub fn get_interfaces(prefs: &SCPreferences) -> CFArray<Self> {
         unsafe {
             let array_ptr = SCBondInterfaceCopyAll(prefs.as_concrete_TypeRef());
@@ -144,6 +146,7 @@ impl SCBondInterface {
     /// See [`SCBondInterfaceCreate`] for more details.
     ///
     /// [`SCBondInterfaceCreate`]: https://developer.apple.com/documentation/systemconfiguration/scbondinterfacecreate(_:)?language=objc
+    #[inline]
     pub fn create(prefs: &SCPreferences) -> Option<Self> {
         unsafe {
             let bond_ref = SCBondInterfaceCreate(prefs.as_concrete_TypeRef());
@@ -160,6 +163,7 @@ impl SCBondInterface {
     /// See [`SCBondInterfaceGetMemberInterfaces`] for more details.
     ///
     /// [`SCBondInterfaceGetMemberInterfaces`]: https://developer.apple.com/documentation/systemconfiguration/scbondinterfacegetmemberinterfaces(_:)?language=objc
+    #[inline]
     pub fn member_interfaces(&self) -> CFArray<SCNetworkInterface> {
         unsafe {
             let array_ptr = SCBondInterfaceGetMemberInterfaces(self.0);
@@ -176,6 +180,7 @@ impl SCBondInterface {
     /// See [`SCBondInterfaceGetOptions`] for more details.
     ///
     /// [`SCBondInterfaceGetOptions`]: https://developer.apple.com/documentation/systemconfiguration/scbondinterfacegetoptions(_:)?language=objc
+    #[inline]
     pub fn options(&self) -> Option<CFDictionary<CFString, CFType>> {
         unsafe {
             let dictionary_ref = SCBondInterfaceGetOptions(self.as_concrete_TypeRef());
@@ -190,6 +195,7 @@ impl SCBondInterface {
     /// Removes the Ethernet bond interface from the configuration.
     ///
     /// Returns: `true` if the interface was removed; `false` if an error was encountered.
+    #[inline]
     pub fn remove(self) -> bool {
         (unsafe { SCBondInterfaceRemove(self.0) }) != 0
     }
@@ -197,6 +203,7 @@ impl SCBondInterface {
     /// Sets the member interfaces for the specified Ethernet bond interface.
     ///
     /// Returns: `true` if the configuration was stored; `false` if an error occurred.
+    #[inline]
     pub fn set_member_interfaces(&mut self, members: &CFArray<SCNetworkInterface>) -> bool {
         (unsafe { SCBondInterfaceSetMemberInterfaces(self.0, members.as_concrete_TypeRef()) }) != 0
     }
@@ -204,6 +211,7 @@ impl SCBondInterface {
     /// Sets the configuration settings for the specified Ethernet bond interface.
     ///
     /// Returns: `true` if the configuration was stored; `false` if an error occurred.
+    #[inline]
     pub fn set_options(&mut self, new_options: &CFDictionary<CFString, CFType>) -> bool {
         (unsafe { SCBondInterfaceSetOptions(self.0, new_options.as_concrete_TypeRef()) }) != 0
     }

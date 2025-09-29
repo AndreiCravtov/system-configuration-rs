@@ -5,9 +5,10 @@ use core_foundation::{
 };
 use sys::network_configuration::{
     SCNetworkSetAddService, SCNetworkSetContainsInterface, SCNetworkSetCopy, SCNetworkSetCopyAll,
-    SCNetworkSetCopyCurrent, SCNetworkSetCopyServices, SCNetworkSetGetName, SCNetworkSetGetServiceOrder,
-    SCNetworkSetGetSetID, SCNetworkSetGetTypeID, SCNetworkSetRef, SCNetworkSetRemove, SCNetworkSetRemoveService,
-    SCNetworkSetSetCurrent, SCNetworkSetSetServiceOrder
+    SCNetworkSetCopyCurrent, SCNetworkSetCopyServices, SCNetworkSetGetName,
+    SCNetworkSetGetServiceOrder, SCNetworkSetGetSetID, SCNetworkSetGetTypeID, SCNetworkSetRef,
+    SCNetworkSetRemove, SCNetworkSetRemoveService, SCNetworkSetSetCurrent,
+    SCNetworkSetSetServiceOrder,
 };
 
 use super::{SCNetworkInterface, SCNetworkService};
@@ -29,6 +30,7 @@ core_foundation::impl_CFTypeDescription!(SCNetworkSet);
 
 impl SCNetworkSet {
     /// Returns all available sets for the specified preferences session.
+    #[inline]
     pub fn get_sets(prefs: &SCPreferences) -> CFArray<Self> {
         unsafe {
             let array_ptr = SCNetworkSetCopyAll(prefs.to_void());
@@ -40,6 +42,7 @@ impl SCNetworkSet {
     }
 
     /// Returns the current set. Or `None` if no current set has been defined.
+    #[inline]
     pub fn get_current(prefs: &SCPreferences) -> Option<Self> {
         unsafe {
             let set_ref = SCNetworkSetCopyCurrent(prefs.as_concrete_TypeRef());
@@ -57,6 +60,7 @@ impl SCNetworkSet {
     /// See [`SCNetworkSetCopy`] for details.
     ///
     /// [`SCNetworkSetCopy`]: https://developer.apple.com/documentation/systemconfiguration/scnetworksetcopy(_:_:)?language=objc
+    #[inline]
     pub fn find_set<S: Into<CFString>>(prefs: &SCPreferences, set_id: S) -> Option<Self> {
         let cf_set_id = set_id.into();
         unsafe {
@@ -71,12 +75,14 @@ impl SCNetworkSet {
     }
 
     /// Constructs a new set of network services from the preferences.
+    #[inline]
     pub fn new(prefs: &SCPreferences) -> Self {
         let ptr = unsafe { SCNetworkSetCopyCurrent(prefs.to_void()) };
         unsafe { SCNetworkSet::wrap_under_create_rule(ptr) }
     }
 
     /// Returns all network services associated with the specified set.
+    #[inline]
     pub fn services(&self) -> CFArray<SCNetworkService> {
         unsafe {
             let array_ptr = SCNetworkSetCopyServices(self.0);
@@ -88,6 +94,7 @@ impl SCNetworkSet {
     }
 
     /// Returns an list of network service identifiers, ordered by their priority.
+    #[inline]
     pub fn service_order(&self) -> CFArray<CFString> {
         unsafe {
             let array_ptr = SCNetworkSetGetServiceOrder(self.0);
@@ -99,6 +106,7 @@ impl SCNetworkSet {
     }
 
     /// Returns the identifier for the specified set.
+    #[inline]
     pub fn id(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkSetGetSetID(self.0);
@@ -112,6 +120,7 @@ impl SCNetworkSet {
 
     /// Returns the user-specified name associated with the specified set. Or `None` if it hasn't
     /// been defined.
+    #[inline]
     pub fn name(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkSetGetName(self.0);
@@ -125,6 +134,7 @@ impl SCNetworkSet {
 
     /// Returns a [`bool`] value indicating whether the specified interface is represented by at
     /// least one network service in the specified set.
+    #[inline]
     pub fn contains_network_interface(&self, interface: &SCNetworkInterface) -> bool {
         let iface_ref = interface.as_concrete_TypeRef();
         (unsafe { SCNetworkSetContainsInterface(self.0, iface_ref) }) != 0
@@ -134,6 +144,7 @@ impl SCNetworkSet {
     ///
     /// Returns: `true` if the service was added to the set; `false` if the service was already
     ///          present or an error occurred.
+    #[inline]
     pub fn add_service(&mut self, service: &SCNetworkService) -> bool {
         let service_ref = service.as_concrete_TypeRef();
         (unsafe { SCNetworkSetAddService(self.0, service_ref) }) != 0
@@ -142,6 +153,7 @@ impl SCNetworkSet {
     /// Removes the specified set from the configuration.
     ///
     /// Returns: `true` if the set was removed; `false` if an error occurred.
+    #[inline]
     pub fn remove(self) -> bool {
         (unsafe { SCNetworkSetRemove(self.0) }) != 0
     }
@@ -150,6 +162,7 @@ impl SCNetworkSet {
     ///
     /// Returns: `true` if the service was removed from the set; `false` if the service was not
     ///          already present or an error occurred.
+    #[inline]
     pub fn remove_service(&mut self, service: &SCNetworkService) -> bool {
         let service_ref = service.as_concrete_TypeRef();
         (unsafe { SCNetworkSetRemoveService(self.0, service_ref) }) != 0
@@ -158,6 +171,7 @@ impl SCNetworkSet {
     /// Specifies the set that should be the current set.
     ///
     /// Returns: `true` if the current set was updated; `false` if an error occurred.
+    #[inline]
     pub fn set_current(&mut self) -> bool {
         (unsafe { SCNetworkSetSetCurrent(self.0) }) != 0
     }
@@ -165,6 +179,7 @@ impl SCNetworkSet {
     /// Stores the user-specified ordering of network services for the specified set.
     ///
     /// Returns: `true` if the new service order was saved; `false` if an error occurred.
+    #[inline]
     pub fn set_service_order(&mut self, new_order: CFArray<CFString>) -> bool {
         let cf_order_ref = new_order.as_concrete_TypeRef();
         (unsafe { SCNetworkSetSetServiceOrder(self.0, cf_order_ref) }) != 0

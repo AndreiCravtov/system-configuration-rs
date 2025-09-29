@@ -25,21 +25,25 @@ pub struct SCStatus(Result<SCStatusKind, OSStatus>);
 
 impl SCStatus {
     /// Creates a new [`SCStatus`] from a status code.
+    #[inline]
     pub fn from_code(code: OSStatus) -> Self {
         Self(SCStatusKind::try_from_code(code))
     }
 
     /// Creates a new [`SCStatus`] from a known [`SCStatusKind`].
-    pub fn from_known_status(status: SCStatusKind) -> Self {
+    #[inline]
+    pub const fn from_known_status(status: SCStatusKind) -> Self {
         Self(Ok(status))
     }
 
     /// Returns the code of the current status.
+    #[inline]
     pub fn code(&self) -> OSStatus {
         self.0.as_ref().map_or_else(|s| *s, SCStatusKind::code)
     }
 
     /// Returns a string describing the current status.
+    #[inline]
     pub fn message(&self) -> String {
         self.0
             .as_ref()
@@ -47,8 +51,10 @@ impl SCStatus {
     }
 
     /// Attempts to return a known [`SCStatusKind`] that this status represents, or falls back to
-    /// [`OSStatus`] if not known
-    pub fn kind(&self) -> Result<SCStatusKind, OSStatus> {
+    /// [`OSStatus`] if not known.
+    #[allow(clippy::missing_errors_doc)]
+    #[inline]
+    pub const fn kind(&self) -> Result<SCStatusKind, OSStatus> {
         self.0
     }
 }
@@ -61,7 +67,8 @@ mod status_trait_impls {
     use std::{error, fmt};
 
     impl fmt::Debug for SCStatus {
-        #[cold]
+        #[allow(clippy::explicit_auto_deref)]
+        #[inline]
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
             let variant_name = self.0.as_ref().map_or("Unknown", |s| s.as_ref());
             fmt.debug_struct(&*format!("SCStatus::{variant_name}"))
@@ -71,28 +78,32 @@ mod status_trait_impls {
         }
     }
     impl fmt::Display for SCStatus {
-        #[cold]
+        #[inline]
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(fmt, "{}", self.message())
         }
     }
     impl From<SCStatus> for OSStatus {
+        #[inline]
         fn from(value: SCStatus) -> Self {
             value.code()
         }
     }
     impl From<OSStatus> for SCStatus {
+        #[inline]
         fn from(value: OSStatus) -> Self {
             Self::from_code(value)
         }
     }
     impl From<SCStatusKind> for SCStatus {
+        #[inline]
         fn from(value: SCStatusKind) -> Self {
             Self::from_known_status(value)
         }
     }
     impl TryFrom<SCStatus> for SCStatusKind {
         type Error = OSStatus;
+        #[inline]
         fn try_from(value: SCStatus) -> Result<Self, Self::Error> {
             value.kind()
         }
@@ -168,17 +179,21 @@ pub enum SCStatusKind {
 impl SCStatusKind {
     /// Tries to create a new [`SCStatusKind`] from a status code. The code must correspond to one
     /// of the ***known*** status types.
+    #[allow(clippy::missing_errors_doc)]
+    #[inline]
     pub fn try_from_code(code: OSStatus) -> Result<Self, OSStatus> {
         let code_u16: u16 = code.try_into().map_err(|_| code)?;
         code_u16.try_into().map_err(|_| code)
     }
 
     /// Returns the code of the current status.
+    #[inline]
     pub fn code(&self) -> OSStatus {
         Into::<u16>::into(*self).into()
     }
 
     /// Returns a string describing the current status.
+    #[inline]
     pub fn message(&self) -> String {
         get_error_string(self.code())
     }
@@ -191,7 +206,8 @@ mod status_kind_trait_impls {
     use sys::core_foundation_sys::base::OSStatus;
 
     impl fmt::Debug for SCStatusKind {
-        #[cold]
+        #[allow(clippy::explicit_auto_deref)]
+        #[inline]
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
             let variant_name: &str = self.as_ref();
             fmt.debug_struct(&*format!("SCStatusKind::{variant_name}"))
@@ -201,12 +217,13 @@ mod status_kind_trait_impls {
         }
     }
     impl fmt::Display for SCStatusKind {
-        #[cold]
+        #[inline]
         fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(fmt, "{}", self.message())
         }
     }
     impl From<SCStatusKind> for OSStatus {
+        #[inline]
         fn from(value: SCStatusKind) -> Self {
             value.code()
         }
@@ -214,6 +231,7 @@ mod status_kind_trait_impls {
     impl TryFrom<OSStatus> for SCStatusKind {
         type Error = OSStatus;
 
+        #[inline]
         fn try_from(value: OSStatus) -> Result<Self, Self::Error> {
             Self::try_from_code(value)
         }

@@ -19,6 +19,12 @@ use crate::helpers::create_empty_array;
 /// Trait for all subclasses of [`SCNetworkInterface`].
 ///
 /// [`SCNetworkInterface`]: struct.SCNetworkInterface.html
+///
+/// # Safety
+///
+/// Implementing this trait is only safe if you know that the type is intended to be a subtype of
+/// [`SCNetworkInterface`] and corresponds 1:1 to one of [`SCNetworkInterfaceType`]s, e.g.
+/// [`SCBondInterface`](super::SCBondInterface) corresponding to [`Bond`](SCNetworkInterfaceType::Bond)
 pub unsafe trait SCNetworkInterfaceSubClass: TCFType {
     /// Determines what the type subclass of [`SCNetworkInterface`] this is.
     const INTERFACE_TYPE: SCNetworkInterfaceType;
@@ -69,6 +75,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceCopyAll`] for more details.
     ///
     /// [`SCNetworkInterfaceCopyAll`]: https://developer.apple.com/documentation/systemconfiguration/1517090-scnetworkinterfacecopyall?language=objc
+    #[inline]
     pub fn get_interfaces() -> CFArray<Self> {
         get_interfaces()
     }
@@ -77,6 +84,7 @@ impl SCNetworkInterface {
     /// correct subclass happens at runtime and `None` is returned if it is not the correct type.
     /// Works similar to [`CFPropertyList::downcast`](core_foundation::propertylist::CFPropertyList::downcast)
     /// and [`CFType::downcast`](core_foundation::base::CFType::downcast).
+    #[inline]
     pub fn downcast_SCNetworkInterface<T: SCNetworkInterfaceSubClass>(&self) -> Option<T> {
         if self.instance_of::<T>() && self.interface_type()? == T::INTERFACE_TYPE {
             unsafe {
@@ -92,6 +100,7 @@ impl SCNetworkInterface {
     /// the retain count.
     ///
     /// [`downcast_SCNetworkInterface`]: #method.downcast_SCNetworkInterface
+    #[inline]
     pub fn downcast_into_SCNetworkInterface<T: SCNetworkInterfaceSubClass>(self) -> Option<T> {
         if self.instance_of::<T>() && self.interface_type()? == T::INTERFACE_TYPE {
             unsafe {
@@ -109,6 +118,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetInterfaceType`] for details.
     ///
     /// [`SCNetworkInterfaceGetInterfaceType`]: https://developer.apple.com/documentation/systemconfiguration/1517371-scnetworkinterfacegetinterfacety?language=objc
+    #[inline]
     pub fn interface_type(&self) -> Option<SCNetworkInterfaceType> {
         SCNetworkInterfaceType::from_cfstring(&self.interface_type_string()?)
     }
@@ -118,6 +128,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetInterfaceType`] for details.
     ///
     /// [`SCNetworkInterfaceGetInterfaceType`]: https://developer.apple.com/documentation/systemconfiguration/1517371-scnetworkinterfacegetinterfacety?language=objc
+    #[inline]
     pub fn interface_type_string(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkInterfaceGetInterfaceType(self.0);
@@ -134,6 +145,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetBSDName`] for details.
     ///
     /// [`SCNetworkInterfaceGetBSDName`]: https://developer.apple.com/documentation/systemconfiguration/1516854-scnetworkinterfacegetbsdname?language=objc
+    #[inline]
     pub fn bsd_name(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkInterfaceGetBSDName(self.0);
@@ -151,6 +163,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetInterface`] for details.
     ///
     /// [`SCNetworkInterfaceGetInterface`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegetinterface(_:)?language=objc
+    #[inline]
     pub fn underlying_interface(&self) -> Option<Self> {
         unsafe {
             let ptr = SCNetworkInterfaceGetInterface(self.0);
@@ -168,6 +181,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetHardwareAddressString`] for details.
     ///
     /// [`SCNetworkInterfaceGetHardwareAddressString`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegethardwareaddressstring(_:)?language=objc
+    #[inline]
     pub fn hardware_address_string(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkInterfaceGetHardwareAddressString(self.0);
@@ -183,6 +197,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetLocalizedDisplayName`] for details.
     ///
     /// [`SCNetworkInterfaceGetLocalizedDisplayName`]: https://developer.apple.com/documentation/systemconfiguration/1517060-scnetworkinterfacegetlocalizeddi?language=objc
+    #[inline]
     pub fn display_name(&self) -> Option<CFString> {
         unsafe {
             let ptr = SCNetworkInterfaceGetLocalizedDisplayName(self.0);
@@ -200,6 +215,8 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceCopyMTU`] for more details.
     ///
     /// [`SCNetworkInterfaceCopyMTU`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacecopymtu(_:_:_:_:)?language=objc
+    #[allow(clippy::missing_panics_doc)]
+    #[inline]
     pub fn mtu(&self) -> Option<SCNetworkInterfaceMTU> {
         // perform call w/ out parameters
         let mut mtu_cur: std::ffi::c_int = -1;
@@ -244,6 +261,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetSupportedInterfaceTypes`] for details.
     ///
     /// [`SCNetworkInterfaceGetSupportedInterfaceTypes`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegetsupportedinterfacetypes(_:)?language=objc
+    #[inline]
     pub fn supported_interface_type_strings(&self) -> CFArray<CFString> {
         unsafe {
             let array_ptr = SCNetworkInterfaceGetSupportedInterfaceTypes(self.0);
@@ -260,6 +278,7 @@ impl SCNetworkInterface {
     /// See [`SCNetworkInterfaceGetSupportedProtocolTypes`] for details.
     ///
     /// [`SCNetworkInterfaceGetSupportedProtocolTypes`]: https://developer.apple.com/documentation/systemconfiguration/scnetworkinterfacegetsupportedprotocoltypes(_:)?language=objc
+    #[inline]
     pub fn supported_protocol_type_strings(&self) -> CFArray<CFString> {
         unsafe {
             let array_ptr = SCNetworkInterfaceGetSupportedProtocolTypes(self.0);
@@ -273,6 +292,7 @@ impl SCNetworkInterface {
     /// Sets the requested MTU setting for the specified network interface.
     ///
     /// Returns: `true` if the configuration was updated; `false` if an error occurred.
+    #[inline]
     pub fn set_mtu(&mut self, mtu: u32) -> bool {
         let Ok(mtu) = TryInto::<std::ffi::c_int>::try_into(mtu) else {
             return false;
@@ -348,6 +368,8 @@ static IRDA_INTERFACE_TYPE_ID: &str = "IrDA";
 impl SCNetworkInterfaceType {
     /// Tries to construct a type by matching it to string constants used to identify a network
     /// interface type. If no constants match it, `None` is returned.
+    #[allow(clippy::blocks_in_conditions)]
+    #[inline]
     pub fn from_cfstring(type_id: &CFString) -> Option<Self> {
         use system_configuration_sys::network_configuration::*;
         #[cfg(feature = "private")]
@@ -407,6 +429,7 @@ impl SCNetworkInterfaceType {
     }
 
     /// Returns the string constants used to identify this network interface type.
+    #[inline]
     pub fn to_cfstring(&self) -> CFString {
         use system_configuration_sys::network_configuration::*;
         #[cfg(feature = "private")]
@@ -449,6 +472,7 @@ impl SCNetworkInterfaceType {
 /// See [`SCNetworkInterfaceCopyAll`] for more details.
 ///
 /// [`SCNetworkInterfaceCopyAll`]: https://developer.apple.com/documentation/systemconfiguration/1517090-scnetworkinterfacecopyall?language=objc
+#[inline]
 pub fn get_interfaces() -> CFArray<SCNetworkInterface> {
     unsafe { CFArray::<SCNetworkInterface>::wrap_under_create_rule(SCNetworkInterfaceCopyAll()) }
 }

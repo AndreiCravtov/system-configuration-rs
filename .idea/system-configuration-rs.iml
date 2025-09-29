@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/system-configuration/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/system-configuration/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/sys-changer-app/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/system-configuration/system-configuration-proc/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

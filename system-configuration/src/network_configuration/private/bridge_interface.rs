@@ -1,19 +1,20 @@
 #![allow(non_snake_case)]
 
-use std::os;
 use core_foundation::{
     array::CFArray,
     base::{Boolean, CFRetain, CFType, CFTypeID, CFTypeRef, TCFType, TCFTypeRef, ToVoid},
     dictionary::CFDictionary,
     string::CFString,
 };
+use std::os;
 use sys::{
     network_configuration::SCNetworkInterfaceGetTypeID,
     network_configuration_private::{
-        SCBridgeInterfaceCopyAll, SCBridgeInterfaceCopyAvailableMemberInterfaces, SCBridgeInterfaceCreate,
-        SCBridgeInterfaceGetAllowConfiguredMembers, SCBridgeInterfaceGetMemberInterfaces, SCBridgeInterfaceGetOptions,
-        SCBridgeInterfaceRef, SCBridgeInterfaceRemove, SCBridgeInterfaceSetAllowConfiguredMembers,
-        SCBridgeInterfaceSetMemberInterfaces, SCBridgeInterfaceSetOptions
+        SCBridgeInterfaceCopyAll, SCBridgeInterfaceCopyAvailableMemberInterfaces,
+        SCBridgeInterfaceCreate, SCBridgeInterfaceGetAllowConfiguredMembers,
+        SCBridgeInterfaceGetMemberInterfaces, SCBridgeInterfaceGetOptions, SCBridgeInterfaceRef,
+        SCBridgeInterfaceRemove, SCBridgeInterfaceSetAllowConfiguredMembers,
+        SCBridgeInterfaceSetMemberInterfaces, SCBridgeInterfaceSetOptions,
     },
 };
 
@@ -21,7 +22,6 @@ use super::{SCNetworkInterface, SCNetworkInterfaceSubClass, SCNetworkInterfaceTy
 use crate::preferences::SCPreferences;
 
 use crate::helpers::create_empty_array;
-
 
 core_foundation::declare_TCFType! {
     /// Represents a bridge interface, which is a subclass of
@@ -53,9 +53,7 @@ const _: () = {
 
         #[inline]
         fn type_id() -> CFTypeID {
-            unsafe {
-                SCNetworkInterfaceGetTypeID()
-            }
+            unsafe { SCNetworkInterfaceGetTypeID() }
         }
 
         #[inline]
@@ -73,9 +71,7 @@ const _: () = {
     impl Clone for SCBridgeInterface {
         #[inline]
         fn clone(&self) -> SCBridgeInterface {
-            unsafe {
-                SCBridgeInterface::wrap_under_get_rule(self.0)
-            }
+            unsafe { SCBridgeInterface::wrap_under_get_rule(self.0) }
         }
     }
     impl PartialEq for SCBridgeInterface {
@@ -85,17 +81,20 @@ const _: () = {
         }
     }
     impl Eq for SCBridgeInterface {}
-    unsafe impl<'a> ToVoid<SCBridgeInterface> for &'a SCBridgeInterface {
+    unsafe impl ToVoid<SCBridgeInterface> for &SCBridgeInterface {
+        #[inline]
         fn to_void(&self) -> *const os::raw::c_void {
             self.as_concrete_TypeRef().as_void_ptr()
         }
     }
     unsafe impl ToVoid<SCBridgeInterface> for SCBridgeInterface {
+        #[inline]
         fn to_void(&self) -> *const os::raw::c_void {
             self.as_concrete_TypeRef().as_void_ptr()
         }
     }
     unsafe impl ToVoid<SCBridgeInterface> for SCBridgeInterfaceRef {
+        #[inline]
         fn to_void(&self) -> *const os::raw::c_void {
             self.as_void_ptr()
         }
@@ -107,9 +106,11 @@ const _: () = {
 
 impl SCBridgeInterface {
     /// Retrieve all network capable devices on the system that can be added to a bridge interface.
+    #[inline]
     pub fn get_available_member_interfaces(prefs: &SCPreferences) -> CFArray<SCNetworkInterface> {
         unsafe {
-            let array_ptr = SCBridgeInterfaceCopyAvailableMemberInterfaces(prefs.as_concrete_TypeRef());
+            let array_ptr =
+                SCBridgeInterfaceCopyAvailableMemberInterfaces(prefs.as_concrete_TypeRef());
             if array_ptr.is_null() {
                 return create_empty_array();
             }
@@ -118,6 +119,7 @@ impl SCBridgeInterface {
     }
 
     /// Retrieve all current bridge interfaces.
+    #[inline]
     pub fn get_interfaces(prefs: &SCPreferences) -> CFArray<Self> {
         unsafe {
             let array_ptr = SCBridgeInterfaceCopyAll(prefs.as_concrete_TypeRef());
@@ -129,6 +131,7 @@ impl SCBridgeInterface {
     }
 
     /// Creates a new SCBridgeInterface interface. Or `None` if an error occurred.
+    #[inline]
     pub fn create(prefs: &SCPreferences) -> Option<Self> {
         unsafe {
             let bridge_ref = SCBridgeInterfaceCreate(prefs.as_concrete_TypeRef());
@@ -142,11 +145,13 @@ impl SCBridgeInterface {
 
     /// Returns a [`bool`] value indicating whether the bridge interface allows members with
     /// configured services.
+    #[inline]
     pub fn configured_members_allowed(&self) -> bool {
         unsafe { SCBridgeInterfaceGetAllowConfiguredMembers(self.0) != 0 }
     }
 
     /// Returns the member interfaces for the specified bridge interface.
+    #[inline]
     pub fn member_interfaces(&self) -> CFArray<SCNetworkInterface> {
         unsafe {
             let array_ptr = SCBridgeInterfaceGetMemberInterfaces(self.0);
@@ -159,6 +164,7 @@ impl SCBridgeInterface {
 
     /// Returns the configuration settings associated with the bridge interface. Or `None` if no
     /// changes to the default configuration have been saved.
+    #[inline]
     pub fn options(&self) -> Option<CFDictionary<CFString, CFType>> {
         unsafe {
             let dictionary_ref = SCBridgeInterfaceGetOptions(self.as_concrete_TypeRef());
@@ -173,6 +179,7 @@ impl SCBridgeInterface {
     /// Removes the SCBridgeInterface from the configuration.
     ///
     /// Returns: `true` if the interface was removed; `false` if an error was encountered.
+    #[inline]
     pub fn remove(self) -> bool {
         (unsafe { SCBridgeInterfaceRemove(self.0) }) != 0
     }
@@ -180,6 +187,7 @@ impl SCBridgeInterface {
     /// Allow adding member interfaces to the bridge that have configured services.
     ///
     /// Returns: `true` if the change was successful; `false` otherwise.
+    #[inline]
     pub fn set_configured_members_allowed(&mut self, enable: bool) -> bool {
         (unsafe { SCBridgeInterfaceSetAllowConfiguredMembers(self.0, enable as Boolean) }) != 0
     }
@@ -187,13 +195,16 @@ impl SCBridgeInterface {
     /// Sets the member interfaces for the specified bridge interface.
     ///
     /// Returns: `true` if the configuration was stored; `false` if an error was encountered.
+    #[inline]
     pub fn set_member_interfaces(&mut self, members: &CFArray<SCNetworkInterface>) -> bool {
-        (unsafe { SCBridgeInterfaceSetMemberInterfaces(self.0, members.as_concrete_TypeRef()) }) != 0
+        (unsafe { SCBridgeInterfaceSetMemberInterfaces(self.0, members.as_concrete_TypeRef()) })
+            != 0
     }
 
     /// Sets the configuration settings for the specified bridge interface.
     ///
     /// Returns: `true` if the configuration was stored; `false` if an error occurred.
+    #[inline]
     pub fn set_options(&mut self, new_options: &CFDictionary<CFString, CFType>) -> bool {
         (unsafe { SCBridgeInterfaceSetOptions(self.0, new_options.as_concrete_TypeRef()) }) != 0
     }
